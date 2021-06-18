@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"name": "LWM2M",
+			"path": "."
+		}
+	],
+	"settings": {
+		"nrf-connect.applications": [
+			"c:\\Users\\mare\\VSCodeTest\\LWM2M\\LWM2M"
+		],
+		"nrf-connect.activeApplication": "c:\\Users\\mare\\VSCodeTest\\LWM2M\\LWM2M",
+		"nrf-connect.activeConfiguration": "c:\\Users\\mare\\VSCodeTest\\LWM2M\\LWM2M\\build_thingy91_nrf9160ns",
+		"nrf-connect.kconfig.interface.warnAboutMenuconfigArrowKeys": false,
+		"nrf-connect.defaultBoard": "thingy91_nrf9160ns",
+		"files.associations": {
+			"zephyr.h": "c",
+			"kernel.h": "c",
+			"pwm.h": "c",
+			"gps.h": "c",
+			"kernel_includes.h": "c",
+			"toolchain.h": "c",
+			"sensor.h": "c",
+			"gpio.h": "c",
+			"lwm2m_client.h": "c"
+		}
+	}
+}
