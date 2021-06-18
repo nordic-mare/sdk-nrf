@@ -1,6 +1,7 @@
 *.o
 *.d
 *.cmd
+*.code-workspace
 *.log
 *.pyc
 *.swp
