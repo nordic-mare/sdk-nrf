@@ -22,9 +22,6 @@ extern "C" {
 #endif
 
 #define UI_BUTTON_1			1
-#define UI_BUTTON_2			2
-#define UI_SWITCH_1			3
-#define UI_SWITCH_2			4
 
 #define UI_LED_1			1
 #define UI_LED_2			2

@@ -27,7 +27,7 @@ LOG_MODULE_REGISTER(app_lwm2m_client, CONFIG_APP_LOG_LEVEL);
 #include "ui.h"
 #include "lwm2m_client.h"
 #include "settings.h"
-#include "ipso/include/ipso_objects.h"
+#include "ipso_objects.h"
 
 #if !defined(CONFIG_LTE_LINK_CONTROL)
 #error "Missing CONFIG_LTE_LINK_CONTROL"
