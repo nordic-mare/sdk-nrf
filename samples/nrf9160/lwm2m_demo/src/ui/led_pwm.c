@@ -16,9 +16,9 @@ LOG_MODULE_REGISTER(ui_led_pwm, CONFIG_UI_LOG_LEVEL);
 
 const struct device *led_pwm_dev;
 
-#define PERIOD_USEC	(USEC_PER_SEC / 50U)
-#define STEPSIZE_USEC	2000
+#define PERIOD_USEC	(USEC_PER_SEC / 100U)
 
+static uint8_t current_dutycycle;
 static uint8_t red_val;
 static uint8_t green_val;
 static uint8_t blue_val;
@@ -36,9 +36,9 @@ int ui_pwm_led_on_off(bool new_state)
     is_on = new_state;
     int ret;
     uint32_t pulse_red, pulse_green, pulse_blue;
-    pulse_red = is_on * red_val * PERIOD_USEC / 255;
-    pulse_green = is_on * green_val * PERIOD_USEC / 255;
-    pulse_blue = is_on * blue_val * PERIOD_USEC / 255;
+    pulse_red = is_on * red_val * PERIOD_USEC * current_dutycycle / (255 * 100);
+    pulse_green = is_on * green_val * PERIOD_USEC * current_dutycycle / (255 * 100);
+    pulse_blue = is_on * blue_val * PERIOD_USEC * current_dutycycle / (255 * 100);
     ret = pwm_set(led_pwm_dev, PWM_PIN(0), pulse_red, PWM_FLAGS);
     if (ret != 0) {
         LOG_ERR("Error %d: red write failed\n", ret);
@@ -65,7 +65,7 @@ int ui_pwm_led_set_colour(uint32_t colour_values)
     if (!is_on) {
         return 0;
     }
-    return ui_pwm_led_on_off(true);
+    return ui_pwm_led_on_off(is_on);
 }
 
 
@@ -78,5 +78,16 @@ int ui_pwm_led_init(void)
 		LOG_ERR("Could not bind to device %s", dev_name);
 		return -ENODEV;
 	}
+
+    current_dutycycle = 100;
+
     return 0;
+}
+
+
+int ui_pwm_led_set_dutycycle(uint8_t dutycycle)
+{
+    current_dutycycle = dutycycle;
+
+    return ui_pwm_led_on_off(is_on);
 }
