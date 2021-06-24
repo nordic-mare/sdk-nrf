@@ -6,3 +6,4 @@
 
 zephyr_include_directories(include)
 target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ipso_colour.c)
+target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ipso_gas_sensor.c)
