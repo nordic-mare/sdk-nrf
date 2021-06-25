@@ -198,12 +198,31 @@ module-dep = LOG
 module-str = Log level for sample
 source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
 
-config LWM2M_IPSO_GAS_SENSOR_INSTANCE_COUNT
-	int "Number of gas sensors present on board"
+config LWM2M_IPSO_GENERIC_SENSOR_INSTANCE_COUNT
+	int "Number of generic sensors present on board"
 	default 1
 	help
-		Number of gas sensors present on board that reads
-		the gas resistance to determine the air quality.
+		Number of generic sensors present on board. Could be anything 
+		that outputs a value, e.g. a humidity sensor 
+		or a temperature sensor.
+
+config LWM2M_IPSO_GENERIC_SENSOR_TYPE
+	string "Type of sensor"
+	default "Generic sensor"
+	help 
+		Type of sensor. E.g. gas resistance sensor, 
+
+config LWM2M_IPSO_GENERIC_SENSOR_NAME
+	string "Name of sensor"
+	default "Generic sensor"
+	help
+		The name of the sensor, only used by debug lo.
+
+config LWM2M_IPSO_GENERIC_SENSOR_APP_TYPE
+	string "App type"
+	default "Sensor"
+	help 
+		The purpose of the sensor.
 
 endmenu
 
