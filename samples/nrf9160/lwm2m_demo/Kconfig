@@ -198,6 +198,7 @@ module-dep = LOG
 module-str = Log level for sample
 source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
 
+
 config LWM2M_IPSO_GENERIC_SENSOR_INSTANCE_COUNT
 	int "Number of generic sensors present on board"
 	default 1
@@ -223,6 +224,13 @@ config LWM2M_IPSO_GENERIC_SENSOR_APP_TYPE
 	default "Sensor"
 	help 
 		The purpose of the sensor.
+
+
+config LWM2M_IPSO_COLOUR_INSTANCE_COUNT
+	int "Number of colour sensors present on board"
+	default 1
+	help 
+		Number of colour sensors present on board.
 
 endmenu
 

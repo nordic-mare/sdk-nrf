@@ -126,7 +126,6 @@ static int query_modem(const char *cmd, char *buf, size_t buf_len)
 
 static int lwm2m_setup(void)
 {
-	ipso_colour_sensor_init();
 	/* use IMEI as serial number */
 	lwm2m_init_device(imei_buf);
 	lwm2m_init_security(&client, endpoint_name);

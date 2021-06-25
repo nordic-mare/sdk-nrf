@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-int ipso_colour_sensor_init();
+//int ipso_colour_sensor_init();
 
 #ifdef __cplusplus
 }
