@@ -5,4 +5,4 @@
 #
 
 zephyr_include_directories(include)
-target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ipso_colour_1_0.c)
+target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ipso_colour.c)

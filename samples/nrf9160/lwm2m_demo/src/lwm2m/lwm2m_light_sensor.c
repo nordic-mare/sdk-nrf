@@ -24,6 +24,9 @@ LOG_MODULE_REGISTER(app_lwm2m_light_sens, CONFIG_APP_LOG_LEVEL);
 #define COLOUR_SENSOR_APP_NAME  "Colour sensor"
 #define LIGHT_UNIT              "RGB-IR"
 
+#define MEAS_QUAL_IND_UNCHECKED     0
+#define MEAS_QUAL_LEVEL_UNCHECKED   0
+
 // GPIO sense leds are used by colour sensor object instance.
 #define GPIO_SENSE_RED_NODE_ID      DT_NODELABEL(sense_red_led)
 #define GPIO_SENSE_GREEN_NODE_ID    DT_NODELABEL(sense_green_led)
@@ -36,6 +39,8 @@ LOG_MODULE_REGISTER(app_lwm2m_light_sens, CONFIG_APP_LOG_LEVEL);
 #define BLUE_SENSE_LED_GPIO_PIN	    DT_GPIO_PIN(GPIO_SENSE_BLUE_NODE_ID, gpios)
 
 #define SENSE_LED_GPIO_FLAGS	    DT_GPIO_FLAGS(GPIO_SENSE_RED_NODE_ID, gpios)
+
+#define SENSE_LED_ON_TIME_MS        500
 
 
 static const struct device *light_sens_dev;
@@ -97,12 +102,13 @@ int gpio_sense_led_init(void)
 static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len) 
 {
+    int32_t ts;
     uint8_t red_val, blue_val, green_val, ir_val;
     struct sensor_value sens_val;
 
     if (obj_inst_id == COLOUR_SENSOR_OBJ_INST_ID) {
         gpio_sense_led_on_off(true);
-        k_sleep(K_SECONDS(2));
+        k_sleep(K_MSEC(SENSE_LED_ON_TIME_MS));
     }
 
     sensor_sample_fetch_chan(light_sens_dev, SENSOR_CHAN_ALL);
@@ -129,6 +135,13 @@ static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_
 
     snprintf(light_value, LIGHT_VALUE_STR_LENGTH, "0x%02X%02X%02X%02X", red_val, green_val, blue_val, ir_val);
 
+    /* get current time from device */
+	lwm2m_engine_get_s32("3/0/13", &ts);
+	/* set timestamp */
+    char obj_inst_id_str[16];
+    snprintf(obj_inst_id_str, 16, "3335/%d/5518", obj_inst_id);
+	lwm2m_engine_set_s32(obj_inst_id_str, ts);
+
     return &light_value;
 }
 
@@ -149,6 +162,10 @@ int lwm2m_init_light_sensor(void) {
                 LWM2M_RES_DATA_FLAG_RO);
     lwm2m_engine_set_res_data("3335/0/5701", LIGHT_UNIT, sizeof(LIGHT_UNIT),
                 LWM2M_RES_DATA_FLAG_RO);
+    lwm2m_engine_set_res_data("3335/0/6042", MEAS_QUAL_IND_UNCHECKED, 
+                sizeof(MEAS_QUAL_IND_UNCHECKED), LWM2M_RES_DATA_FLAG_RO);
+    lwm2m_engine_set_res_data("3335/0/6049", MEAS_QUAL_LEVEL_UNCHECKED, 
+                sizeof(MEAS_QUAL_LEVEL_UNCHECKED), LWM2M_RES_DATA_FLAG_RO);
 
     /* Surface colour sensor */
     lwm2m_engine_create_obj_inst("3335/1");
@@ -158,6 +175,10 @@ int lwm2m_init_light_sensor(void) {
                 LWM2M_RES_DATA_FLAG_RO);
     lwm2m_engine_set_res_data("3335/1/5701", LIGHT_UNIT, sizeof(LIGHT_UNIT),
                 LWM2M_RES_DATA_FLAG_RO);
+    lwm2m_engine_set_res_data("3335/1/6042", MEAS_QUAL_IND_UNCHECKED, 
+                sizeof(MEAS_QUAL_IND_UNCHECKED), LWM2M_RES_DATA_FLAG_RO);
+    lwm2m_engine_set_res_data("3335/1/6049", MEAS_QUAL_LEVEL_UNCHECKED, 
+                sizeof(MEAS_QUAL_LEVEL_UNCHECKED), LWM2M_RES_DATA_FLAG_RO);
     
     return 0;
 }
