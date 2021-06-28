@@ -15,12 +15,8 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 #include <lwm2m_object.h>
 #include <lwm2m_engine.h>
 #include <lwm2m_resource_ids.h>
+#include "lwm2m_additional_ids.h"
 
-#define IPSO_OBJECT_ID 3335
-#define COLOUR_RID 5706
-#define FRACTIONAL_TIMESTAMP_RID 6050
-#define MEASUREMENT_QUALITY_INDICATOR_RID 6042
-#define MEASUREMENT_QUALITY_LEVEL_RID 6049
 
 #define MAX_INSTANCE_COUNT CONFIG_LWM2M_IPSO_COLOUR_INSTANCE_COUNT
 
@@ -128,7 +124,7 @@ static struct lwm2m_engine_obj_inst *colour_create(uint16_t obj_inst_id)
 
 static int ipso_colour_init()
 {
-	sensor.obj_id = IPSO_OBJECT_ID;
+	sensor.obj_id = IPSO_COLOUR_OBJECT_ID;
 	sensor.fields = fields;
 	sensor.field_count = ARRAY_SIZE(fields);
 	sensor.max_instance_count = MAX_INSTANCE_COUNT;
