@@ -7,13 +7,14 @@
 #include <zephyr.h>
 #include <drivers/sensor.h>
 #include <net/lwm2m.h>
+#include <math.h>
 
 #include "ui.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_accel, CONFIG_APP_LOG_LEVEL);
 
-#define SENSOR_UNIT_NAME		"Orientation"
+#define SENSOR_UNIT_NAME		"m/s2"
 #define FLIP_ACCELERATION_THRESHOLD	5.0
 #define CALIBRATION_ITERATIONS		CONFIG_ACCEL_CALIBRATION_ITERATIONS
 #define MEASUREMENT_ITERATIONS		CONFIG_ACCEL_ITERATIONS
@@ -47,193 +48,114 @@ enum orientation_state {
 
 
 /**@brief Struct containing current orientation and 3 axis acceleration data. */
-struct orientation_detector_sensor_data {
-	double x;			    /**< x-axis acceleration [m/s^2]. */
-	double y;			    /**< y-axis acceleration [m/s^2]. */
-	double z;			    /**< z-axis acceleration [m/s^2]. */
+struct accelerometer_sensor_data {
+	struct sensor_value x; /**< x-axis acceleration [m/s^2]. */
+	struct sensor_value y; /**< y-axis acceleration [m/s^2]. */
+	struct sensor_value z; /**< z-axis acceleration [m/s^2]. */
 	enum orientation_state orientation; /**< Current orientation. */
 };
 
 static const struct device *accel_dev;
 static double accel_offset[3];
-static struct k_delayed_work flip_poll_work;
 static uint32_t timestamp;
+static struct sensor_value x_val, y_val, z_val;
 
-int orientation_detector_poll(
-	struct orientation_detector_sensor_data *sensor_data)
-{
+static struct accelerometer_sensor_data read_accelerometer() {
+	struct accelerometer_sensor_data sensor_data;
 	int err;
-	uint8_t i;
-	double aggregated_data[3] = {0};
-	struct sensor_value accel_data[3];
-	enum orientation_state current_orientation;
-
-	for (i = 0; i < MEASUREMENT_ITERATIONS; i++) {
-		err = sensor_sample_fetch_chan(accel_dev, SENSOR_CHAN_ACCEL_Z);
-		if (err) {
-			LOG_ERR("sensor_sample_fetch failed");
-			return err;
-		}
-
-		err = sensor_channel_get(accel_dev,
-				SENSOR_CHAN_ACCEL_Z, &accel_data[2]);
-		if (err) {
-			LOG_ERR("sensor_channel_get failed");
-			return err;
-		}
-
-		aggregated_data[2] += sensor_value_to_double(&accel_data[2]);
+	err = sensor_sample_fetch(accel_dev);
+	if (err) {
+		LOG_ERR("Sensor sample fetch failed");
 	}
-
-	sensor_data->z = (aggregated_data[2] / (double)MEASUREMENT_ITERATIONS) -
-				accel_offset[2];
-
-	if (sensor_data->z >= FLIP_ACCELERATION_THRESHOLD) {
-		if (IS_ENABLED(ACCEL_INVERTED)) {
-			current_orientation = ORIENTATION_UPSIDE_DOWN;
-		} else {
-			current_orientation = ORIENTATION_NORMAL;
-		}
-	} else if (sensor_data->z <= -FLIP_ACCELERATION_THRESHOLD) {
-		if (IS_ENABLED(ACCEL_INVERTED)) {
-			current_orientation = ORIENTATION_NORMAL;
-		} else {
-			current_orientation = ORIENTATION_UPSIDE_DOWN;
-		}
-	} else {
-		current_orientation = ORIENTATION_ON_SIDE;
+	err = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_X, &(sensor_data.x));
+	if (err) {
+		LOG_ERR("Accelerometer failed getting x value");
 	}
-
-	sensor_data->orientation = current_orientation;
-
-	return 0;
+	err = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_Y, &(sensor_data.y));
+	if (err) {
+		LOG_ERR("Accelerometer failed getting y value");
+	}
+	err = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_Z, &(sensor_data.z));
+	if (err) {
+		LOG_ERR("Accelerometer failed getting z value");
+	}
+	double x_temp, y_temp, z_temp;
+	double x_int, y_int, z_int;
+	x_temp = sensor_value_to_double(&sensor_data.x) - accel_offset[0];
+	y_temp = sensor_value_to_double(&sensor_data.y) - accel_offset[1];
+	z_temp = sensor_value_to_double(&sensor_data.z) - accel_offset[2];
+	sensor_data.x.val2 = (int32_t) (modf(x_temp, &x_int) * 1000000);
+	sensor_data.x.val1 = (int32_t) x_int;
+	sensor_data.y.val2 = (int32_t) (modf(y_temp, &y_int) * 1000000);
+	sensor_data.y.val1 = (int32_t) y_int;
+	sensor_data.z.val2 = (int32_t) (modf(z_temp, &z_int) * 1000000);
+	sensor_data.z.val1 = (int32_t) z_int;
+	
+	return sensor_data;
 }
 
-/**@brief Poll flip orientation and update object if flip mode is enabled. */
-static void flip_work(struct k_work *work)
+static void *accel_x_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
+			  size_t *data_len)
 {
-	int32_t ts;
-	static enum orientation_state last_orientation_state =
-		ORIENTATION_NOT_KNOWN;
-	static struct orientation_detector_sensor_data sensor_data;
-	struct float32_value f32;
-
-	if (orientation_detector_poll(&sensor_data) == 0) {
-		if (sensor_data.orientation == last_orientation_state) {
-			goto exit;
-		}
-
-		/* get current time from device */
-		lwm2m_engine_get_s32("3/0/13", &ts);
-
-		f32.val1 = 0;
-		f32.val2 = 0;
-		switch (sensor_data.orientation) {
-		case ORIENTATION_NORMAL:
-			/* X=0, Y=0, Z=1 */
-			LOG_INF("accelerometer normal");
-			lwm2m_engine_set_float32("3313/0/5702", &f32);
-			lwm2m_engine_set_float32("3313/0/5703", &f32);
-			f32.val1 = 1;
-			lwm2m_engine_set_float32("3313/0/5704", &f32);
-			break;
-		case ORIENTATION_UPSIDE_DOWN:
-			/* X=0, Y=0, Z=-1 */
-			LOG_INF("accelerometer upside down");
-			lwm2m_engine_set_float32("3313/0/5702", &f32);
-			lwm2m_engine_set_float32("3313/0/5703", &f32);
-			f32.val1 = -1;
-			lwm2m_engine_set_float32("3313/0/5704", &f32);
-			break;
-		case ORIENTATION_ON_SIDE:
-			/* X=1, Y=0, Z=0 */
-			LOG_INF("accelerometer on side");
-			lwm2m_engine_set_float32("3313/0/5702", &f32);
-			lwm2m_engine_set_float32("3313/0/5704", &f32);
-			f32.val1 = 1;
-			lwm2m_engine_set_float32("3313/0/5703", &f32);
-			break;
-		default:
-			/* X=0, Y=0, Z=0 */
-			LOG_INF("accelerometer in unknown position");
-			lwm2m_engine_set_float32("3313/0/5702", &f32);
-			lwm2m_engine_set_float32("3313/0/5703", &f32);
-			lwm2m_engine_set_float32("3313/0/5704", &f32);
-			goto exit;
-		}
-
-		/* set timestamp */
-		lwm2m_engine_set_s32("3313/0/5518", ts);
-		last_orientation_state = sensor_data.orientation;
-	}
-
-exit:
-	if (work) {
-		k_delayed_work_submit(&flip_poll_work, FLIP_POLL_INTERVAL);
-	}
+	x_val = read_accelerometer().x;
+	return &x_val;
 }
 
-static int accel_calibrate(void)
+static void *accel_y_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
+			  size_t *data_len)
 {
-	uint8_t i;
+	y_val = read_accelerometer().y;
+	return &y_val;
+}
+
+static void *accel_z_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
+			  size_t *data_len)
+{
+	z_val = read_accelerometer().z;
+	return &z_val;
+}
+
+static int accel_calibrate(void) {
 	int err;
 	struct sensor_value accel_data[3];
-	double aggregated_data[3] = {0};
+	double aggr_data[3] = {0};
+	
+	k_sleep(K_SECONDS(2));
 
-	for (i = 0; i < CALIBRATION_ITERATIONS; i++) {
+	for (uint8_t i = 0; i < CALIBRATION_ITERATIONS; i++) 
+	{
+		LOG_INF("CALIBRATING %i of %i", i, CALIBRATION_ITERATIONS);
 		err = sensor_sample_fetch(accel_dev);
 		if (err) {
-			LOG_INF("sensor_sample_fetch failed");
+			LOG_ERR("Sensor sample fetch failed while calibrating accelerometer");
 			return err;
 		}
-
 		err = sensor_channel_get(accel_dev,
-				SENSOR_CHAN_ACCEL_X, &accel_data[0]);
+				SENSOR_CHAN_ACCEL_X, &(accel_data[0]));
 		err += sensor_channel_get(accel_dev,
-				SENSOR_CHAN_ACCEL_Y, &accel_data[1]);
+				SENSOR_CHAN_ACCEL_Y, &(accel_data[1]));
 		err += sensor_channel_get(accel_dev,
-				SENSOR_CHAN_ACCEL_Z, &accel_data[2]);
+				SENSOR_CHAN_ACCEL_Z, &(accel_data[2]));
 
 		if (err) {
-			LOG_ERR("sensor_channel_get failed");
+			LOG_ERR("Sensor channel get failed while calibrating accelerometer");
 			return err;
 		}
 
-		aggregated_data[0] += sensor_value_to_double(&accel_data[0]);
-		aggregated_data[1] += sensor_value_to_double(&accel_data[1]);
-		aggregated_data[2] +=
-			(sensor_value_to_double(&accel_data[2])
+		aggr_data[0] += sensor_value_to_double(&(accel_data[0]));
+		aggr_data[1] += sensor_value_to_double(&(accel_data[1]));
+		aggr_data[2] += (sensor_value_to_double(&(accel_data[2]))
 			+ ((double)SENSOR_G) / 1000000.0);
 	}
-
-	accel_offset[0] = aggregated_data[0] / (double)CALIBRATION_ITERATIONS;
-	accel_offset[1] = aggregated_data[1] / (double)CALIBRATION_ITERATIONS;
-	accel_offset[2] = aggregated_data[2] / (double)CALIBRATION_ITERATIONS;
-
+	accel_offset[0] = aggr_data[0] / (double)CALIBRATION_ITERATIONS;
+	accel_offset[1] = aggr_data[1] / (double)CALIBRATION_ITERATIONS;
+	accel_offset[2] = aggr_data[2] / (double)CALIBRATION_ITERATIONS;
 	return 0;
-}
-
-int handle_accel_events(struct ui_evt *evt)
-{
-	if (!evt) {
-		return -EINVAL;
-	}
-
-	if (IS_ENABLED(CONFIG_ACCEL_USE_SIM) && (evt->button == FLIP_INPUT)) {
-		flip_work(NULL);
-		return 0;
-	}
-
-	return -ENOENT;
 }
 
 int lwm2m_init_accel(void)
 {
 	int ret;
-
-	if (IS_ENABLED(CONFIG_FLIP_POLL)) {
-		k_delayed_work_init(&flip_poll_work, flip_work);
-	}
 
 	accel_dev = device_get_binding(CONFIG_ACCEL_DEV_NAME);
 	if (accel_dev == NULL) {
@@ -255,16 +177,11 @@ int lwm2m_init_accel(void)
 	lwm2m_engine_set_res_data("3313/0/5701",
 				  SENSOR_UNIT_NAME, sizeof(SENSOR_UNIT_NAME),
 				  LWM2M_RES_DATA_FLAG_RO);
+	lwm2m_engine_register_read_callback("3313/0/5702", accel_x_read_cb);
+	lwm2m_engine_register_read_callback("3313/0/5703", accel_y_read_cb);
+	lwm2m_engine_register_read_callback("3313/0/5704", accel_z_read_cb);
 	lwm2m_engine_set_res_data("3313/0/5518",
 				  &timestamp, sizeof(timestamp), 0);
-
-	if (IS_ENABLED(CONFIG_FLIP_POLL)) {
-		k_delayed_work_submit(&flip_poll_work, K_NO_WAIT);
-	}
-
-	if (IS_ENABLED(CONFIG_ACCEL_USE_SIM)) {
-		flip_work(NULL);
-	}
 
 	return 0;
 }
