@@ -20,7 +20,8 @@ LOG_MODULE_REGISTER(app_lwm2m_light, CONFIG_APP_LOG_LEVEL);
 
 #define LIGHT_NAME	"LED1"
 
-static uint32_t led_state;
+static bool led_state;
+
 
 /* TODO: Move to a pre write hook that can handle ret codes once available */
 static int lc_on_off_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
@@ -28,8 +29,8 @@ static int lc_on_off_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 			bool last_block, size_t total_size)
 {
 
-	uint32_t led_val;
-	led_val = *(uint8_t *) data;
+	bool led_val;
+	led_val = *(bool *) data;
 	if (led_val != led_state) {
 #ifdef CONFIG_UI_LED_USE_PWM
 		ui_pwm_led_on_off(led_val);
@@ -44,6 +45,7 @@ static int lc_on_off_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 
 	return 0;
 }
+
 
 static int lc_colour_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			uint8_t *data, uint16_t data_len,
@@ -62,12 +64,29 @@ static int lc_colour_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 	return ret;
 }
 
+
+static int lc_dimmer_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
+			uint8_t *data, uint16_t data_len,
+			bool last_block, size_t total_size)
+{
+	uint8_t dutycycle = *data;
+	LOG_DBG("Dutycycle: %x", dutycycle);
+	
+#ifdef CONFIG_UI_LED_USE_PWM
+	return ui_pwm_led_set_dutycycle(dutycycle);
+#endif
+
+	return 0;
+}
+
+
 int lwm2m_init_light_control(void)
 {
 	/* create light control device */
 	lwm2m_engine_create_obj_inst("3311/0");
 	lwm2m_engine_register_post_write_callback("3311/0/5850", lc_on_off_cb);
 	lwm2m_engine_register_post_write_callback("3311/0/5706", lc_colour_cb);
+	lwm2m_engine_register_post_write_callback("3311/0/5851", lc_dimmer_cb);
 	lwm2m_engine_set_res_data("3311/0/5750",
 				  LIGHT_NAME, sizeof(LIGHT_NAME),
 				  LWM2M_RES_DATA_FLAG_RO);

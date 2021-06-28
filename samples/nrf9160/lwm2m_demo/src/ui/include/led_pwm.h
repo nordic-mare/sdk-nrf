@@ -28,6 +28,9 @@ int ui_pwm_led_on_off(bool new_state);
 /**@brief Changes led colour. */
 int ui_pwm_led_set_colour(uint32_t colour_values);
 
+/**@brief Sets duty cycle. */
+int ui_pwm_led_set_dutycycle(uint8_t dutycycle);
+
 #ifdef __cplusplus
 }
 #endif
