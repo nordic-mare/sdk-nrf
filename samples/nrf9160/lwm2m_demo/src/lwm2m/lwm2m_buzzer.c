@@ -43,7 +43,7 @@ static int buzzer_intensity_cb(uint16_t obj_inst_id,
 			   uint8_t *data, uint16_t data_len,
 			   bool last_block, size_t total_size)
 {
-	return ui_buzzer_set_intensity(*data);
+	return ui_buzzer_set_intensity(data[0]);
 }
 
 int lwm2m_init_buzzer(void)
@@ -52,18 +52,13 @@ int lwm2m_init_buzzer(void)
 	lwm2m_engine_create_obj_inst("3338/0");
 	lwm2m_engine_register_post_write_callback("3338/0/5500",
 						  buzzer_state_cb);
-	float32_value_t intensity_default = {50, 000000};
-	lwm2m_engine_set_res_data("3338/0/5548", 
-				  &intensity_default, sizeof(float32_value_t), 31);
-	
 	lwm2m_engine_register_post_write_callback("3338/0/5548",
-						  buzzer_frequency_cb);
-	lwm2m_engine_register_post_write_callback("3338/0/7001",
 						  buzzer_intensity_cb);
+	lwm2m_engine_register_post_write_callback("3338/0/7001",
+						  buzzer_frequency_cb);
 	lwm2m_engine_set_res_data("3338/0/5750",
 				  BUZZER_NAME, sizeof(BUZZER_NAME),
 				  LWM2M_RES_DATA_FLAG_RO);
-	lwm2m_engine_set_u32("3338/0/7001", 1000);
 
 	return 0;
 }
