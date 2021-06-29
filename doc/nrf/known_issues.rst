@@ -501,17 +501,6 @@ KRKNWK-9214: Pigweed submodule may not be accessible from some regions
        west update
 
 HomeKit
-=======
-
-.. _krknwk_10611:
-
-.. rst-class:: v1-6-0
-
-KRKNWK-10611: DFU will fail when using external flash memory for update image storage.
-  DFU with external flash memory cannot be performed on HomeKit accessories.
-
-More information on HomeKit known issues is available in the HomeKit documentation available in the sdk-homekit private repository.
-
 nRF Desktop
 ===========
 

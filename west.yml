@@ -75,7 +75,6 @@ manifest:
           - civetweb
           - edtt
           - fatfs
-          - hal_nordic
           - hal_st
           - libmetal
           - littlefs
