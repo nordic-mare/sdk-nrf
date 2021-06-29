@@ -323,7 +323,7 @@ int lwm2m_init_image(void)
 		lwm2m_engine_set_u8("5/0/5", RESULT_UPDATE_FAILED);
 	}
 
-#ifdef CONFIG_DFU_TARGET_MCUBOOT
+#ifndef CONFIG_DFU_TARGET_MCUBOOT
 	/* Set the required buffer for MCUboot targets */
 	ret = dfu_target_mcuboot_set_buf(mcuboot_buf, sizeof(mcuboot_buf));
 	if (ret) {

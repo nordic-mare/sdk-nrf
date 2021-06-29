@@ -97,7 +97,7 @@ static struct lwm2m_engine_obj_inst *colour_create(uint16_t obj_inst_id)
 	INIT_OBJ_RES(COLOUR_RID, res[index], i,
 		    res_inst[index], j, 1, false, true,
 		    &colour[index], sizeof(*colour),
-		    NULL, NULL, NULL, NULL);
+		    NULL, NULL, NULL, NULL, NULL);
 	INIT_OBJ_RES_DATA(SENSOR_UNITS_RID, res[index], i, res_inst[index], j,
 			units[index], UNIT_STR_MAX_SIZE);
 	INIT_OBJ_RES_DATA(APPLICATION_TYPE_RID, res[index], i, res_inst[index],
