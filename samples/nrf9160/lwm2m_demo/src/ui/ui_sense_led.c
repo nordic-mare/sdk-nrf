@@ -16,24 +16,24 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(ui_sense_led, CONFIG_UI_LOG_LEVEL);
 
-static const struct device *sense_led_dev;
+static const struct device *gpio_dev;
 
 int ui_sense_led_on_off(bool new_state)
 {
     int ret;
-    ret = gpio_pin_set(sense_led_dev, RED_SENSE_LED_GPIO_PIN, new_state);
+    ret = gpio_pin_set(gpio_dev, RED_SENSE_LED_GPIO_PIN, new_state);
     if (ret) {
-        LOG_ERR("Could not set red sense led");
+        LOG_ERR("Could not set red sense LED");
         return ret;
     }
-    ret = gpio_pin_set(sense_led_dev, GREEN_SENSE_LED_GPIO_PIN, new_state);
+    ret = gpio_pin_set(gpio_dev, GREEN_SENSE_LED_GPIO_PIN, new_state);
     if (ret) {
-        LOG_ERR("Could not set green sense led");
+        LOG_ERR("Could not set green sense LED");
         return ret;
     }
-    ret = gpio_pin_set(sense_led_dev, BLUE_SENSE_LED_GPIO_PIN, new_state);
+    ret = gpio_pin_set(gpio_dev, BLUE_SENSE_LED_GPIO_PIN, new_state);
     if (ret) {
-        LOG_ERR("Could not set blue sense led");
+        LOG_ERR("Could not set blue sense LED");
         return ret;
     }
     return 0;
@@ -44,24 +44,28 @@ int ui_sense_led_init(void)
 {
 	int ret;
 
-	sense_led_dev = device_get_binding(GPIO_NAME);
-	if (!sense_led_dev) {
+	gpio_dev = device_get_binding(GPIO_NAME);
+	if (!gpio_dev) {
+        LOG_ERR("No GPIO device found");
 		return -ENODEV;
 	}
 
-	ret = gpio_pin_configure(sense_led_dev, RED_SENSE_LED_GPIO_PIN, 
+	ret = gpio_pin_configure(gpio_dev, RED_SENSE_LED_GPIO_PIN, 
                     SENSE_LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
     if (ret) {
+        LOG_ERR("Could not configure red sense LED");
 		return ret;
 	}
-    ret = gpio_pin_configure(sense_led_dev, GREEN_SENSE_LED_GPIO_PIN, 
+    ret = gpio_pin_configure(gpio_dev, GREEN_SENSE_LED_GPIO_PIN, 
                     SENSE_LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
     if (ret) {
+        LOG_ERR("Could not configure green sense LED");
 		return ret;
 	}
-    ret = gpio_pin_configure(sense_led_dev, BLUE_SENSE_LED_GPIO_PIN, 
+    ret = gpio_pin_configure(gpio_dev, BLUE_SENSE_LED_GPIO_PIN, 
                     SENSE_LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
+        LOG_ERR("Could not configure blue sense LED");
 		return ret;
 	}
 

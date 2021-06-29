@@ -32,11 +32,13 @@ int ui_light_sensor_read(char *light_value)
 
     ret = sensor_sample_fetch_chan(light_sens_dev, SENSOR_CHAN_ALL);
     if (ret) {
+        LOG_ERR("Could not fetch sample");
         return ret;
     }
     
     ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_RED, &sensor_val);
     if (ret) {
+        LOG_ERR("Could not get red channel");
         return ret;
     }
     red_val = sensor_val.val1;
@@ -44,6 +46,7 @@ int ui_light_sensor_read(char *light_value)
 
     ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_GREEN, &sensor_val);
     if (ret) {
+        LOG_ERR("Could not get green channel");
         return ret;
     }
     green_val = sensor_val.val1;
@@ -51,6 +54,7 @@ int ui_light_sensor_read(char *light_value)
 
     ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_BLUE, &sensor_val);
     if (ret) {
+        LOG_ERR("Could not get blue channel");
         return ret;
     }
     blue_val = sensor_val.val1;
@@ -58,6 +62,7 @@ int ui_light_sensor_read(char *light_value)
 
     ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_IR, &sensor_val);
     if (ret) {
+        LOG_ERR("Could not get infra red channel");
         return ret;
     }
     ir_val = sensor_val.val1;
