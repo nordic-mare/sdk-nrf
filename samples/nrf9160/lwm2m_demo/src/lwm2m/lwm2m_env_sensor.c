@@ -13,21 +13,21 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_env_sens, CONFIG_APP_LOG_LEVEL);
 
-#define TEMP_UNIT "C"
-#define PRESS_UNIT "kPa"
-#define HUMID_UNIT "%"
-#define GAS_RES_UNIT "Ohm"
+#define TEMP_UNIT 		"C"
+#define PRESS_UNIT 		"kPa"
+#define HUMID_UNIT 		"%"
+#define GAS_RES_UNIT 	"Ohm"
 
 static float32_value_t temp_float;
 static float32_value_t press_float;
 static float32_value_t humid_float;
-static float32_value_t gas_resistance_float;	
+static float32_value_t gas_res_float;	
 
 
 static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	ui_read_env_sensor(TEMP_UNIT, SENSOR_CHAN_AMBIENT_TEMP, &temp_float);	
+	ui_env_sensor_read_temp(&(temp_float.val1), &(temp_float.val2));
 
 	*data_len = sizeof(temp_float);
 
@@ -37,7 +37,7 @@ static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_in
 static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	ui_read_env_sensor(PRESS_UNIT, SENSOR_CHAN_PRESS, &press_float);
+	ui_env_sensor_read_pressure(&(press_float.val1), &(press_float.val2));
 
 	*data_len = sizeof(press_float);
 
@@ -47,7 +47,7 @@ static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	ui_read_env_sensor(HUMID_UNIT, SENSOR_CHAN_HUMIDITY, &humid_float);
+	ui_env_sensor_read_humidity(&(humid_float.val1), &(humid_float.val2));
 
 	*data_len = sizeof(humid_float);
 
@@ -57,11 +57,11 @@ static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	ui_read_env_sensor(GAS_RES_UNIT, SENSOR_CHAN_GAS_RES, &gas_resistance_float);
+	ui_env_sensor_read_gas_resistance(&(gas_res_float.val1), &(gas_res_float.val2));
 
-	*data_len = sizeof(gas_resistance_float);
+	*data_len = sizeof(gas_res_float);
 
-	return &gas_resistance_float;
+	return &gas_res_float;
 }
 
 int lwm2m_init_env_sensor(void)

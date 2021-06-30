@@ -11,7 +11,7 @@ LOG_MODULE_REGISTER(ui_light_sensor, CONFIG_APP_LOG_LEVEL);
 #define RGBIR_STR_LENGTH        11  // '0xRRGGBBIR\0'
 
 static const struct device *light_sens_dev;
-static struct sensor_value sensor_val;
+static struct sensor_value light_sensor_val;
 
 
 int ui_light_sensor_init(void)
@@ -37,36 +37,36 @@ int ui_light_sensor_read(char *light_value)
         return ret;
     }
     
-    ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_RED, &sensor_val);
+    ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_RED, &light_sensor_val);
     if (ret) {
         LOG_ERR("Could not get red channel");
         return ret;
     }
-    red_val = sensor_val.val1;
-    LOG_DBG("Light sensor red value: %i", sensor_val.val1);
+    red_val = light_sensor_val.val1;
+    LOG_DBG("Light sensor red value: %i", red_val);
 
-    ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_GREEN, &sensor_val);
+    ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_GREEN, &light_sensor_val);
     if (ret) {
         LOG_ERR("Could not get green channel");
         return ret;
     }
-    green_val = sensor_val.val1;
+    green_val = light_sensor_val.val1;
     LOG_DBG("Light sensor green value: %i", green_val);
 
-    ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_BLUE, &sensor_val);
+    ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_BLUE, &light_sensor_val);
     if (ret) {
         LOG_ERR("Could not get blue channel");
         return ret;
     }
-    blue_val = sensor_val.val1;
+    blue_val = light_sensor_val.val1;
     LOG_DBG("Light sensor blue value: %i", blue_val);
 
-    ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_IR, &sensor_val);
+    ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_IR, &light_sensor_val);
     if (ret) {
         LOG_ERR("Could not get infra red channel");
         return ret;
     }
-    ir_val = sensor_val.val1;
+    ir_val = light_sensor_val.val1;
     LOG_DBG("Light sensor IR value: %i", ir_val);
 
     snprintf(light_value, RGBIR_STR_LENGTH, 
