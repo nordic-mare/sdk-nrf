@@ -5,13 +5,16 @@
  */
 
 #include <zephyr.h>
-#include <drivers/sensor.h>
 #include <net/lwm2m.h>
+#include <lwm2m_resource_ids.h>
 
 #include "ui_env_sensor.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_env_sens, CONFIG_APP_LOG_LEVEL);
+
+#define GENERIC_SENSOR_APP_TYPE "A measure for Air Quality Index"
+#define GENERIC_SENSOR_TYPE 	"Gas resistance sensor"
 
 #define TEMP_UNIT 		"C"
 #define PRESS_UNIT 		"kPa"
@@ -68,28 +71,38 @@ int lwm2m_init_env_sensor(void)
 {
 	ui_env_sensor_init();
 
-	lwm2m_engine_create_obj_inst("3303/0");
-	lwm2m_engine_register_read_callback("3303/0/5700", temp_read_cb);
-	lwm2m_engine_set_res_data("3303/0/5701", TEMP_UNIT, sizeof(TEMP_UNIT),
-				  LWM2M_RES_DATA_FLAG_RO);
+	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0));
+	lwm2m_engine_register_read_callback(
+			LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID), temp_read_cb);
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_UNITS_RID), 
+			TEMP_UNIT, sizeof(TEMP_UNIT), LWM2M_RES_DATA_FLAG_RO);
 
-    lwm2m_engine_create_obj_inst("3323/0");
-	lwm2m_engine_register_read_callback("3323/0/5700", pressure_read_cb);
-	lwm2m_engine_set_res_data("3323/0/5701", PRESS_UNIT, sizeof(PRESS_UNIT),
-				  LWM2M_RES_DATA_FLAG_RO);
+    lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0));
+	lwm2m_engine_register_read_callback(
+			LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID), pressure_read_cb);
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_UNITS_RID), 
+			PRESS_UNIT, sizeof(PRESS_UNIT), LWM2M_RES_DATA_FLAG_RO);
 	
-    lwm2m_engine_create_obj_inst("3304/0");
-	lwm2m_engine_register_read_callback("3304/0/5700", humidity_read_cb);
-	lwm2m_engine_set_res_data("3304/0/5701", HUMID_UNIT, sizeof(HUMID_UNIT),
-				  LWM2M_RES_DATA_FLAG_RO);
+    lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0));
+	lwm2m_engine_register_read_callback(
+			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID), humidity_read_cb);
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_UNITS_RID), 
+			HUMID_UNIT, sizeof(HUMID_UNIT), LWM2M_RES_DATA_FLAG_RO);
 
-	lwm2m_engine_create_obj_inst("3300/0");
-	lwm2m_engine_register_read_callback("3300/0/5700", gas_resistance_read_cb);
-	lwm2m_engine_set_res_data("3300/0/5701", GAS_RES_UNIT, sizeof(GAS_RES_UNIT),
-				  LWM2M_RES_DATA_FLAG_RO);
-	lwm2m_engine_set_res_data("3300/0/5750",
-                "A measure for air quality", 
-				sizeof("A measure for air quality"),
-                LWM2M_RES_DATA_FLAG_RO);
+	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0));
+	lwm2m_engine_register_read_callback(
+			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID), gas_resistance_read_cb);
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_UNITS_RID), 
+			GAS_RES_UNIT, sizeof(GAS_RES_UNIT), LWM2M_RES_DATA_FLAG_RO);
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, APPLICATION_TYPE_RID),
+            GENERIC_SENSOR_APP_TYPE, sizeof(GENERIC_SENSOR_APP_TYPE), LWM2M_RES_DATA_FLAG_RO);
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_TYPE_RID),
+			GENERIC_SENSOR_TYPE, sizeof(GENERIC_SENSOR_TYPE), LWM2M_RES_DATA_FLAG_RO);
 	return 0;
 }

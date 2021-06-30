@@ -1,6 +1,5 @@
 #include <zephyr.h>
 #include <drivers/sensor.h>
-#include <net/lwm2m.h>
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(ui_env_sens, CONFIG_APP_LOG_LEVEL);
