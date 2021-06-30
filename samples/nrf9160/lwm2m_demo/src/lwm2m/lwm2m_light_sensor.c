@@ -25,9 +25,6 @@ LOG_MODULE_REGISTER(app_lwm2m_light_sensor, CONFIG_APP_LOG_LEVEL);
 #define COLOUR_SENSOR_APP_NAME  "Colour sensor"
 #define LIGHT_UNIT              "RGB-IR"
 
-#define MEAS_QUAL_IND_UNCHECKED     0
-#define MEAS_QUAL_LEVEL_UNCHECKED   0
-
 #define SENSE_LED_ON_TIME_MS        500
 
 static char light_value[RGBIR_STR_LENGTH];
@@ -86,16 +83,6 @@ int lwm2m_init_light_sensor(void)
             LIGHT_UNIT, 
             sizeof(LIGHT_UNIT),
             LWM2M_RES_DATA_FLAG_RO);
-    lwm2m_engine_set_res_data(
-            LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, LIGHT_OBJ_INSTANCE, MEASUREMENT_QUALITY_INDICATOR_RID), 
-            MEAS_QUAL_IND_UNCHECKED, 
-            sizeof(MEAS_QUAL_IND_UNCHECKED), 
-            LWM2M_RES_DATA_FLAG_RO);
-    lwm2m_engine_set_res_data(
-            LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, LIGHT_OBJ_INSTANCE, MEASUREMENT_QUALITY_LEVEL_RID), 
-            MEAS_QUAL_LEVEL_UNCHECKED, 
-            sizeof(MEAS_QUAL_LEVEL_UNCHECKED), 
-            LWM2M_RES_DATA_FLAG_RO);
 
     /* Surface colour sensor */
     lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, COLOUR_OBJ_INSTANCE));
@@ -111,16 +98,6 @@ int lwm2m_init_light_sensor(void)
             LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, COLOUR_OBJ_INSTANCE, SENSOR_UNITS_RID), 
             LIGHT_UNIT, 
             sizeof(LIGHT_UNIT),
-            LWM2M_RES_DATA_FLAG_RO);
-    lwm2m_engine_set_res_data(
-            LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, COLOUR_OBJ_INSTANCE, MEASUREMENT_QUALITY_INDICATOR_RID), 
-            MEAS_QUAL_IND_UNCHECKED, 
-            sizeof(MEAS_QUAL_IND_UNCHECKED), 
-            LWM2M_RES_DATA_FLAG_RO);
-    lwm2m_engine_set_res_data(
-            LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, COLOUR_OBJ_INSTANCE, MEASUREMENT_QUALITY_LEVEL_RID), 
-            MEAS_QUAL_LEVEL_UNCHECKED, 
-            sizeof(MEAS_QUAL_LEVEL_UNCHECKED), 
             LWM2M_RES_DATA_FLAG_RO);
     
     return 0;

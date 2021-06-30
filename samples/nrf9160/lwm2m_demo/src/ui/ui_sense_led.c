@@ -18,6 +18,7 @@ LOG_MODULE_REGISTER(ui_sense_led, CONFIG_UI_LOG_LEVEL);
 
 static const struct device *gpio_dev;
 
+
 int ui_sense_led_on_off(bool new_state)
 {
     int ret;

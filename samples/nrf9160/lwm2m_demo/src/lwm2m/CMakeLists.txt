@@ -7,7 +7,6 @@
 zephyr_include_directories(include)
 target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_device.c)
 target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_security.c)
-target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_light_sensor.c)
 
 target_sources_ifdef(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_location.c
@@ -32,4 +31,7 @@ target_sources_ifdef(CONFIG_UI_BUTTON
 	)
 target_sources_ifdef(CONFIG_LWM2M_IPSO_ACCELEROMETER
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_accelerometer.c
+	)
+target_sources_ifdef(CONFIG_LWM2M_IPSO_COLOUR_SENSOR
+	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_light_sensor.c
 	)

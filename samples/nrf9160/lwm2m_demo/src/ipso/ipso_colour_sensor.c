@@ -3,7 +3,6 @@
  * https://raw.githubusercontent.com/OpenMobileAlliance/lwm2m-registry/prod/version_history/3335-1_0.xml
  */
 #include <zephyr.h>
-//#include <stdint.h>
 #include <init.h>
 
 #include <lwm2m_object.h>
@@ -11,13 +10,22 @@
 #include <lwm2m_resource_ids.h>
 
 #include <logging/log.h>
-LOG_MODULE_REGISTER(ipso_colour, CONFIG_LWM2M_LOG_LEVEL);
+LOG_MODULE_REGISTER(app_ipso_colour_sensor, CONFIG_LWM2M_LOG_LEVEL);
 
 #define IPSO_COLOUR_OBJECT_ID 3335
 
-#define MAX_INSTANCE_COUNT CONFIG_LWM2M_IPSO_COLOUR_INSTANCE_COUNT
+#define MAX_INSTANCE_COUNT CONFIG_LWM2M_IPSO_COLOUR_SENSOR_INSTANCE_COUNT
 
+#define COLOUR_VERSION_MAJOR 1
+
+#ifdef CONFIG_LWM2M_IPSO_COLOUR_SENSOR_VERSION_1_1
+#define COLOUR_VERSION_MINOR 1
 #define NUMBER_OF_OBJECT_FIELDS 7
+#else
+#define COLOUR_VERSION_MINOR 0
+#define NUMBER_OF_OBJECT_FIELDS 3
+#endif /* ifdef CONFIG_LWM2M_IPSO_COLOUR_VERSION_1_1 */
+
 #define RESOURCE_INSTANCE_COUNT	NUMBER_OF_OBJECT_FIELDS
 
 #define UNIT_STR_MAX_SIZE	8
@@ -29,21 +37,18 @@ LOG_MODULE_REGISTER(ipso_colour, CONFIG_LWM2M_LOG_LEVEL);
 static char colour[MAX_INSTANCE_COUNT][COLOUR_STR_MAX_SIZE]; 
 static char units[MAX_INSTANCE_COUNT][UNIT_STR_MAX_SIZE];
 static char app_type[MAX_INSTANCE_COUNT][APP_TYPE_STR_MAX_SIZE];
-static int32_t time_stamp[MAX_INSTANCE_COUNT];
-static int32_t frac_time_stamp[MAX_INSTANCE_COUNT];
-static int32_t meas_qual_ind[MAX_INSTANCE_COUNT];
-static int32_t meas_qual_level[MAX_INSTANCE_COUNT];
-
 
 static struct lwm2m_engine_obj sensor;
 static struct lwm2m_engine_obj_field fields[] = {
     OBJ_FIELD_DATA(COLOUR_RID, R, STRING),
     OBJ_FIELD_DATA(SENSOR_UNITS_RID, R_OPT, STRING),
 	OBJ_FIELD_DATA(APPLICATION_TYPE_RID, RW_OPT, STRING),
+#ifdef CONFIG_LWM2M_IPSO_COLOUR_SENSOR_VERSION_1_1
 	OBJ_FIELD_DATA(TIMESTAMP_RID, R_OPT, TIME),
 	OBJ_FIELD_DATA(FRACTIONAL_TIMESTAMP_RID, R_OPT, FLOAT32),
 	OBJ_FIELD_DATA(MEASUREMENT_QUALITY_INDICATOR_RID, R_OPT, INT),
 	OBJ_FIELD_DATA(MEASUREMENT_QUALITY_LEVEL_RID, R_OPT, INT)
+#endif
 };
 
 static struct lwm2m_engine_obj_inst inst[MAX_INSTANCE_COUNT];
@@ -52,7 +57,7 @@ static struct lwm2m_engine_res_inst
 		res_inst[MAX_INSTANCE_COUNT][RESOURCE_INSTANCE_COUNT];
 
 
-static struct lwm2m_engine_obj_inst *colour_create(uint16_t obj_inst_id)
+static struct lwm2m_engine_obj_inst *colour_sensor_create(uint16_t obj_inst_id)
 {
 	int index, i = 0, j = 0;
 
@@ -81,10 +86,6 @@ static struct lwm2m_engine_obj_inst *colour_create(uint16_t obj_inst_id)
 	colour[index][0] = '\0';
 	units[index][0] = '\0';
 	app_type[index][0] = '\0';
-	time_stamp[index] = 0;
-	frac_time_stamp[index] = 0;
-	meas_qual_ind[index] = 0;
-	meas_qual_level[index] = 0;
 
 	(void)memset(res[index], 0,
 		     sizeof(res[index][0]) * ARRAY_SIZE(res[index]));
@@ -99,17 +100,15 @@ static struct lwm2m_engine_obj_inst *colour_create(uint16_t obj_inst_id)
 			units[index], UNIT_STR_MAX_SIZE);
 	INIT_OBJ_RES_DATA(APPLICATION_TYPE_RID, res[index], i, res_inst[index],
 			j, app_type[index], APP_TYPE_STR_MAX_SIZE);
-	INIT_OBJ_RES_DATA(TIMESTAMP_RID, res[index], i, res_inst[index], j,
-			&time_stamp[index], sizeof(time_stamp[index]));
-	INIT_OBJ_RES_DATA(FRACTIONAL_TIMESTAMP_RID, res[index], i, 
-			res_inst[index], j, &frac_time_stamp[index], 
-			sizeof(frac_time_stamp[index]));
-	INIT_OBJ_RES_DATA(MEASUREMENT_QUALITY_INDICATOR_RID, res[index], i, 
-			res_inst[index], j, &meas_qual_ind[index], 
-			sizeof(meas_qual_ind[index]));
-	INIT_OBJ_RES_DATA(MEASUREMENT_QUALITY_LEVEL_RID, res[index], i, 
-			res_inst[index], j, &meas_qual_level[index], 
-			sizeof(meas_qual_level[index]));
+#ifdef CONFIG_LWM2M_IPSO_COLOUR_SENSOR_VERSION_1_1
+	INIT_OBJ_RES_OPTDATA(TIMESTAMP_RID, res[index], i, res_inst[index], j);
+	INIT_OBJ_RES_OPTDATA(FRACTIONAL_TIMESTAMP_RID, res[index], i,
+			     res_inst[index], j);
+	INIT_OBJ_RES_OPTDATA(MEASUREMENT_QUALITY_INDICATOR_RID, res[index],
+			     i, res_inst[index], j);
+	INIT_OBJ_RES_OPTDATA(MEASUREMENT_QUALITY_LEVEL_RID, res[index], i,
+			     res_inst[index], j);
+#endif
 
 	inst[index].resources = res[index];
 	inst[index].resource_count = i;
@@ -119,17 +118,20 @@ static struct lwm2m_engine_obj_inst *colour_create(uint16_t obj_inst_id)
     
 }
 
-static int ipso_colour_init()
+static int ipso_colour_sensor_init()
 {
 	sensor.obj_id = IPSO_COLOUR_OBJECT_ID;
+	sensor.version_major = COLOUR_VERSION_MAJOR;
+	sensor.version_minor = COLOUR_VERSION_MINOR;
+	sensor.is_core = false;
 	sensor.fields = fields;
 	sensor.field_count = ARRAY_SIZE(fields);
 	sensor.max_instance_count = MAX_INSTANCE_COUNT;
-	sensor.create_cb = colour_create;
+	sensor.create_cb = colour_sensor_create;
 	lwm2m_register_obj(&sensor);
 
 	return 0;
 }
 
-SYS_INIT(ipso_colour_init, APPLICATION,
+SYS_INIT(ipso_colour_sensor_init, APPLICATION,
 	 CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);

@@ -15,7 +15,7 @@ target_sources_ifdef(CONFIG_UI_BUZZER
 target_sources_ifdef(CONFIG_UI_LED_USE_PWM
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/led_pwm.c
 	)
-	target_sources_ifdef(CONFIG_UI_LED_USE_GPIO
+target_sources_ifdef(CONFIG_UI_LED_USE_GPIO
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/led_gpio.c
 	)
 target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_sense_led.c)
