@@ -10,15 +10,15 @@ LOG_MODULE_REGISTER(ui_light_sensor, CONFIG_APP_LOG_LEVEL);
 
 #define RGBIR_STR_LENGTH        11  // '0xRRGGBBIR\0'
 
-static const struct device *light_sens_dev;
+static const struct device *light_sensor_dev;
 static struct sensor_value light_sensor_val;
 
 
 int ui_light_sensor_init(void)
 {
-    light_sens_dev = device_get_binding(LIGHT_SENSOR_NAME);
-    if (!light_sens_dev) {
-        LOG_ERR("No light sensor found");
+    light_sensor_dev = device_get_binding(LIGHT_SENSOR_NAME);
+    if (!light_sensor_dev) {
+        LOG_ERR("Could not bind to device %s", light_sensor_dev->name);
         return -ENODEV;
     }
 
@@ -31,13 +31,13 @@ int ui_light_sensor_read(char *light_value)
     int ret;
     uint8_t red_val, blue_val, green_val, ir_val;
 
-    ret = sensor_sample_fetch_chan(light_sens_dev, SENSOR_CHAN_ALL);
+    ret = sensor_sample_fetch_chan(light_sensor_dev, SENSOR_CHAN_ALL);
     if (ret) {
         LOG_ERR("Could not fetch sample");
         return ret;
     }
     
-    ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_RED, &light_sensor_val);
+    ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_RED, &light_sensor_val);
     if (ret) {
         LOG_ERR("Could not get red channel");
         return ret;
@@ -45,7 +45,7 @@ int ui_light_sensor_read(char *light_value)
     red_val = light_sensor_val.val1;
     LOG_DBG("Light sensor red value: %i", red_val);
 
-    ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_GREEN, &light_sensor_val);
+    ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_GREEN, &light_sensor_val);
     if (ret) {
         LOG_ERR("Could not get green channel");
         return ret;
@@ -53,7 +53,7 @@ int ui_light_sensor_read(char *light_value)
     green_val = light_sensor_val.val1;
     LOG_DBG("Light sensor green value: %i", green_val);
 
-    ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_BLUE, &light_sensor_val);
+    ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_BLUE, &light_sensor_val);
     if (ret) {
         LOG_ERR("Could not get blue channel");
         return ret;
@@ -61,7 +61,7 @@ int ui_light_sensor_read(char *light_value)
     blue_val = light_sensor_val.val1;
     LOG_DBG("Light sensor blue value: %i", blue_val);
 
-    ret = sensor_channel_get(light_sens_dev, SENSOR_CHAN_IR, &light_sensor_val);
+    ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_IR, &light_sensor_val);
     if (ret) {
         LOG_ERR("Could not get infra red channel");
         return ret;

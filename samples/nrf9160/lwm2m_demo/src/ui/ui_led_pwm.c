@@ -1,0 +1,108 @@
+/*
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+#include <zephyr.h>
+#include <drivers/pwm.h>
+#include <stdlib.h>
+
+#include <logging/log.h>
+LOG_MODULE_REGISTER(ui_led_pwm, CONFIG_UI_LOG_LEVEL);
+
+#define LED_PWM_NODE            DT_ALIAS(rgb_pwm)
+#define LED_PWM_PIN(channel)    DT_PROP(LED_PWM_NODE, ch##channel##_pin)
+#define LED_PWM_FLAGS           DT_PWMS_FLAGS(LED_PWM_NODE)
+#define LED_PWM_NAME            DT_LABEL(LED_PWM_NODE)
+
+#define PERIOD_USEC	(USEC_PER_SEC / 100U)
+
+#define COLOUR_RESOLUTION       255
+#define DUTYCYCLE_RESOLUTION    100
+
+static const struct device *led_pwm_dev;
+
+
+static uint8_t current_dutycycle;
+static uint8_t red_val;
+static uint8_t green_val;
+static uint8_t blue_val;
+static bool is_on;
+
+
+int ui_led_pwm_on_off(bool new_state)
+{
+    is_on = new_state;
+    int ret;
+    uint32_t pulse_width_red, pulse_width_green, pulse_width_blue;
+
+
+    pulse_width_red = PERIOD_USEC * is_on * red_val * current_dutycycle 
+                        / (COLOUR_RESOLUTION * DUTYCYCLE_RESOLUTION);
+    pulse_width_green = PERIOD_USEC * is_on * green_val * current_dutycycle 
+                        / (COLOUR_RESOLUTION * DUTYCYCLE_RESOLUTION);
+    pulse_width_blue = PERIOD_USEC * is_on * blue_val * current_dutycycle 
+                        / (COLOUR_RESOLUTION * DUTYCYCLE_RESOLUTION);
+
+    ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(0), PERIOD_USEC, pulse_width_red, LED_PWM_FLAGS);
+    if (ret != 0) {
+        LOG_ERR("Error %d: red write failed\n", ret);
+        return ret;
+    }
+    ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(1), PERIOD_USEC, pulse_width_green, LED_PWM_FLAGS);
+    if (ret != 0) {
+        LOG_ERR("Error %d: green write failed\n", ret);
+        return ret;
+    }
+    ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(2), PERIOD_USEC, pulse_width_blue, LED_PWM_FLAGS);
+    if (ret != 0) {
+        LOG_ERR("Error %d: blue write failed\n", ret);
+        return ret;
+    }
+
+    return 0;
+}
+
+int ui_led_pwm_set_colour(uint32_t colour_values)
+{
+    red_val = (uint8_t)(colour_values >> 16);
+    green_val = (uint8_t)(colour_values >> 8);
+    blue_val = (uint8_t)colour_values;
+
+    if (!is_on) {
+        return 0;
+    }
+
+    return ui_led_pwm_on_off(true);
+}
+
+
+int ui_led_pwm_set_dutycycle(uint8_t dutycycle)
+{
+    current_dutycycle = dutycycle;
+
+    if (!is_on) {
+        return 0;
+    }
+
+    return ui_led_pwm_on_off(is_on);
+}
+
+
+int ui_led_pwm_init(void)
+{
+	led_pwm_dev = device_get_binding(LED_PWM_NAME);
+    if (!led_pwm_dev) {
+		LOG_ERR("Could not bind to device %s", led_pwm_dev->name);
+		return -ENODEV;
+	}
+
+    current_dutycycle = 100;
+
+    return 0;
+}
+
+
+
+

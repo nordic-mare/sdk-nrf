@@ -10,20 +10,15 @@
 #include "button.h"
 #include "buzzer.h"
 #include "led_gpio.h"
-#include "led_pwm.h"
 
 LOG_MODULE_REGISTER(ui, CONFIG_UI_LOG_LEVEL);
 
 int ui_init(ui_callback_t cb)
 {
 	int err;
-#ifdef CONFIG_UI_LED_USE_GPIO
-	err = ui_gpio_led_init();
-#endif
 
-#ifdef CONFIG_UI_LED_USE_PWM
-	err = ui_pwm_led_init();
-#endif
+
+
 
 #ifdef CONFIG_UI_BUTTON
 	err = ui_button_init(cb);

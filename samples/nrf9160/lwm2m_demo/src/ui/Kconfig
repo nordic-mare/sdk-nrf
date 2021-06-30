@@ -6,6 +6,10 @@
 
 menu "User Interface"
 
+config UI_LED
+	bool "Enable normal LEDs"
+	default y
+
 choice
 	prompt "LED device"
 	default UI_LED_USE_PWM

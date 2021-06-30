@@ -10,11 +10,10 @@
 #include <stdlib.h>
 
 #ifdef CONFIG_UI_LED_USE_PWM
-#include <led_pwm.h>
+#include "ui_led_pwm.h"
 #else
 #include <led_gpio.h>
 #endif
-
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_light_control, CONFIG_APP_LOG_LEVEL);
@@ -33,7 +32,7 @@ static int lc_on_off_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 
 	if (new_led_state != led_state)  {
 #ifdef CONFIG_UI_LED_USE_PWM
-		ret = ui_pwm_led_on_off(new_led_state);
+		ret = ui_led_pwm_on_off(new_led_state);
 #else
 		ret = ui_gpio_led_on_off(new_led_state);
 #endif /* ifdef CONFIG_UI_LED_USE_PWM */
@@ -61,10 +60,10 @@ static int lc_colour_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 	LOG_DBG("Colour value: %x", colour_val);
 
 #ifdef CONFIG_UI_LED_USE_PWM
-	ret = ui_pwm_led_set_colour(colour_val);
+	ret = ui_led_pwm_set_colour(colour_val);
 #else
 	ret = ui_gpio_led_set_colour(colour_val);
-#endif /* ifdef CONFIG_UI_LED_USE_PWM */
+#endif 
 
 	return ret;
 }
@@ -78,7 +77,7 @@ static int lc_dimmer_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 	LOG_DBG("Dutycycle: %x", dutycycle);
 	
 #ifdef CONFIG_UI_LED_USE_PWM
-	return ui_pwm_led_set_dutycycle(dutycycle);
+	return ui_led_pwm_set_dutycycle(dutycycle);
 #endif
 
 	return 0;
@@ -87,6 +86,11 @@ static int lc_dimmer_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 
 int lwm2m_init_light_control(void)
 {
+#ifdef CONFIG_UI_LED_USE_PWM
+	ui_led_pwm_init();
+#else
+	ui_gpio_led_init();
+#endif 
 
 	lwm2m_engine_create_obj_inst("3311/0");
 	lwm2m_engine_register_post_write_callback("3311/0/5850", lc_on_off_cb);

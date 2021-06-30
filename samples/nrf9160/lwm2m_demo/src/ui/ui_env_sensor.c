@@ -23,7 +23,7 @@ int ui_env_sensor_init(void)
 {
     env_sensor_dev = device_get_binding(ENV_SENSOR_NAME);
 	if (!env_sensor_dev) {
-		LOG_ERR("No enviroment sensor device found.");
+		LOG_ERR("Could not bind to device %s", env_sensor_dev->name);
         return -ENODEV;
 	}
 
