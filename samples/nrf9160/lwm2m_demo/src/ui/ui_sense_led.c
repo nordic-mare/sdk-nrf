@@ -1,6 +1,9 @@
 #include <zephyr.h>
 #include <drivers/gpio.h>
 
+#include <logging/log.h>
+LOG_MODULE_REGISTER(ui_sense_led, CONFIG_UI_LOG_LEVEL);
+
 #define GPIO_SENSE_RED_NODE_ID      DT_NODELABEL(sense_red_led)
 #define GPIO_SENSE_GREEN_NODE_ID    DT_NODELABEL(sense_green_led)
 #define GPIO_SENSE_BLUE_NODE_ID     DT_NODELABEL(sense_blue_led)
@@ -12,9 +15,6 @@
 #define BLUE_SENSE_LED_GPIO_PIN	    DT_GPIO_PIN(GPIO_SENSE_BLUE_NODE_ID, gpios)
 
 #define SENSE_LED_GPIO_FLAGS	    DT_GPIO_FLAGS(GPIO_SENSE_RED_NODE_ID, gpios)
-
-#include <logging/log.h>
-LOG_MODULE_REGISTER(ui_sense_led, CONFIG_UI_LOG_LEVEL);
 
 static const struct device *gpio_dev;
 

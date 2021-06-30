@@ -2,21 +2,18 @@
  * Source material for IPSO Colour object (3335) v1.1:
  * https://raw.githubusercontent.com/OpenMobileAlliance/lwm2m-registry/prod/version_history/3335-1_0.xml
  */
-
-#define LOG_MODULE_NAME ipso_colour_1_0
-#define LOG_LEVEL CONFIG_LWM2M_LOG_LEVEL
-
-#include <logging/log.h>
-LOG_MODULE_REGISTER(LOG_MODULE_NAME);
-
-#include <stdint.h>
+#include <zephyr.h>
+//#include <stdint.h>
 #include <init.h>
 
 #include <lwm2m_object.h>
 #include <lwm2m_engine.h>
 #include <lwm2m_resource_ids.h>
-#include "lwm2m_additional_ids.h"
 
+#include <logging/log.h>
+LOG_MODULE_REGISTER(ipso_colour, CONFIG_LWM2M_LOG_LEVEL);
+
+#define IPSO_COLOUR_OBJECT_ID 3335
 
 #define MAX_INSTANCE_COUNT CONFIG_LWM2M_IPSO_COLOUR_INSTANCE_COUNT
 

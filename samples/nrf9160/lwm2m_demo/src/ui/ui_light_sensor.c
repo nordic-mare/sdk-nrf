@@ -1,13 +1,13 @@
 #include <zephyr.h>
 #include <drivers/sensor.h>
 
+#include <logging/log.h>
+LOG_MODULE_REGISTER(ui_light_sensor, CONFIG_APP_LOG_LEVEL);
+
 #define LIGHT_SENSOR_NODE_ID	DT_PATH(soc, peripheral_40000000, i2c_a000, bh1749_38)
 #define LIGHT_SENSOR_NAME	    DT_LABEL(LIGHT_SENSOR_NODE_ID)
 
 #define RGBIR_STR_LENGTH        11  // '0xRRGGBBIR\0'
-
-#include <logging/log.h>
-LOG_MODULE_REGISTER(ui_light_sensor, CONFIG_APP_LOG_LEVEL);
 
 static const struct device *light_sens_dev;
 struct sensor_value sensor_val;
