@@ -137,7 +137,7 @@ static int lwm2m_setup(void)
 	lwm2m_init_firmware();
 #endif
 #if defined(CONFIG_LWM2M_CLIENT_UTILS_CONN_MON_OBJ_SUPPORT)
-	// lwm2m_init_connmon();
+	lwm2m_init_connmon();
 #endif
 #if defined(CONFIG_LWM2M_IPSO_LIGHT_CONTROL)
 	lwm2m_init_light_control();
@@ -477,7 +477,7 @@ void main(void)
 	modem_connect();
 
 #if defined(CONFIG_LWM2M_CLIENT_UTILS_CONN_MON_OBJ_SUPPORT)
-	ret = 0; //lwm2m_update_connmon();
+	ret = lwm2m_update_connmon();
 	if (ret < 0) {
 		LOG_ERR("Error registering rsrp handler (%d)", ret);
 	}
