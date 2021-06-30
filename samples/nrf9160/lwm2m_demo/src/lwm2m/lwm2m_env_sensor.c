@@ -202,8 +202,8 @@ int lwm2m_init_env_sensor(void)
 	lwm2m_engine_set_res_data("3300/0/5701", gas_resistance_unit, sizeof(gas_resistance_unit),
 				  LWM2M_RES_DATA_FLAG_RO);
 	lwm2m_engine_set_res_data("3300/0/5750",
-                CONFIG_LWM2M_IPSO_GENERIC_SENSOR_APP_TYPE, 
-				sizeof(CONFIG_LWM2M_IPSO_GENERIC_SENSOR_APP_TYPE),
+                "A measure for air quality", 
+				sizeof("A measure for air quality"),
                 LWM2M_RES_DATA_FLAG_RO);
 	return 0;
 }
