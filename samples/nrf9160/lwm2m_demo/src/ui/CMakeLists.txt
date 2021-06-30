@@ -20,3 +20,4 @@ target_sources_ifdef(CONFIG_UI_LED_USE_GPIO
 	)
 target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_sense_led.c)
 target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_light_sensor.c)
+target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_env_sensor.c)

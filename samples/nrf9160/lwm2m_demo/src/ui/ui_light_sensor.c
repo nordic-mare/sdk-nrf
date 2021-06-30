@@ -1,5 +1,6 @@
 #include <zephyr.h>
 #include <drivers/sensor.h>
+#include <stdio.h>
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(ui_light_sensor, CONFIG_APP_LOG_LEVEL);
@@ -10,7 +11,7 @@ LOG_MODULE_REGISTER(ui_light_sensor, CONFIG_APP_LOG_LEVEL);
 #define RGBIR_STR_LENGTH        11  // '0xRRGGBBIR\0'
 
 static const struct device *light_sens_dev;
-struct sensor_value sensor_val;
+static struct sensor_value sensor_val;
 
 
 int ui_light_sensor_init(void)
