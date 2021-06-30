@@ -59,6 +59,21 @@ config UI_BUTTON
 	bool "Enable buttons"
 	default y if BOARD_NRF9160DK_NRF9160NS
 
+
+config UI_ENVIRONMENT_SENSOR
+	bool "Enable environment sensor"
+	default y
+
+
+config UI_LIGHT_SENSOR
+	bool "Enable light sensor"
+	default y
+
+
+config UI_SENSE_LED
+	bool "Enable sense LEDs"
+	default y
+
 endmenu
 
 module = UI
