@@ -34,7 +34,7 @@ static int lc_on_off_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 #ifdef CONFIG_UI_LED_USE_PWM
 		ret = ui_led_pwm_on_off(new_led_state);
 #else
-		ret = ui_gpio_led_on_off(new_led_state);
+		ret = ui_led_gpio_on_off(new_led_state);
 #endif /* ifdef CONFIG_UI_LED_USE_PWM */
 
 		if (ret) {
@@ -64,7 +64,7 @@ static int lc_colour_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 #ifdef CONFIG_UI_LED_USE_PWM
 	ret = ui_led_pwm_set_colour(colour_val);
 #else
-	ret = ui_gpio_led_set_colour(colour_val);
+	ret = ui_led_gpio_set_colour(colour_val);
 #endif 
 
 	return ret;
@@ -91,7 +91,7 @@ int lwm2m_init_light_control(void)
 #ifdef CONFIG_UI_LED_USE_PWM
 	ui_led_pwm_init();
 #else
-	ui_gpio_led_init();
+	ui_led_gpio_init();
 #endif 
 
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0));

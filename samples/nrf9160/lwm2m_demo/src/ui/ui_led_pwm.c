@@ -94,7 +94,7 @@ int ui_led_pwm_init(void)
 {
 	led_pwm_dev = device_get_binding(LED_PWM_NAME);
     if (!led_pwm_dev) {
-		LOG_ERR("Could not bind to device %s", led_pwm_dev->name);
+		LOG_ERR("Could not bind to LED PWM device");
 		return -ENODEV;
 	}
 

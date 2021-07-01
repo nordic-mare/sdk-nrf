@@ -9,7 +9,6 @@
 #include "ui.h"
 #include "button.h"
 #include "buzzer.h"
-#include "led_gpio.h"
 
 LOG_MODULE_REGISTER(ui, CONFIG_UI_LOG_LEVEL);
 

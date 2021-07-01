@@ -9,8 +9,8 @@
  *	    control RGB colors and light intensity.
  */
 
-#ifndef UI_LEDS_GPIO_H__
-#define UI_LEDS_GPIO_H__
+#ifndef UI_LED_GPIO_H__
+#define UI_LED_GPIO_H__
 
 #include <zephyr.h>
 #include "ui.h"
@@ -19,17 +19,14 @@
 extern "C" {
 #endif
 
-/**@brief Initializes LEDs. */
-int ui_gpio_led_init(void);
+int ui_led_gpio_init(void);
 
-/**@brief Toggles LED state. */
-int ui_gpio_led_on_off(bool new_state);
+int ui_led_gpio_on_off(bool new_state);
 
-/**@brief Changes led colour. */
-int ui_gpio_led_set_colour(uint32_t colour_values);
+int ui_led_gpio_set_colour(uint32_t colour_values);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* UI_LEDS_H__ */
+#endif /* UI_LED_H__ */

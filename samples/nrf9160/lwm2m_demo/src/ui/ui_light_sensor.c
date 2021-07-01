@@ -18,7 +18,7 @@ int ui_light_sensor_init(void)
 {
     light_sensor_dev = device_get_binding(LIGHT_SENSOR_NAME);
     if (!light_sensor_dev) {
-        LOG_ERR("Could not bind to device %s", light_sensor_dev->name);
+        LOG_ERR("Could not bind to Light Sensor device");
         return -ENODEV;
     }
 

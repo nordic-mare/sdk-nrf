@@ -47,7 +47,7 @@ int ui_sense_led_init(void)
 
 	gpio_dev = device_get_binding(GPIO_NAME);
 	if (!gpio_dev) {
-        LOG_ERR("Could not bind to device %s", gpio_dev->name);
+        LOG_ERR("Could not bind to GPIO device");
 		return -ENODEV;
 	}
 
