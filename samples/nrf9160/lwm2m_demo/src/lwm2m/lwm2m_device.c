@@ -20,7 +20,6 @@ LOG_MODULE_REGISTER(app_lwm2m_device, CONFIG_APP_LOG_LEVEL);
 #define CLIENT_DEVICE_TYPE	"OMA-LWM2M Client"
 #define CLIENT_HW_VER		CONFIG_SOC
 #define CLIENT_FLASH_SIZE	PM_MCUBOOT_SECONDARY_SIZE
-#define REBOOT_DELAY		K_SECONDS(1)
 
 static uint8_t bat_idx = LWM2M_DEVICE_PWR_SRC_TYPE_BAT_INT;
 static int bat_mv = 3800;
@@ -33,25 +32,6 @@ static int mem_total = (CLIENT_FLASH_SIZE / 1024);
 
 static struct k_delayed_work reboot_work;
 
-static void reboot_work_handler(struct k_work *work)
-{
-	LOG_PANIC();
-	sys_reboot(0);
-}
-
-static int device_reboot_cb(uint16_t obj_inst_id, uint8_t *args,
-			    uint16_t args_len)
-{
-	ARG_UNUSED(args);
-	ARG_UNUSED(args_len);
-
-	LOG_INF("DEVICE: Reboot in progress");
-
-	k_delayed_work_submit(&reboot_work, REBOOT_DELAY);
-
-	return 0;
-}
-
 static int device_factory_default_cb(uint16_t obj_inst_id, uint8_t *args,
 				     uint16_t args_len)
 {
@@ -63,10 +43,8 @@ static int device_factory_default_cb(uint16_t obj_inst_id, uint8_t *args,
 	return 0;
 }
 
-int lwm2m_init_device(char *serial_num)
+int lwm2m_app_init_device(char *serial_num)
 {
-	k_delayed_work_init(&reboot_work, reboot_work_handler);
-
 	lwm2m_engine_set_res_data("3/0/0", CLIENT_MANUFACTURER,
 				  sizeof(CLIENT_MANUFACTURER),
 				  LWM2M_RES_DATA_FLAG_RO);
@@ -75,7 +53,6 @@ int lwm2m_init_device(char *serial_num)
 				  LWM2M_RES_DATA_FLAG_RO);
 	lwm2m_engine_set_res_data("3/0/2", serial_num, strlen(serial_num),
 				  LWM2M_RES_DATA_FLAG_RO);
-	lwm2m_engine_register_exec_callback("3/0/4", device_reboot_cb);
 	lwm2m_engine_register_exec_callback("3/0/5", device_factory_default_cb);
 	lwm2m_engine_set_res_data("3/0/17", CLIENT_DEVICE_TYPE,
 				  sizeof(CLIENT_DEVICE_TYPE),

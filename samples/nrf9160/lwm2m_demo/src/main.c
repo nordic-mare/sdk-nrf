@@ -127,8 +127,14 @@ static int query_modem(const char *cmd, char *buf, size_t buf_len)
 
 static int lwm2m_setup(void)
 {
-	/* use IMEI as serial number */
+#if defined(CONFIG_LWM2M_CLIENT_UTILS_DEVICE_OBJ_SUPPORT)
+	/* Manufacturer independent */
 	lwm2m_init_device();
+#endif
+
+	/* Manufacturer dependent */
+	/* use IMEI as serial number */
+	lwm2m_app_init_device(imei_buf);
 	lwm2m_init_security(&client, endpoint_name);
 #if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
 	lwm2m_init_location();

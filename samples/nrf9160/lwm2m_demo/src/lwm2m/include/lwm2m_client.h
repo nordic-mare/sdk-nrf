@@ -15,7 +15,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+int lwm2m_app_init_device(char *serial_num);
 #if defined(CONFIG_LWM2M_IPSO_LIGHT_CONTROL)
 int lwm2m_init_light_control(void);
 #endif
