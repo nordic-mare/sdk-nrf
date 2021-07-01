@@ -41,8 +41,10 @@ static int lc_on_off_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 			return ret;
 		}
 
+		// Reset on-time if just turned on
 		if (led_state == false) {
-			lwm2m_engine_set_s32("3311/0/5852", 0);
+			lwm2m_engine_set_s32(
+				LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0, ON_TIME_RID), 0);
 		}
 
 		led_state = new_led_state;
@@ -78,9 +80,9 @@ static int lc_dimmer_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 	
 #ifdef CONFIG_UI_LED_USE_PWM
 	return ui_led_pwm_set_dutycycle(dutycycle);
-#endif
-
+#else
 	return 0;
+#endif	
 }
 
 
@@ -92,11 +94,15 @@ int lwm2m_init_light_control(void)
 	ui_gpio_led_init();
 #endif 
 
-	lwm2m_engine_create_obj_inst("3311/0");
-	lwm2m_engine_register_post_write_callback("3311/0/5850", lc_on_off_cb);
-	lwm2m_engine_register_post_write_callback("3311/0/5706", lc_colour_cb);
-	lwm2m_engine_register_post_write_callback("3311/0/5851", lc_dimmer_cb);
-	lwm2m_engine_set_res_data("3311/0/5750",
+	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0));
+	lwm2m_engine_register_post_write_callback(
+			LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0, ON_OFF_RID), lc_on_off_cb);
+	lwm2m_engine_register_post_write_callback(
+			LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0, COLOUR_RID), lc_colour_cb);
+	lwm2m_engine_register_post_write_callback(
+			LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0, DIMMER_RID), lc_dimmer_cb);
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0, APPLICATION_TYPE_RID),
 			LIGHT_CONTROL_APP_TYPE, sizeof(LIGHT_CONTROL_APP_TYPE),
 			LWM2M_RES_DATA_FLAG_RO);
 
