@@ -78,7 +78,7 @@ endif
 
 choice
 	prompt "Accelerometer device"
-	default ACCEL_USE_SIM
+	default ACCEL_USE_EXTERNAL
 	help
 		Select which device will provide accelerometer data.
 
@@ -142,6 +142,7 @@ if ACCEL_USE_EXTERNAL
 
 config ACCEL_DEV_NAME
 	string "Accelerometer device name"
+	default "ADXL362"
 	help
 		Device from which accelerometer data will be fetched and used
 		for orientation detection and sent to nRF Cloud.
@@ -164,19 +165,12 @@ config ACCEL_CALIBRATE
 if ACCEL_CALIBRATE
 config ACCEL_CALIBRATION_ITERATIONS
 	int "Number of readings for calibration"
+	default 5
 	help
 		Number of measurement readings to average over to find the
 		static offset in the readings when calibrating the
 		accelerometer.
 
-config CALIBRATION_INPUT
-	int "Button to trigger accelerometer calibration"
-	range 1 2 if BOARD_NRF9160DK_NRF9160NS
-	default 1 if BOARD_NRF9160DK_NRF9160NS
-	help
-		Button number to use to trigger accelerometer calibration:
-		1 - Button 1
-		2 - Button 2
 endif
 
 if !ACCEL_CALIBRATE
