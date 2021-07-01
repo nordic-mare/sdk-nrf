@@ -30,8 +30,6 @@ static int usb_ma = 900;
 static uint8_t bat_status = LWM2M_DEVICE_BATTERY_STATUS_CHARGING;
 static int mem_total = (CLIENT_FLASH_SIZE / 1024);
 
-static struct k_delayed_work reboot_work;
-
 static int device_factory_default_cb(uint16_t obj_inst_id, uint8_t *args,
 				     uint16_t args_len)
 {
