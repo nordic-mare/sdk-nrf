@@ -9,6 +9,8 @@
 #include <drivers/gpio.h>
 #include <stdio.h>
 #include <net/lwm2m.h>
+#include <net/lwm2m_client_utils.h>
+#include <net/lwm2m_client_utils_fota.h>
 #include <modem/nrf_modem_lib.h>
 #include <settings/settings.h>
 
@@ -26,7 +28,6 @@ LOG_MODULE_REGISTER(app_lwm2m_client, CONFIG_APP_LOG_LEVEL);
 
 #include "ui.h"
 #include "lwm2m_client.h"
-#include "settings.h"
 #include "ipso_objects.h"
 
 #if !defined(CONFIG_LTE_LINK_CONTROL)
@@ -126,8 +127,14 @@ static int query_modem(const char *cmd, char *buf, size_t buf_len)
 
 static int lwm2m_setup(void)
 {
+#if defined(CONFIG_LWM2M_CLIENT_UTILS_DEVICE_OBJ_SUPPORT)
+	/* Manufacturer independent */
+	lwm2m_init_device();
+#endif
+
+	/* Manufacturer dependent */
 	/* use IMEI as serial number */
-	lwm2m_init_device(imei_buf);
+	lwm2m_app_init_device(imei_buf);
 	lwm2m_init_security(&client, endpoint_name);
 #if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
 	lwm2m_init_location();
@@ -135,7 +142,7 @@ static int lwm2m_setup(void)
 #if defined(CONFIG_LWM2M_FIRMWARE_UPDATE_OBJ_SUPPORT)
 	lwm2m_init_firmware();
 #endif
-#if defined(CONFIG_LWM2M_CONN_MON_OBJ_SUPPORT)
+#if defined(CONFIG_LWM2M_CLIENT_UTILS_CONN_MON_OBJ_SUPPORT)
 	lwm2m_init_connmon();
 #endif
 #if defined(CONFIG_LWM2M_IPSO_LIGHT_CONTROL)
@@ -475,8 +482,8 @@ void main(void)
 
 	modem_connect();
 
-#if defined(CONFIG_LWM2M_CONN_MON_OBJ_SUPPORT)
-	ret = lwm2m_start_connmon();
+#if defined(CONFIG_LWM2M_CLIENT_UTILS_CONN_MON_OBJ_SUPPORT)
+	ret = lwm2m_update_connmon();
 	if (ret < 0) {
 		LOG_ERR("Error registering rsrp handler (%d)", ret);
 	}
