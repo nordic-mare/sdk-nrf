@@ -7,7 +7,6 @@
 #include <logging/log.h>
 
 #include "ui.h"
-#include "button.h"
 #include "buzzer.h"
 
 LOG_MODULE_REGISTER(ui, CONFIG_UI_LOG_LEVEL);
@@ -19,9 +18,7 @@ int ui_init(ui_callback_t cb)
 
 
 
-#ifdef CONFIG_UI_BUTTON
-	err = ui_button_init(cb);
-#endif /* CONFIG_UI_BUTTONS */
+
 
 #ifdef CONFIG_UI_BUZZER
 	err = ui_buzzer_init();

@@ -7,7 +7,7 @@
 zephyr_include_directories(include)
 target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui.c)
 target_sources_ifdef(CONFIG_UI_BUTTON
-	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/button.c
+	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_button.c
 	)
 target_sources_ifdef(CONFIG_UI_BUZZER
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/buzzer.c

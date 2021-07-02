@@ -13,6 +13,7 @@
 #include <net/lwm2m_client_utils_fota.h>
 #include <modem/nrf_modem_lib.h>
 #include <settings/settings.h>
+#include <event_manager.h>
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_client, CONFIG_APP_LOG_LEVEL);
@@ -74,11 +75,6 @@ static void ui_evt_handler(struct ui_evt *evt)
 
 	LOG_DBG("Event: %d", evt->button);
 
-#if defined(CONFIG_UI_BUTTON)
-	if (handle_button_events(evt) == 0) {
-		return;
-	}
-#endif
 #if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER) && CONFIG_FLIP_INPUT > 0
 	if (handle_accel_events(evt) == 0) {
 		return;
@@ -417,6 +413,12 @@ void main(void)
 	k_sem_init(&lwm2m_restart, 0, 1);
 
 	ui_init(ui_evt_handler);
+
+	ret = event_manager_init();
+	if (ret) {
+		LOG_ERR("Unable to init event manager (%d", ret);
+		return;	
+	}
 
 	ret = fota_settings_init();
 	if (ret < 0) {

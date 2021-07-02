@@ -18,7 +18,16 @@ extern "C" {
 #endif
 
 /**@brief Initialize buttons in the user interface module. */
-int ui_button_init(ui_callback_t cb);
+int ui_button_init(void);
+
+/**
+ * @brief Get the state of a button.
+ *
+ * @param button Button number.
+ *
+ * @return 1 if button is active, 0 if it's inactive.
+ */
+bool ui_button_is_active(uint32_t button);
 
 #ifdef __cplusplus
 }

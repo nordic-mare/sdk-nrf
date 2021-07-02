@@ -15,7 +15,7 @@
 #define UI_H__
 
 #include <zephyr.h>
-#include <dk_buttons_and_leds.h>
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,14 +59,7 @@ typedef void (*ui_callback_t)(struct ui_evt *evt);
  */
 int ui_init(ui_callback_t cb);
 
-/**
- * @brief Get the state of a button.
- *
- * @param button Button number.
- *
- * @return 1 if button is active, 0 if it's inactive.
- */
-bool ui_button_is_active(uint32_t button);
+
 
 /**
  * @brief Play the buzzer with set frequency and intensity.
