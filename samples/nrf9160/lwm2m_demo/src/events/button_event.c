@@ -16,4 +16,5 @@ EVENT_TYPE_DEFINE(
     button_event,
     true,
     log_button_event,
-    NULL);
+    NULL
+);

@@ -7,12 +7,15 @@
 #include <zephyr.h>
 #include <net/lwm2m.h>
 #include <lwm2m_resource_ids.h>
+#include <stdio.h>
 
+#include "measurement_event.h"
 #include "ui_light_sensor.h"
-#include "ui_sense_led.h"
+
+#define MODULE app_lwm2m_light_sensor
 
 #include <logging/log.h>
-LOG_MODULE_REGISTER(app_lwm2m_light_sensor, CONFIG_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
 #define IPSO_COLOUR_OBJECT_ID 3335
 
@@ -25,20 +28,19 @@ LOG_MODULE_REGISTER(app_lwm2m_light_sensor, CONFIG_APP_LOG_LEVEL);
 #define COLOUR_SENSOR_APP_NAME  "Colour sensor"
 #define LIGHT_UNIT              "RGB-IR"
 
-#define SENSE_LED_ON_TIME_MS        500
-
-static char light_value[RGBIR_STR_LENGTH];
-static char colour_value[RGBIR_STR_LENGTH];
+static char light_value[RGBIR_STR_LENGTH] = "Unread";
+static char colour_value[RGBIR_STR_LENGTH] = "Unread";
 
 
 static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len) 
 {
-    int ret;
-    ret = ui_light_sensor_read(light_value);
-    if (ret) {
-        return NULL;
-    }
+    uint32_t measurement;
+
+    ui_light_sensor_read(&measurement);
+
+    snprintf(light_value, RGBIR_STR_LENGTH,
+                    "0x%08X", measurement);
 
     return &light_value;
 }
@@ -47,17 +49,12 @@ static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_
 static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-    int ret;
+    uint32_t measurement;
 
-    ui_sense_led_on_off(true);
-    k_sleep(K_MSEC(SENSE_LED_ON_TIME_MS));
-    
-    ret = ui_light_sensor_read(colour_value);
-    if (ret) {
-        return NULL;
-    }
+    ui_colour_sensor_read(&measurement);
 
-    ui_sense_led_on_off(false);
+    snprintf(colour_value, RGBIR_STR_LENGTH,
+                    "0x%08X", measurement);
 
     return &colour_value;
 }
@@ -66,7 +63,6 @@ static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16
 int lwm2m_init_light_sensor(void) 
 {
     ui_light_sensor_init();    
-    ui_sense_led_init();
 
     /* Ambient light sensor */
     lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, LIGHT_OBJ_INSTANCE));
@@ -102,3 +98,39 @@ int lwm2m_init_light_sensor(void)
     
     return 0;
 }
+
+
+static bool event_handler(const struct event_header *eh)
+{
+    if (is_measurement_event(eh)) {
+        struct measurement_event *event = cast_measurement_event(eh);
+
+        if (event->type == LightMeasurement) {
+            LOG_DBG("Light measurement event received! Val: 0x%08X", event->unsigned_val);
+            snprintf(light_value, RGBIR_STR_LENGTH,
+                    "0x%08X", event->unsigned_val);
+            lwm2m_engine_set_string(
+                LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, LIGHT_OBJ_INSTANCE, COLOUR_RID),
+                light_value);
+
+            return true;
+        }
+        else if (event->type == ColourMeasurement) {
+            LOG_DBG("Colour measurement event received! Val: 0x%08X", event->unsigned_val);
+            snprintf(colour_value, RGBIR_STR_LENGTH,
+                    "0x%08X", event->unsigned_val);
+            lwm2m_engine_set_string(
+                LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, LIGHT_OBJ_INSTANCE, COLOUR_RID),
+                colour_value);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    return false;
+}
+
+EVENT_LISTENER(MODULE, event_handler);
+EVENT_SUBSCRIBE(MODULE, measurement_event);

@@ -5,6 +5,7 @@
 
 int ui_light_sensor_init(void);
 
-int ui_light_sensor_read(char *light_value);
+int ui_light_sensor_read(uint32_t *measurement);
+int ui_colour_sensor_read(uint32_t *measurement);
 
 #endif

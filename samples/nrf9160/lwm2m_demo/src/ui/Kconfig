@@ -73,6 +73,54 @@ config UI_LIGHT_SENSOR
 	bool "Enable light sensor"
 	default y
 
+config UI_LIGHT_SENSOR_MEASUREMENT_MAX_VALUE
+	int "Max sensor output value"
+	default 500
+	depends on UI_LIGHT_SENSOR
+	help
+		Maximum value expected from the light sensor. 
+		Reasonable values will depend on the sensors environment.
+		Raw measurements in different use conditions can give a 
+		good estimate for this value.
+
+config UI_COLOUR_SENSOR_MEASUREMENT_MAX_VALUE
+	int "Max sensor output value"
+	default 500
+	depends on UI_LIGHT_SENSOR
+	help
+		Maximum value expected from the colour sensor. 
+		Reasonable values will depend on the sensors environment.
+		Raw measurements in different use conditions can give a 
+		good estimate for this value.
+
+config UI_LIGHT_SENSOR_TRIGGER_ENABLE
+	bool "Enable sensor trigger"
+	default n
+	depends on UI_LIGHT_SENSOR
+	help
+		Enable trigger for the light sensor
+
+choice
+	prompt "Light sensor trigger source"
+	default UI_LIGHT_SENSOR_TRIGGER_THRESH
+	help
+	  	Select light sensor trigger source.
+
+config UI_LIGHT_SENSOR_TRIGGER_THRESH
+	bool "Threshold trigger"
+	depends on UI_LIGHT_SENSOR_TRIGGER_ENABLE
+	help
+		Trigger fires when sensor values exceeds the 
+		threshold values.
+
+config UI_LIGHT_SENSOR_TRIGGER_DATA_READY
+	bool "Data ready trigger"
+	depends on UI_LIGHT_SENSOR_TRIGGER_ENABLE
+	help
+		Trigger fires when new data is ready
+		to be read.
+endchoice
+
 
 config UI_SENSE_LED
 	bool "Enable sense LEDs"

@@ -32,12 +32,6 @@ int ui_button_init(void)
 }
 
 
-bool ui_button_is_active(uint32_t button)
-{
-	return dk_get_buttons() & BIT((button - 1));
-}
-
-
 /**@brief Callback for button events from the DK buttons and LEDs library. */
 static void dk_button_event_handler(uint32_t button_states, uint32_t has_changed)
 {
