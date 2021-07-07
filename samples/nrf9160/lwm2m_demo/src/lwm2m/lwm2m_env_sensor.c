@@ -8,10 +8,15 @@
 #include <net/lwm2m.h>
 #include <lwm2m_resource_ids.h>
 
+#include "measurement_event.h"
 #include "ui_env_sensor.h"
 
+#define MODULE app_lwm2m_env_sens
+
 #include <logging/log.h>
-LOG_MODULE_REGISTER(app_lwm2m_env_sens, CONFIG_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
+
+#define LWM2M_RES_DATA_FLAG_RW	0
 
 #define GENERIC_SENSOR_APP_TYPE "A measure for Air Quality Index"
 #define GENERIC_SENSOR_TYPE 	"Gas resistance sensor"
@@ -21,6 +26,7 @@ LOG_MODULE_REGISTER(app_lwm2m_env_sens, CONFIG_APP_LOG_LEVEL);
 #define HUMID_UNIT 		"%"
 #define GAS_RES_UNIT 	"Ohm"
 
+/* Pointers to the ipso object's resource data buffer */ 	
 static float32_value_t temp_float;
 static float32_value_t press_float;
 static float32_value_t humid_float;
@@ -30,6 +36,8 @@ static float32_value_t gas_res_float;
 static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
+	LOG_DBG("Temp callback!");
+
 	ui_env_sensor_read_temp(&(temp_float.val1), &(temp_float.val2));
 
 	*data_len = sizeof(temp_float);
@@ -75,12 +83,18 @@ int lwm2m_init_env_sensor(void)
 	lwm2m_engine_register_read_callback(
 			LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID), temp_read_cb);
 	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID),
+			&temp_float, sizeof(temp_float), LWM2M_RES_DATA_FLAG_RW);
+	lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_UNITS_RID), 
 			TEMP_UNIT, sizeof(TEMP_UNIT), LWM2M_RES_DATA_FLAG_RO);
 
     lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0));
 	lwm2m_engine_register_read_callback(
 			LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID), pressure_read_cb);
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID),
+			&press_float, sizeof(press_float), LWM2M_RES_DATA_FLAG_RW);
 	lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_UNITS_RID), 
 			PRESS_UNIT, sizeof(PRESS_UNIT), LWM2M_RES_DATA_FLAG_RO);
@@ -89,12 +103,18 @@ int lwm2m_init_env_sensor(void)
 	lwm2m_engine_register_read_callback(
 			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID), humidity_read_cb);
 	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID),
+			&humid_float, sizeof(humid_float), LWM2M_RES_DATA_FLAG_RW);
+	lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_UNITS_RID), 
 			HUMID_UNIT, sizeof(HUMID_UNIT), LWM2M_RES_DATA_FLAG_RO);
 
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0));
 	lwm2m_engine_register_read_callback(
 			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID), gas_resistance_read_cb);
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID),
+			&gas_res_float, sizeof(gas_res_float), LWM2M_RES_DATA_FLAG_RW);
 	lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_UNITS_RID), 
 			GAS_RES_UNIT, sizeof(GAS_RES_UNIT), LWM2M_RES_DATA_FLAG_RO);
@@ -106,3 +126,60 @@ int lwm2m_init_env_sensor(void)
 			GENERIC_SENSOR_TYPE, sizeof(GENERIC_SENSOR_TYPE), LWM2M_RES_DATA_FLAG_RO);
 	return 0;
 }
+
+
+static bool event_handler(const struct event_header *eh)
+{
+    if (is_measurement_event(eh)) {
+        struct measurement_event *event = cast_measurement_event(eh);
+
+		switch (event->type)
+		{
+		case TemperatureMeasurement:
+			LOG_DBG("Temperature measurement event received! val1: 0x%08X, val2: 0x%08X", 
+					event->float_val.val1, event->float_val.val2);
+
+			lwm2m_engine_set_float32(
+				LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID),
+				&(event->float_val));
+			break;
+
+		case PressureMeasurement:
+			LOG_DBG("Pressure measurement event received! val1: 0x%08X, val2: 0x%08X", 
+					event->float_val.val1, event->float_val.val2);
+
+			lwm2m_engine_set_float32(
+				LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID),
+				&(event->float_val));
+			break;
+
+		case HumidityMeasurement:
+			LOG_DBG("Humidity measurement event received! val1: 0x%08X, val2: 0x%08X", 
+					event->float_val.val1, event->float_val.val2);
+
+			lwm2m_engine_set_float32(
+				LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID),
+				&(event->float_val));
+			break;
+
+		case GasResistanceMeasurement:
+			LOG_DBG("Gas resistance measurement event received! val1: 0x%08X, val2: 0x%08X", 
+					event->float_val.val1, event->float_val.val2);
+
+			lwm2m_engine_set_float32(
+				LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID),
+				&(event->float_val));
+			break;
+
+		default:
+			return false;
+		} 
+
+		return true;
+    } 
+
+    return false;
+}
+
+EVENT_LISTENER(MODULE, event_handler);
+EVENT_SUBSCRIBE(MODULE, measurement_event);

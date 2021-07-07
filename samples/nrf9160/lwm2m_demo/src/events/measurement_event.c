@@ -9,7 +9,7 @@ static int log_measurement_event(const struct event_header *eh, char *buf,
 
     return snprintf(buf, buf_len, 
             STRINGIFY(event->type) " measurement event: unsigned_val=%u, float_val1=%d, float_val2=%d", 
-            event->unsigned_val, event->float_val1, event->float_val2);
+            event->unsigned_val, event->float_val.val1, event->float_val.val2);
 }
 
 

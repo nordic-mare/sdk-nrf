@@ -37,14 +37,14 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 static const struct device *light_sensor_dev;
 static struct sensor_value light_sensor_val;
 
+#ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE
 static void trigger_handler(const struct device *dev, struct sensor_trigger *trigger);
+#endif
 static int sensor_read(uint32_t measurement_values[]);
 
 
 int ui_light_sensor_init(struct measurement_event *event)
 {
-    int ret;
-
     ui_sense_led_init();
 
     light_sensor_dev = device_get_binding(LIGHT_SENSOR_NAME);
@@ -54,6 +54,8 @@ int ui_light_sensor_init(struct measurement_event *event)
     }
 
 #ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE
+    int ret;
+    
 #ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_THRESH
     struct sensor_value temp_val;
     struct sensor_trigger sensor_trigger_config = {
@@ -144,6 +146,7 @@ int ui_colour_sensor_read(uint32_t *measurement)
 }
 
 
+#ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE
 // TODO: Generate events when trigger fires
 static void trigger_handler(const struct device *dev, struct sensor_trigger *trigger) 
 {
@@ -184,6 +187,7 @@ static void trigger_handler(const struct device *dev, struct sensor_trigger *tri
         break;
     }
 }
+#endif
 
 
 static int sensor_read(uint32_t measurement_values[])
