@@ -10,78 +10,49 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(ui_led_gpio, CONFIG_UI_LOG_LEVEL);
 
-#define RED_LED_GPIO_NODE DT_NODELABEL(red_led)
-#define GREEN_LED_GPIO_NODE DT_NODELABEL(green_led)
-#define BLUE_LED_GPIO_NODE DT_NODELABEL(blue_led)
+#define LED_RED_GPIO_NODE   DT_NODELABEL(red_led)
+#define LED_GREEN_GPIO_NODE DT_NODELABEL(green_led)
+#define LED_BLUE_GPIO_NODE  DT_NODELABEL(blue_led)
 
-#define GPIO_NAME	DT_GPIO_LABEL(RED_LED_GPIO_NODE, gpios)
+#define LED_GPIO_NAME	    DT_GPIO_LABEL(LED_RED_GPIO_NODE, gpios)
 
-#define RED_LED_GPIO_PIN	DT_GPIO_PIN(RED_LED_GPIO_NODE, gpios)
-#define GREEN_LED_GPIO_PIN	DT_GPIO_PIN(GREEN_LED_GPIO_NODE, gpios)
-#define BLUE_LED_GPIO_PIN	DT_GPIO_PIN(BLUE_LED_GPIO_NODE, gpios)
+#define LED_RED_GPIO_PIN	DT_GPIO_PIN(LED_RED_GPIO_NODE, gpios)
+#define LED_GREEN_GPIO_PIN	DT_GPIO_PIN(LED_GREEN_GPIO_NODE, gpios)
+#define LED_BLUE_GPIO_PIN	DT_GPIO_PIN(LED_BLUE_GPIO_NODE, gpios)
 
-#define LED_GPIO_FLAGS	DT_GPIO_FLAGS(RED_LED_GPIO_NODE, gpios)
+#define LED_GPIO_FLAGS	    DT_GPIO_FLAGS(LED_RED_GPIO_NODE, gpios)
 
-static const struct device *gpio_dev;
+static const struct device *led_gpio_dev;
 static uint8_t red_val;
 static uint8_t green_val;
 static uint8_t blue_val;
 static bool is_on;
 
-int ui_led_gpio_init(void)
-{
-	int ret;
-
-	gpio_dev = device_get_binding(GPIO_NAME);
-	if (!gpio_dev) {
-        LOG_ERR("Could not bind to GPIO device");
-		return -ENODEV;
-	}
-
-	ret = gpio_pin_configure(gpio_dev, RED_LED_GPIO_PIN, LED_GPIO_FLAGS |
-							GPIO_OUTPUT_INACTIVE);
-    if (ret) {
-        LOG_ERR("Could not configure red LED GPIO pin");
-		return ret;
-	}
-    ret = gpio_pin_configure(gpio_dev, GREEN_LED_GPIO_PIN, LED_GPIO_FLAGS |
-							GPIO_OUTPUT_INACTIVE);
-    if (ret) {
-        LOG_ERR("Could not configure green LED GPIO pin");
-		return ret;
-	}                            
-    ret = gpio_pin_configure(gpio_dev, BLUE_LED_GPIO_PIN, LED_GPIO_FLAGS |
-							GPIO_OUTPUT_INACTIVE);
-	if (ret) {
-        LOG_ERR("Could not configure blue LED GPIO pin");
-		return ret;
-	}
-
-	return 0;
-}
 
 int ui_led_gpio_on_off(bool new_state)
 {
     int ret;
+
     is_on = new_state;
     
-    ret = gpio_pin_set(gpio_dev, RED_LED_GPIO_PIN, is_on * red_val);
+    ret = gpio_pin_set(led_gpio_dev, LED_RED_GPIO_PIN, is_on * red_val);
     if (ret) {
-        LOG_ERR("Could not set red led");
+        LOG_ERR("Could not set red led. (%d)", ret);
         return ret;
     }
-    ret = gpio_pin_set(gpio_dev, GREEN_LED_GPIO_PIN, is_on * green_val);
+    ret = gpio_pin_set(led_gpio_dev, LED_GREEN_GPIO_PIN, is_on * green_val);
     if (ret) {
-        LOG_ERR("Could not set green led");
+        LOG_ERR("Could not set green led. (%d)", ret);
         return ret;
     }
-    ret = gpio_pin_set(gpio_dev, BLUE_LED_GPIO_PIN, is_on * blue_val);
+    ret = gpio_pin_set(led_gpio_dev, LED_BLUE_GPIO_PIN, is_on * blue_val);
     if (ret) {
-        LOG_ERR("Could not set blue led");
+        LOG_ERR("Could not set blue led. (%d)", ret);
         return ret;
     }
     return 0;
 }
+
 
 int ui_led_gpio_set_colour(uint32_t colour_values)
 {
@@ -92,4 +63,36 @@ int ui_led_gpio_set_colour(uint32_t colour_values)
         return 0;
     }
     return ui_led_gpio_on_off(true);
+}
+
+
+int ui_led_gpio_init(void)
+{
+	int ret;
+
+	led_gpio_dev = device_get_binding(LED_GPIO_NAME);
+	if (!led_gpio_dev) {
+        LOG_ERR("Could not bind to GPIO device. (%d)", -ENODEV);
+		return -ENODEV;
+	}
+
+	ret = gpio_pin_configure(led_gpio_dev, LED_RED_GPIO_PIN, 
+                    LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
+    if (ret) {
+        LOG_ERR("Could not configure red LED GPIO pin. (%d)", ret);
+		return ret;
+	}
+    ret = gpio_pin_configure(led_gpio_dev, LED_GREEN_GPIO_PIN, 
+                    LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
+    if (ret) {
+        LOG_ERR("Could not configure green LED GPIO pin. (%d)", ret);
+		return ret;
+	}                            
+    ret = gpio_pin_configure(led_gpio_dev, LED_BLUE_GPIO_PIN, 
+                    LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
+	if (ret) {
+        LOG_ERR("Could not configure blue LED GPIO pin. (%d)", ret);
+		return ret;
+	}
+	return 0;
 }

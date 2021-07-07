@@ -3,8 +3,8 @@
 
 #include <zephyr.h>
 
-int ui_sense_led_init(void);
-
 int ui_sense_led_on_off(bool new_state);
+
+int ui_sense_led_init(void);
 
 #endif

@@ -18,12 +18,12 @@
 extern "C" {
 #endif
 
-int ui_led_pwm_init(void);
-
 int ui_led_pwm_on_off(bool new_state);
 
 int ui_led_pwm_set_colour(uint32_t colour_values);
 int ui_led_pwm_set_dutycycle(uint8_t dutycycle);
+
+int ui_led_pwm_init(void);
 
 #ifdef __cplusplus
 }

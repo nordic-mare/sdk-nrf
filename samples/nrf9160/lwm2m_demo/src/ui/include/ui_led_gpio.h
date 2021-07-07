@@ -13,17 +13,16 @@
 #define UI_LED_GPIO_H__
 
 #include <zephyr.h>
-#include "ui.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int ui_led_gpio_init(void);
-
 int ui_led_gpio_on_off(bool new_state);
 
 int ui_led_gpio_set_colour(uint32_t colour_values);
+
+int ui_led_gpio_init(void);
 
 #ifdef __cplusplus
 }

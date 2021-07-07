@@ -16,13 +16,12 @@ LOG_MODULE_REGISTER(ui_led_pwm, CONFIG_UI_LOG_LEVEL);
 #define LED_PWM_FLAGS           DT_PWMS_FLAGS(LED_PWM_NODE)
 #define LED_PWM_NAME            DT_LABEL(LED_PWM_NODE)
 
-#define PERIOD_USEC	(USEC_PER_SEC / 100U)
+#define PERIOD_USEC	            (USEC_PER_SEC / 100U)
 
 #define COLOUR_RESOLUTION       255
 #define DUTYCYCLE_RESOLUTION    100
 
 static const struct device *led_pwm_dev;
-
 
 static uint8_t current_dutycycle;
 static uint8_t red_val;
@@ -31,38 +30,39 @@ static uint8_t blue_val;
 static bool is_on;
 
 
+static uint32_t calculate_pulse_width(uint8_t colour_val);
+
+
 int ui_led_pwm_on_off(bool new_state)
 {
-    is_on = new_state;
     int ret;
     uint32_t pulse_width_red, pulse_width_green, pulse_width_blue;
 
+    is_on = new_state;
 
-    pulse_width_red = PERIOD_USEC * is_on * red_val * current_dutycycle 
-                        / (COLOUR_RESOLUTION * DUTYCYCLE_RESOLUTION);
-    pulse_width_green = PERIOD_USEC * is_on * green_val * current_dutycycle 
-                        / (COLOUR_RESOLUTION * DUTYCYCLE_RESOLUTION);
-    pulse_width_blue = PERIOD_USEC * is_on * blue_val * current_dutycycle 
-                        / (COLOUR_RESOLUTION * DUTYCYCLE_RESOLUTION);
+    pulse_width_red = calculate_pulse_width(red_val);
+    pulse_width_green = calculate_pulse_width(green_val);
+    pulse_width_blue = calculate_pulse_width(blue_val);
 
     ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(0), PERIOD_USEC, pulse_width_red, LED_PWM_FLAGS);
     if (ret != 0) {
-        LOG_ERR("Error %d: red write failed\n", ret);
+        LOG_ERR("Error %d: red write failed", ret);
         return ret;
     }
     ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(1), PERIOD_USEC, pulse_width_green, LED_PWM_FLAGS);
     if (ret != 0) {
-        LOG_ERR("Error %d: green write failed\n", ret);
+        LOG_ERR("Error %d: green write failed", ret);
         return ret;
     }
     ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(2), PERIOD_USEC, pulse_width_blue, LED_PWM_FLAGS);
     if (ret != 0) {
-        LOG_ERR("Error %d: blue write failed\n", ret);
+        LOG_ERR("Error %d: blue write failed", ret);
         return ret;
     }
 
     return 0;
 }
+
 
 int ui_led_pwm_set_colour(uint32_t colour_values)
 {
@@ -94,7 +94,7 @@ int ui_led_pwm_init(void)
 {
 	led_pwm_dev = device_get_binding(LED_PWM_NAME);
     if (!led_pwm_dev) {
-		LOG_ERR("Could not bind to LED PWM device");
+		LOG_ERR("Could not bind to LED PWM device. (%d)", -ENODEV);
 		return -ENODEV;
 	}
 
@@ -104,5 +104,8 @@ int ui_led_pwm_init(void)
 }
 
 
-
-
+static uint32_t calculate_pulse_width(uint8_t colour_val)
+{
+    return PERIOD_USEC * is_on * colour_val * current_dutycycle 
+            / (COLOUR_RESOLUTION * DUTYCYCLE_RESOLUTION);
+}
