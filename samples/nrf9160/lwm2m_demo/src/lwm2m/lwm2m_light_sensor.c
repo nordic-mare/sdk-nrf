@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 #include "measurement_event.h"
-#include "ui_light_sensor.h"
+#include "light_sensor.h"
 
 #define MODULE app_lwm2m_light_sensor
 
@@ -37,7 +37,7 @@ static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_
 {
     uint32_t measurement;
 
-    ui_light_sensor_read(&measurement);
+    light_sensor_read(&measurement);
 
     snprintf(light_value, RGBIR_STR_LENGTH,
                     "0x%08X", measurement);
@@ -51,7 +51,7 @@ static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16
 {
     uint32_t measurement;
 
-    ui_colour_sensor_read(&measurement);
+    colour_sensor_read(&measurement);
 
     snprintf(colour_value, RGBIR_STR_LENGTH,
                     "0x%08X", measurement);
@@ -62,7 +62,7 @@ static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16
 
 int lwm2m_init_light_sensor(void) 
 {
-    ui_light_sensor_init();    
+    light_sensor_init();    
 
     /* Ambient light sensor */
     lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, LIGHT_OBJ_INSTANCE));

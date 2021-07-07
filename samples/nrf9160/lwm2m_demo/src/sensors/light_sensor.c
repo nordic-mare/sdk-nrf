@@ -5,7 +5,7 @@
 #include "measurement_event.h"
 #include "ui_sense_led.h"
 
-#define MODULE ui_light_sensor
+#define MODULE light_sensor
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
@@ -43,7 +43,7 @@ static void trigger_handler(const struct device *dev, struct sensor_trigger *tri
 static int sensor_read(uint32_t measurement_values[]);
 
 
-int ui_light_sensor_init(struct measurement_event *event)
+int light_sensor_init(struct measurement_event *event)
 {
     ui_sense_led_init();
 
@@ -95,7 +95,7 @@ int ui_light_sensor_init(struct measurement_event *event)
 }
 
 
-int ui_light_sensor_read(uint32_t *measurement)
+int light_sensor_read(uint32_t *measurement)
 {
     int ret;
     uint32_t measurement_values[NUM_COLOURS];
@@ -118,7 +118,7 @@ int ui_light_sensor_read(uint32_t *measurement)
 }
 
 
-int ui_colour_sensor_read(uint32_t *measurement)
+int colour_sensor_read(uint32_t *measurement)
 {
     int ret;
     uint32_t measurement_values[NUM_COLOURS];

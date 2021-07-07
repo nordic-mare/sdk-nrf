@@ -21,6 +21,8 @@ zephyr_library_include_directories(
   src/ui
   src/ipso
   src/events
+  src/sensors
+  src/modules
   )
 
 # Application sources
@@ -28,3 +30,5 @@ add_subdirectory(src/lwm2m)
 add_subdirectory(src/ui)
 add_subdirectory(src/ipso)
 add_subdirectory(src/events)
+add_subdirectory(src/sensors)
+add_subdirectory(src/modules)

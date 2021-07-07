@@ -18,12 +18,6 @@ target_sources_ifdef(CONFIG_UI_LED_USE_PWM
 target_sources_ifdef(CONFIG_UI_LED_USE_GPIO
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_led_gpio.c
 	)
-target_sources_ifdef(CONFIG_UI_ENVIRONMENT_SENSOR
-	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_env_sensor.c
-	)
 target_sources_ifdef(CONFIG_UI_SENSE_LED
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_sense_led.c
-	)
-target_sources_ifdef(CONFIG_UI_LIGHT_SENSOR
-	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_light_sensor.c
 	)

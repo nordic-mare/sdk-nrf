@@ -9,7 +9,7 @@
 #include <lwm2m_resource_ids.h>
 
 #include "measurement_event.h"
-#include "ui_env_sensor.h"
+#include "env_sensor.h"
 
 #define MODULE app_lwm2m_env_sens
 
@@ -38,7 +38,7 @@ static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_in
 {
 	LOG_DBG("Temp callback!");
 
-	ui_env_sensor_read_temp(&(temp_float.val1), &(temp_float.val2));
+	env_sensor_read_temp(&(temp_float.val1), &(temp_float.val2));
 
 	*data_len = sizeof(temp_float);
 
@@ -48,7 +48,7 @@ static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_in
 static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	ui_env_sensor_read_pressure(&(press_float.val1), &(press_float.val2));
+	env_sensor_read_pressure(&(press_float.val1), &(press_float.val2));
 
 	*data_len = sizeof(press_float);
 
@@ -58,7 +58,7 @@ static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	ui_env_sensor_read_humidity(&(humid_float.val1), &(humid_float.val2));
+	env_sensor_read_humidity(&(humid_float.val1), &(humid_float.val2));
 
 	*data_len = sizeof(humid_float);
 
@@ -68,7 +68,7 @@ static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	ui_env_sensor_read_gas_resistance(&(gas_res_float.val1), &(gas_res_float.val2));
+	env_sensor_read_gas_resistance(&(gas_res_float.val1), &(gas_res_float.val2));
 
 	*data_len = sizeof(gas_res_float);
 
@@ -77,7 +77,7 @@ static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint1
 
 int lwm2m_init_env_sensor(void)
 {
-	ui_env_sensor_init();
+	env_sensor_init();
 
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0));
 	lwm2m_engine_register_read_callback(

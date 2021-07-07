@@ -2,7 +2,7 @@
 #include <drivers/sensor.h>
 
 #include <logging/log.h>
-LOG_MODULE_REGISTER(ui_env_sens, CONFIG_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(env_sensor, CONFIG_APP_LOG_LEVEL);
 
 #define ENV_SENSOR_NODE	DT_PATH(soc, peripheral_40000000, i2c_a000, bme680_76)
 #define ENV_SENSOR_NAME	DT_LABEL(ENV_SENSOR_NODE)
@@ -19,11 +19,11 @@ static struct sensor_value env_sensor_val;
 static int read_sensor(enum sensor_channel channel);
 
 
-int ui_env_sensor_init(void)
+int env_sensor_init(void)
 {
     env_sensor_dev = device_get_binding(ENV_SENSOR_NAME);
 	if (!env_sensor_dev) {
-		LOG_ERR("Could not bind to Environment Sensor device ");
+		LOG_ERR("Could not bind to Environment Sensor device. (%d)", -ENODEV);
         return -ENODEV;
 	}
 
@@ -31,7 +31,7 @@ int ui_env_sensor_init(void)
 }
 
 
-int ui_env_sensor_read_temp(int32_t *temp_float_val1, int32_t *temp_float_val2)
+int env_sensor_read_temp(int32_t *temp_float_val1, int32_t *temp_float_val2)
 {
 	int ret;
 
@@ -50,7 +50,7 @@ int ui_env_sensor_read_temp(int32_t *temp_float_val1, int32_t *temp_float_val2)
 }
 
 
-int ui_env_sensor_read_pressure(int32_t *press_float_val1, int32_t *press_float_val2)
+int env_sensor_read_pressure(int32_t *press_float_val1, int32_t *press_float_val2)
 {
 	int ret;
 
@@ -69,7 +69,7 @@ int ui_env_sensor_read_pressure(int32_t *press_float_val1, int32_t *press_float_
 }
 
 
-int ui_env_sensor_read_humidity(int32_t *humid_float_val1, int32_t *humid_float_val2)
+int env_sensor_read_humidity(int32_t *humid_float_val1, int32_t *humid_float_val2)
 {
 	int ret;
 
@@ -88,7 +88,7 @@ int ui_env_sensor_read_humidity(int32_t *humid_float_val1, int32_t *humid_float_
 }
 
 
-int ui_env_sensor_read_gas_resistance(int32_t *gas_res_float_val1, int32_t *gas_res_float_val2)
+int env_sensor_read_gas_resistance(int32_t *gas_res_float_val1, int32_t *gas_res_float_val2)
 {
 	int ret;
 
