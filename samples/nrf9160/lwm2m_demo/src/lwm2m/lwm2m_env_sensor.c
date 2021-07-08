@@ -36,9 +36,13 @@ static float32_value_t gas_res_float;
 static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	LOG_DBG("Temp callback!");
+	int ret;
 
-	env_sensor_read_temp(&(temp_float.val1), &(temp_float.val2));
+	ret = env_sensor_read_temp(&(temp_float.val1), &(temp_float.val2));
+	if (ret) {
+		LOG_ERR("Error %d: read temperature sensor failed", ret);
+		return NULL;
+	}
 
 	*data_len = sizeof(temp_float);
 
@@ -48,7 +52,13 @@ static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_in
 static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	env_sensor_read_pressure(&(press_float.val1), &(press_float.val2));
+	int ret;
+
+	ret = env_sensor_read_pressure(&(press_float.val1), &(press_float.val2));
+	if (ret) {
+		LOG_ERR("Error %d: read pressure sensor failed", ret);
+		return NULL;
+	}
 
 	*data_len = sizeof(press_float);
 
@@ -58,7 +68,13 @@ static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	env_sensor_read_humidity(&(humid_float.val1), &(humid_float.val2));
+	int ret;
+
+	ret = env_sensor_read_humidity(&(humid_float.val1), &(humid_float.val2));
+	if (ret) {
+		LOG_ERR("Error %d: read humidity sensor failed", ret);
+		return NULL;
+	}
 
 	*data_len = sizeof(humid_float);
 
@@ -68,7 +84,13 @@ static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	env_sensor_read_gas_resistance(&(gas_res_float.val1), &(gas_res_float.val2));
+	int ret;
+	
+	ret = env_sensor_read_gas_resistance(&(gas_res_float.val1), &(gas_res_float.val2));
+	if (ret) {
+		LOG_ERR("Error %d: read gas resistance sensor failed", ret);
+		return NULL;
+	}
 
 	*data_len = sizeof(gas_res_float);
 
@@ -132,43 +154,47 @@ static bool event_handler(const struct event_header *eh)
 {
     if (is_measurement_event(eh)) {
         struct measurement_event *event = cast_measurement_event(eh);
+		float32_value_t measurement_val = {
+			.val1 = event->float_val1,
+			.val2 = event->float_val2
+		};
 
 		switch (event->type)
 		{
 		case TemperatureMeasurement:
 			LOG_DBG("Temperature measurement event received! val1: 0x%08X, val2: 0x%08X", 
-					event->float_val.val1, event->float_val.val2);
+					event->float_val1, event->float_val2);
 
 			lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID),
-				&(event->float_val));
+				&(measurement_val));
 			break;
 
 		case PressureMeasurement:
 			LOG_DBG("Pressure measurement event received! val1: 0x%08X, val2: 0x%08X", 
-					event->float_val.val1, event->float_val.val2);
+					event->float_val1, event->float_val2);
 
 			lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID),
-				&(event->float_val));
+				&(measurement_val));
 			break;
 
 		case HumidityMeasurement:
 			LOG_DBG("Humidity measurement event received! val1: 0x%08X, val2: 0x%08X", 
-					event->float_val.val1, event->float_val.val2);
+					event->float_val1, event->float_val2);
 
 			lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID),
-				&(event->float_val));
+				&(measurement_val));
 			break;
 
 		case GasResistanceMeasurement:
 			LOG_DBG("Gas resistance measurement event received! val1: 0x%08X, val2: 0x%08X", 
-					event->float_val.val1, event->float_val.val2);
+					event->float_val1, event->float_val2);
 
 			lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID),
-				&(event->float_val));
+				&(measurement_val));
 			break;
 
 		default:

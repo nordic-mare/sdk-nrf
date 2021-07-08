@@ -19,7 +19,8 @@ struct measurement_event {
 
     enum measurement_type type;
     uint32_t unsigned_val;
-    float32_value_t float_val;
+    int32_t float_val1;
+    int32_t float_val2;
 };
 
 EVENT_TYPE_DECLARE(measurement_event);

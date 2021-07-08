@@ -35,64 +35,12 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define SENSE_LED_ON_TIME_MS    500
 
 static const struct device *light_sensor_dev;
-static struct sensor_value light_sensor_val;
 
+
+static int sensor_read(uint32_t measurement_values[]);
 #ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE
 static void trigger_handler(const struct device *dev, struct sensor_trigger *trigger);
 #endif
-static int sensor_read(uint32_t measurement_values[]);
-
-
-int light_sensor_init(struct measurement_event *event)
-{
-    ui_sense_led_init();
-
-    light_sensor_dev = device_get_binding(LIGHT_SENSOR_NAME);
-    if (!light_sensor_dev) {
-        LOG_ERR("Could not bind to Light Sensor device. (%d)", -ENODEV);
-        return -ENODEV;
-    }
-
-#ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE
-    int ret;
-    
-#ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_THRESH
-    struct sensor_value temp_val;
-    struct sensor_trigger sensor_trigger_config = {
-        .type = SENSOR_TRIG_THRESHOLD,
-        .chan = TRIGGER_CHANEL
-    };
-
-    temp_val.val1 = THRESH_UPPER;
-    temp_val.val2 = 0;
-    ret = sensor_attr_set(light_sensor_dev, SENSOR_CHAN_ALL,
-                        SENSOR_ATTR_UPPER_THRESH, &temp_val);
-    if (ret) {
-        LOG_ERR("Failed to set sensor attribute. (%d)", ret);
-    }
-
-    temp_val.val1 = THRESH_LOWER;
-    ret = sensor_attr_set(light_sensor_dev, SENSOR_CHAN_ALL,
-                        SENSOR_ATTR_LOWER_THRESH, &temp_val);
-    if (ret) {
-        LOG_ERR("Failed to set sensor attribute. (%d)", ret);
-    }
-#else
-    struct sensor_trigger sensor_trigger_config = {
-        .type = SENSOR_TRIG_DATA_READY,
-        .chan = TRIGGER_CHANEL
-    };
-#endif /* CONFIG_UI_LIGHT_SENSOR_TRIGGER_THRESH */
-    
-    ret = sensor_trigger_set(light_sensor_dev, &sensor_trigger_config,
-                    trigger_handler);
-    if (ret) {
-        LOG_ERR("Failed to set trigger handler. (%d)", ret);
-    }
-#endif /* CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE */
-
-    return 0;
-}
 
 
 int light_sensor_read(uint32_t *measurement)
@@ -102,6 +50,7 @@ int light_sensor_read(uint32_t *measurement)
 
     ret = sensor_read(measurement_values);
     if (ret) {
+        LOG_ERR("Error %d: read light sensor failed", ret);
         return ret;
     }
 
@@ -128,6 +77,7 @@ int colour_sensor_read(uint32_t *measurement)
 
     ret = sensor_read(measurement_values);
     if (ret) {
+        LOG_ERR("Error %d: read colour sensor failed", ret);
         return ret;
     }
 
@@ -144,6 +94,109 @@ int colour_sensor_read(uint32_t *measurement)
     
     return 0;
 }
+
+
+int light_sensor_init(struct measurement_event *event)
+{
+    ui_sense_led_init();
+
+    light_sensor_dev = device_get_binding(LIGHT_SENSOR_NAME);
+    if (!light_sensor_dev) {
+        LOG_ERR("Error %d: could not bind to Light Sensor device", -ENODEV);
+        return -ENODEV;
+    }
+
+#ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE
+    int ret;
+    
+#ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_THRESH
+    struct sensor_value temp_val;
+    struct sensor_trigger sensor_trigger_config = {
+        .type = SENSOR_TRIG_THRESHOLD,
+        .chan = TRIGGER_CHANEL
+    };
+
+    temp_val.val1 = THRESH_UPPER;
+    temp_val.val2 = 0;
+    ret = sensor_attr_set(light_sensor_dev, SENSOR_CHAN_ALL,
+                        SENSOR_ATTR_UPPER_THRESH, &temp_val);
+    if (ret) {
+        LOG_ERR("Error %d: set upper threshold attribute failed", ret);
+        return ret;
+    }
+
+    temp_val.val1 = THRESH_LOWER;
+    ret = sensor_attr_set(light_sensor_dev, SENSOR_CHAN_ALL,
+                        SENSOR_ATTR_LOWER_THRESH, &temp_val);
+    if (ret) {
+        LOG_ERR("Error %d: set lower threshold attribute failed", ret);
+        return ret;
+    }
+#else
+    struct sensor_trigger sensor_trigger_config = {
+        .type = SENSOR_TRIG_DATA_READY,
+        .chan = TRIGGER_CHANEL
+    };
+#endif /* CONFIG_UI_LIGHT_SENSOR_TRIGGER_THRESH */
+    
+    ret = sensor_trigger_set(light_sensor_dev, &sensor_trigger_config,
+                    trigger_handler);
+    if (ret) {
+        LOG_ERR("Error %d: set trigger handler failed", ret);
+        return ret;
+    }
+#endif /* CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE */
+
+    return 0;
+}
+
+
+static int sensor_read(uint32_t measurement_values[])
+{
+    int ret;
+    struct sensor_value sensor_val;
+
+    ret = sensor_sample_fetch_chan(light_sensor_dev, SENSOR_CHAN_ALL);
+    if (ret) {
+        LOG_ERR("Error %d: fetch sample failed", ret);
+        return ret;
+    }
+
+    ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_RED, &sensor_val);
+    if (ret) {
+        LOG_ERR("Error %d: get red channel failed", ret);
+        return ret;
+    }
+    measurement_values[0] = (uint32_t)sensor_val.val1;
+    LOG_DBG("Light sensor raw red value: %i", sensor_val.val1);
+
+    ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_GREEN, &sensor_val);
+    if (ret) {
+        LOG_ERR("Error %d: get green channel failed", ret);
+        return ret;
+    }
+    measurement_values[1] = (uint32_t)sensor_val.val1;
+    LOG_DBG("Light sensor raw green value: %i", sensor_val.val1);
+
+    ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_BLUE, &sensor_val);
+    if (ret) {
+        LOG_ERR("Error %d: get blue channel failed", ret);
+        return ret;
+    }
+    measurement_values[2] = (uint32_t)sensor_val.val1;
+    LOG_DBG("Light sensor raw blue value: %i", sensor_val.val1);
+
+    ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_IR, &sensor_val);
+    if (ret) {
+        LOG_ERR("Error %d: get IR channel failed", ret);
+        return ret;
+    }
+    measurement_values[3] = (uint32_t)sensor_val.val1;
+    LOG_DBG("Light sensor raw IR value: %i", sensor_val.val1);
+
+    return 0;
+}
+
 
 
 #ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE
@@ -163,7 +216,8 @@ static void trigger_handler(const struct device *dev, struct sensor_trigger *tri
 
         ret = sensor_sample_fetch_chan(light_sensor_dev, SENSOR_CHAN_ALL);
         if (ret) {
-            LOG_ERR("Could not fetch sample. (%d)", ret);
+            LOG_ERR("Error %d: fetch sample failed", ret);
+            return;
         }
         break;
     }
@@ -178,7 +232,7 @@ static void trigger_handler(const struct device *dev, struct sensor_trigger *tri
 
         ret = sensor_sample_fetch_chan(light_sensor_dev, SENSOR_CHAN_ALL);
         if (ret) {
-            LOG_ERR("Could not fetch sample. (%d)", ret);
+            LOG_ERR("Error %d: fetch sample failed", ret);
         }
         break;
     }
@@ -188,49 +242,3 @@ static void trigger_handler(const struct device *dev, struct sensor_trigger *tri
     }
 }
 #endif
-
-
-static int sensor_read(uint32_t measurement_values[])
-{
-    int ret;
-
-    ret = sensor_sample_fetch_chan(light_sensor_dev, SENSOR_CHAN_ALL);
-    if (ret) {
-        LOG_ERR("Could not fetch sample. (%d)", ret);
-        return ret;
-    }
-
-    ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_RED, &light_sensor_val);
-    if (ret) {
-        LOG_ERR("Could not get red channel. (%d)", ret);
-        return ret;
-    }
-    measurement_values[0] = (uint32_t)light_sensor_val.val1;
-    LOG_DBG("Light sensor raw red value: %i", light_sensor_val.val1);
-
-    ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_GREEN, &light_sensor_val);
-    if (ret) {
-        LOG_ERR("Could not get green channel. (%d)", ret);
-        return ret;
-    }
-    measurement_values[1] = (uint32_t)light_sensor_val.val1;
-    LOG_DBG("Light sensor raw green value: %i", light_sensor_val.val1);
-
-    ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_BLUE, &light_sensor_val);
-    if (ret) {
-        LOG_ERR("Could not get blue channel. (%d)", ret);
-        return ret;
-    }
-    measurement_values[2] = (uint32_t)light_sensor_val.val1;
-    LOG_DBG("Light sensor raw blue value: %i", light_sensor_val.val1);
-
-    ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_IR, &light_sensor_val);
-    if (ret) {
-        LOG_ERR("Could not get infra red channel. (%d)", ret);
-        return ret;
-    }
-    measurement_values[3] = (uint32_t)light_sensor_val.val1;
-    LOG_DBG("Light sensor raw IR value: %i", light_sensor_val.val1);
-
-    return 0;
-}

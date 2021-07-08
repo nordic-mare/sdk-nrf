@@ -46,17 +46,17 @@ int ui_led_pwm_on_off(bool new_state)
 
     ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(0), PERIOD_USEC, pulse_width_red, LED_PWM_FLAGS);
     if (ret != 0) {
-        LOG_ERR("Error %d: red write failed", ret);
+        LOG_ERR("Error %d: set red pin failed", ret);
         return ret;
     }
     ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(1), PERIOD_USEC, pulse_width_green, LED_PWM_FLAGS);
     if (ret != 0) {
-        LOG_ERR("Error %d: green write failed", ret);
+        LOG_ERR("Error %d: set green pin failed", ret);
         return ret;
     }
     ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(2), PERIOD_USEC, pulse_width_blue, LED_PWM_FLAGS);
     if (ret != 0) {
-        LOG_ERR("Error %d: blue write failed", ret);
+        LOG_ERR("Error %d: set blue pin failed", ret);
         return ret;
     }
 
@@ -94,7 +94,7 @@ int ui_led_pwm_init(void)
 {
 	led_pwm_dev = device_get_binding(LED_PWM_NAME);
     if (!led_pwm_dev) {
-		LOG_ERR("Could not bind to LED PWM device. (%d)", -ENODEV);
+		LOG_ERR("Error %d: could not bind to LED PWM device", -ENODEV);
 		return -ENODEV;
 	}
 

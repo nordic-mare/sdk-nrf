@@ -24,7 +24,7 @@ int ui_button_init(void)
 
 	ret = dk_buttons_init(dk_button_event_handler);
 	if (ret) {
-		LOG_ERR("Could not initialize buttons (%d)", ret);
+		LOG_ERR("Error %d: could not initialize buttons", ret);
 		return ret;
 	}
 

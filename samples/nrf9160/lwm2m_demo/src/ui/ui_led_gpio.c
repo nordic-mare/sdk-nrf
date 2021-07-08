@@ -37,17 +37,17 @@ int ui_led_gpio_on_off(bool new_state)
     
     ret = gpio_pin_set(led_gpio_dev, LED_RED_GPIO_PIN, is_on * red_val);
     if (ret) {
-        LOG_ERR("Could not set red led. (%d)", ret);
+        LOG_ERR("Error %d: set red pin failed", ret);
         return ret;
     }
     ret = gpio_pin_set(led_gpio_dev, LED_GREEN_GPIO_PIN, is_on * green_val);
     if (ret) {
-        LOG_ERR("Could not set green led. (%d)", ret);
+        LOG_ERR("Error %d: set green pin failed", ret);
         return ret;
     }
     ret = gpio_pin_set(led_gpio_dev, LED_BLUE_GPIO_PIN, is_on * blue_val);
     if (ret) {
-        LOG_ERR("Could not set blue led. (%d)", ret);
+        LOG_ERR("Error %d: set blue pin failed", ret);
         return ret;
     }
     return 0;
@@ -59,6 +59,7 @@ int ui_led_gpio_set_colour(uint32_t colour_values)
     red_val = (uint8_t)(colour_values >> 16);
     green_val = (uint8_t)(colour_values >> 8);
     blue_val = (uint8_t)colour_values;
+
     if (!is_on) {
         return 0;
     }
@@ -72,26 +73,26 @@ int ui_led_gpio_init(void)
 
 	led_gpio_dev = device_get_binding(LED_GPIO_NAME);
 	if (!led_gpio_dev) {
-        LOG_ERR("Could not bind to GPIO device. (%d)", -ENODEV);
+        LOG_ERR("Error %d: could not bind to LED GPIO device", -ENODEV);
 		return -ENODEV;
 	}
 
 	ret = gpio_pin_configure(led_gpio_dev, LED_RED_GPIO_PIN, 
                     LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
     if (ret) {
-        LOG_ERR("Could not configure red LED GPIO pin. (%d)", ret);
+        LOG_ERR("Error %d: configure red pin failed", ret);
 		return ret;
 	}
     ret = gpio_pin_configure(led_gpio_dev, LED_GREEN_GPIO_PIN, 
                     LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
     if (ret) {
-        LOG_ERR("Could not configure green LED GPIO pin. (%d)", ret);
+        LOG_ERR("Error %d: configure green pin failed", ret);
 		return ret;
 	}                            
     ret = gpio_pin_configure(led_gpio_dev, LED_BLUE_GPIO_PIN, 
                     LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
-        LOG_ERR("Could not configure blue LED GPIO pin. (%d)", ret);
+        LOG_ERR("Error %d: configure blue pin failed", ret);
 		return ret;
 	}
 	return 0;

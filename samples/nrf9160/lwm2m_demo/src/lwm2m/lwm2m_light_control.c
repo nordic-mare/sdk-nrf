@@ -12,7 +12,7 @@
 #ifdef CONFIG_UI_LED_USE_PWM
 #include "ui_led_pwm.h"
 #else
-#include <led_gpio.h>
+#include "led_gpio.h"
 #endif
 
 #include <logging/log.h>
@@ -27,21 +27,20 @@ static int lc_on_off_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 			uint8_t *data, uint16_t data_len, bool last_block, size_t total_size)
 {
 	int ret;
-	bool new_led_state;
-	new_led_state = *(bool *)data;
+	bool new_led_state = *(bool *)data;
 
 	if (new_led_state != led_state)  {
 #ifdef CONFIG_UI_LED_USE_PWM
 		ret = ui_led_pwm_on_off(new_led_state);
 #else
 		ret = ui_led_gpio_on_off(new_led_state);
-#endif /* ifdef CONFIG_UI_LED_USE_PWM */
-
+#endif /* CONFIG_UI_LED_USE_PWM */
 		if (ret) {
+			LOG_ERR("Error %d: set LED on/off failed", ret);
 			return ret;
 		}
 
-		// Reset on-time if just turned on
+		/* Reset on-time if transition from off to on */
 		if (led_state == false) {
 			lwm2m_engine_set_s32(
 				LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0, ON_TIME_RID), 0);
@@ -59,15 +58,18 @@ static int lc_colour_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 {
 	int ret;
 	uint32_t colour_val = strtoul(data, NULL, 0);
-	LOG_DBG("Colour value: %x", colour_val);
 
 #ifdef CONFIG_UI_LED_USE_PWM
 	ret = ui_led_pwm_set_colour(colour_val);
 #else
 	ret = ui_led_gpio_set_colour(colour_val);
 #endif 
+	if (ret) {
+		LOG_ERR("Error %d: set colour value failed", ret);
+		return ret;
+	}
 
-	return ret;
+	return 0;
 }
 
 
@@ -75,19 +77,25 @@ static int lc_dimmer_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 			uint8_t *data, uint16_t data_len,
 			bool last_block, size_t total_size)
 {
+	int ret;
 	uint8_t dutycycle = *data;
-	LOG_DBG("Dutycycle: %x", dutycycle);
 	
 #ifdef CONFIG_UI_LED_USE_PWM
-	return ui_led_pwm_set_dutycycle(dutycycle);
-#else
+	ret = ui_led_pwm_set_dutycycle(dutycycle);
+	if (ret) {
+		LOG_ERR("Error %d: set dutycycle failed", ret);
+		return ret;
+	}
+#endif
+
 	return 0;
-#endif	
 }
 
 
 int lwm2m_init_light_control(void)
 {
+	led_state = false;
+
 #ifdef CONFIG_UI_LED_USE_PWM
 	ui_led_pwm_init();
 #else

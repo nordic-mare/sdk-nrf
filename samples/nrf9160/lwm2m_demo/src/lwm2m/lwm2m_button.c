@@ -30,7 +30,7 @@ int lwm2m_init_button(void)
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON1_OBJ_INST_ID));
 	/* Overwriting post write callback of Digital Input State, as the original callback in the ipso object directly 
 	   modifies the Digital Input Counter resource data buffer without notifying the engine, 
-	   which effectively disables Value Tracking functionality for the counter resource. */ 
+	   which effectively disables Value Tracking functionality for the counter resource. Won't be needed with new Zephyr update.*/ 
 	lwm2m_engine_register_post_write_callback(
 			LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON1_OBJ_INST_ID, DIGITAL_INPUT_STATE_RID),
 			NULL);
@@ -55,6 +55,7 @@ static bool event_handler(const struct event_header *eh)
 				LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON1_OBJ_INST_ID, DIGITAL_INPUT_STATE_RID), 
 				event->button_state);
 			
+			/* Won't be needed with new Zephyr update. */
 			if (event->button_state) {
 				counter++;
 				lwm2m_engine_set_u64(
@@ -64,8 +65,8 @@ static bool event_handler(const struct event_header *eh)
 			break;
 
 		default:
-			LOG_DBG("Unsupported button number");
-			return false;
+			LOG_ERR("Error %d: unsupported button number", -ENOTSUP);
+			break;
 		}
 
 		return true;
