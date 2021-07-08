@@ -27,7 +27,6 @@ LOG_MODULE_REGISTER(app_lwm2m_client, CONFIG_APP_LOG_LEVEL);
 #endif
 #endif
 
-#include "ui.h"
 #include "lwm2m_client.h"
 #include "ipso_objects.h"
 
@@ -66,21 +65,6 @@ void client_acknowledge(void)
 	lwm2m_acknowledge(&client);
 }
 
-/**@brief User interface event handler. */
-static void ui_evt_handler(struct ui_evt *evt)
-{
-	if (!evt) {
-		return;
-	}
-
-	LOG_DBG("Event: %d", evt->button);
-
-#if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER) && CONFIG_FLIP_INPUT > 0
-	if (handle_accel_events(evt) == 0) {
-		return;
-	}
-#endif
-}
 
 static int remove_whitespace(char *buf)
 {
@@ -411,8 +395,6 @@ void main(void)
 	LOG_INF(APP_BANNER);
 
 	k_sem_init(&lwm2m_restart, 0, 1);
-
-	ui_init(ui_evt_handler);
 
 	ret = event_manager_init();
 	if (ret) {

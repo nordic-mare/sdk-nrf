@@ -10,8 +10,6 @@
 #include <zephyr.h>
 #include <net/lwm2m.h>
 
-#include "ui.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,7 +29,6 @@ int lwm2m_init_buzzer(void);
 #endif
 
 #if defined(CONFIG_UI_BUTTON)
-int handle_button_events(struct ui_evt *evt);
 int lwm2m_init_button(void);
 #endif
 

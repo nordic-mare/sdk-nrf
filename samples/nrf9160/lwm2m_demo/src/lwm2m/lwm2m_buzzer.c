@@ -7,7 +7,7 @@
 #include <zephyr.h>
 #include <net/lwm2m.h>
 
-#include "ui.h"
+#include "ui_buzzer.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_buzzer, CONFIG_APP_LOG_LEVEL);
@@ -21,10 +21,10 @@ static int buzzer_state_cb(uint16_t obj_inst_id,
 {
 	if (*data == 0) {
 		LOG_DBG("Buzzer OFF");
-		ui_buzzer_play(false);
+		ui_buzzer_on_off(false);
 	} else {
 		LOG_DBG("Buzzer ON");
-		ui_buzzer_play(true);
+		ui_buzzer_on_off(true);
 	}
 
 	return 0;
@@ -43,7 +43,8 @@ static int buzzer_intensity_cb(uint16_t obj_inst_id,
 			   uint8_t *data, uint16_t data_len,
 			   bool last_block, size_t total_size)
 {
-	return ui_buzzer_set_intensity(data[0]);
+	return ui_buzzer_set_dutycycle(50);
+	//return ui_buzzer_set_dutycycle(data[0]);
 }
 
 int lwm2m_init_buzzer(void)

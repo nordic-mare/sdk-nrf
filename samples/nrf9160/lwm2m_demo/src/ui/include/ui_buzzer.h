@@ -21,6 +21,11 @@ extern "C" {
 /**@brief Initialize buzzer in the user interface module. */
 int ui_buzzer_init(void);
 
+int ui_buzzer_on_off(bool new_state);
+
+int ui_buzzer_set_frequency(uint32_t freq);
+int ui_buzzer_set_dutycycle(uint8_t duty);
+
 #ifdef __cplusplus
 }
 #endif

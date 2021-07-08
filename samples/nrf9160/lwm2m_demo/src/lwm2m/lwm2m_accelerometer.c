@@ -9,8 +9,6 @@
 #include <net/lwm2m.h>
 #include <math.h>
 
-#include "ui.h"
-
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_accel, CONFIG_APP_LOG_LEVEL);
 
