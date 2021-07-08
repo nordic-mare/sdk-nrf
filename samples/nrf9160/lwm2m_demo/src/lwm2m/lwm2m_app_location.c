@@ -70,6 +70,9 @@ static void gps_event_handler(const struct device *dev, struct gps_event *evt)
 		case GPS_EVT_PVT:
 			break;
 		case GPS_EVT_PVT_FIX:
+			if (k_uptime_get_32() - timestamp_prev < CONFIG_APP_HOLD_TIME_GPS * MSEC_PER_SEC) {
+				break;
+			}
 			LOG_DBG("Recieved PVT Fix. GPS search completed.");
 			memcpy(&pvt_data, &evt->pvt, sizeof(struct gps_pvt));
 			handle_pvt_fix(&pvt_data);
