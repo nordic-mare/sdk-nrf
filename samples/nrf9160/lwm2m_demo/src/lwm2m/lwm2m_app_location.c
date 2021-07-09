@@ -18,9 +18,9 @@ static struct gps_pvt pvt_data;
 static const struct device *gps_dev;
 static struct gps_config gps_cfg = {
 	.nav_mode = GPS_NAV_MODE_PERIODIC,
-	.power_mode = GPS_POWER_MODE_PERFORMANCE,
-	.interval = 300,
-	.timeout = 150,
+	.power_mode = GPS_POWER_MODE_DISABLED,
+	.interval = CONFIG_GPS_SEARCH_INTERVAL_TIME,
+	.timeout = CONFIG_GPS_SEARCH_TIMEOUT_TIME,
 	.priority = false
 };
 
@@ -44,10 +44,12 @@ static void handle_pvt_fix(struct gps_pvt *pvt)
 	float32_value_t longitude = double_to_lwm2m_float(pvt->longitude);
 	float32_value_t altitude = float_to_lwm2m_float(pvt->altitude);
 	float32_value_t speed = float_to_lwm2m_float(pvt->speed);
+	float32_value_t radius = float_to_lwm2m_float(pvt->accuracy);
 
 	lwm2m_engine_set_float32("6/0/0", &latitude);
 	lwm2m_engine_set_float32("6/0/1", &longitude);
 	lwm2m_engine_set_float32("6/0/2", &altitude);
+	lwm2m_engine_set_float32("6/0/3", &radius);
 	lwm2m_engine_set_float32("6/0/6", &speed);
 }
 

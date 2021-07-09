@@ -36,7 +36,7 @@ config APP_MCUBOOT_FLASH_BUF_SZ
 
 choice
 	prompt "GPS device"
-	default GPS_USE_SIM
+	default GPS_USE_EXTERNAL
 	help
 		Select from which device GPS data will be fetched.
 
@@ -70,10 +70,23 @@ endif
 if GPS_USE_EXTERNAL
 config GPS_DEV_NAME
 	string "GPS device name"
+	default "NRF9160_GPS"
 	help
 		GPS device from which location data will be fetched and sent
 		to nRF Cloud.
 
+config GPS_SEARCH_INTERVAL_TIME
+	int "GPS search interval [s]"
+	default 300
+	help
+		Length of time between GPS searches in seconds.
+
+config GPS_SEARCH_TIMEOUT_TIME
+	int "GPS search timeout [s]"
+	default 150
+	help
+		Length of time the GPS can spend looking for a fix in seconds. 
+		In areas with poor connection, this should be increased.
 endif
 
 choice
