@@ -136,7 +136,7 @@ static int lwm2m_setup(void)
 	lwm2m_app_init_device(imei_buf);
 	lwm2m_init_security(&client, endpoint_name);
 
-#if defined(CONFIG_LWM2M_FIRMWARE_UPDATE_OBJ_SUPPORT)
+#if defined(CONFIG_LWM2M_CLIENT_UTILS_FIRMWARE_UPDATE_OBJ_SUPPORT)
 	lwm2m_init_firmware();
 #endif
 #if defined(CONFIG_LWM2M_CLIENT_UTILS_CONN_MON_OBJ_SUPPORT)
@@ -347,7 +347,10 @@ static void rd_client_event(struct lwm2m_ctx *client,
 
 	case LWM2M_RD_CLIENT_EVENT_REGISTRATION_COMPLETE:
 		LOG_DBG("Registration complete");
+#if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
+		// Ensure that GPS search is only started after bootstrap process is complete.
 		lwm2m_app_start_gps();
+#endif
 		break;
 
 	case LWM2M_RD_CLIENT_EVENT_REG_UPDATE_FAILURE:
