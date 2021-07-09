@@ -6,60 +6,95 @@
 
 #include <zephyr.h>
 #include <net/lwm2m.h>
+#include <lwm2m_resource_ids.h>
 
 #include "ui_buzzer.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_buzzer, CONFIG_APP_LOG_LEVEL);
 
-#define BUZZER_NAME	"BUZZER"
+#define BUZZER_APP_TYPE	"BUZZER"
 
 static int buzzer_state_cb(uint16_t obj_inst_id,
 			   uint16_t res_id, uint16_t res_inst_id,
 			   uint8_t *data, uint16_t data_len,
 			   bool last_block, size_t total_size)
 {
-	if (*data == 0) {
-		LOG_DBG("Buzzer OFF");
-		ui_buzzer_on_off(false);
-	} else {
-		LOG_DBG("Buzzer ON");
-		ui_buzzer_on_off(true);
+	int ret;
+	bool state = *(bool *)data;
+
+	LOG_DBG("Buzzer on/off! State: %d", state);
+
+	ret = ui_buzzer_on_off(state);
+	if (ret) {
+		LOG_ERR("Error %d: set buzzer on/off failed", ret);
+		return ret;
 	}
 
 	return 0;
 }
 
-static int buzzer_frequency_cb(uint16_t obj_inst_id,
-			   uint16_t res_id, uint16_t res_inst_id,
-			   uint8_t *data, uint16_t data_len,
-			   bool last_block, size_t total_size)
-{
-	return ui_buzzer_set_frequency(*data);
-}
+// static int buzzer_frequency_cb(uint16_t obj_inst_id,
+// 			   uint16_t res_id, uint16_t res_inst_id,
+// 			   uint8_t *data, uint16_t data_len,
+// 			   bool last_block, size_t total_size)
+// {
+// 	int ret;
+// 	uint32_t frequency = *(uint32_t *)data;
+
+// 	ret = ui_buzzer_set_frequency(*data);
+// 	if (ret) {
+// 		LOG_ERR("Error %d: set buzzer frequency failed", ret);
+// 		return ret;
+// 	}
+
+// 	return 0; 
+// }
 
 static int buzzer_intensity_cb(uint16_t obj_inst_id,
 			   uint16_t res_id, uint16_t res_inst_id,
 			   uint8_t *data, uint16_t data_len,
 			   bool last_block, size_t total_size)
 {
-	return ui_buzzer_set_dutycycle(50);
-	//return ui_buzzer_set_dutycycle(data[0]);
+	int ret;
+	uint8_t intensity = *data;
+
+	LOG_DBG("Intensity: %u", intensity);
+
+	if (intensity > 100) {
+		LOG_ERR("Error %d: intensity too high. Max 100", -EINVAL);
+		return -EINVAL;
+	}
+
+	ret = ui_buzzer_set_dutycycle(intensity / 2);
+	if (ret) {
+		LOG_ERR("Error %d: set dutycycle failed", ret);
+		return ret;
+	}
+
+	return 0; 
 }
+
 
 int lwm2m_init_buzzer(void)
 {
-	/* create buzzer object */
-	lwm2m_engine_create_obj_inst("3338/0");
-	lwm2m_engine_register_post_write_callback("3338/0/5500",
-						  buzzer_state_cb);
-	lwm2m_engine_register_post_write_callback("3338/0/5548",
-						  buzzer_intensity_cb);
-	lwm2m_engine_register_post_write_callback("3338/0/7001",
-						  buzzer_frequency_cb);
-	lwm2m_engine_set_res_data("3338/0/5750",
-				  BUZZER_NAME, sizeof(BUZZER_NAME),
-				  LWM2M_RES_DATA_FLAG_RO);
+	ui_buzzer_init();
+	
+	lwm2m_engine_create_obj_inst(
+			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0));
+	lwm2m_engine_register_post_write_callback(
+			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, DIGITAL_INPUT_STATE_RID),
+			buzzer_state_cb);
+	lwm2m_engine_register_post_write_callback(
+			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, LEVEL_RID),
+			buzzer_intensity_cb);
+	// lwm2m_engine_register_post_write_callback(
+	// 		LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, DIGITAL_INPUT_STATE_RID)"3338/0/7001",
+	// 					  buzzer_frequency_cb);
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, APPLICATION_TYPE_RID),
+			BUZZER_APP_TYPE, sizeof(BUZZER_APP_TYPE),
+			LWM2M_RES_DATA_FLAG_RO);
 
 	return 0;
 }

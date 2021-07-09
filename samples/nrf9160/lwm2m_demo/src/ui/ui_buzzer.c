@@ -16,13 +16,13 @@ LOG_MODULE_REGISTER(ui_buzzer, CONFIG_UI_LOG_LEVEL);
 #define BUZZER_PWM_FLAGS        DT_PWMS_FLAGS(BUZZER_PWM_NODE)
 
 #define PERIOD(freq)				(USEC_PER_SEC / freq)
-#define PULSE_WIDTH(freq, duty)		(PERIOD(freq) / duty)
+#define PULSE_WIDTH(freq, duty)		(PERIOD(freq) * (uint32_t)duty / 100U)
 
-#define FREQUENCE_MAX				10000
-#define DUTYCYCLE_MAX				50
+#define FREQUENCE_MAX				10000U
+#define DUTYCYCLE_MAX				50U
 
 static const struct device *buzzer_pwm_dev;
-static uint8_t state;
+static bool state;
 static uint32_t frequency;
 static uint8_t dutycycle;
 
@@ -33,12 +33,16 @@ int ui_buzzer_on_off(bool new_state)
 
 	state = new_state;
 
+	LOG_DBG("Frequency: %u", frequency);
+
 	if (frequency == 0) {
 		ret = pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN,
 			UINT32_MAX, 0,
 			BUZZER_PWM_FLAGS);
 	}
 	else {
+		LOG_DBG("ON/OFF period: %u", PERIOD(frequency));
+		LOG_DBG("ON/OFF pulse width: %u", PULSE_WIDTH(frequency * state, dutycycle));
 		ret = pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN,
 			PERIOD(frequency), PULSE_WIDTH(frequency * state, dutycycle),
 			BUZZER_PWM_FLAGS);
@@ -107,6 +111,9 @@ int ui_buzzer_init(void)
         LOG_ERR("Error %d: could not bind to LED GPIO device", -ENODEV);
 		return -ENODEV;
 	}
+
+	frequency = 440;
+	dutycycle = 50;
 
 	return 0;
 }

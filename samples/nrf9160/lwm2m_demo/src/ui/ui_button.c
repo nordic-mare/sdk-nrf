@@ -12,7 +12,7 @@
 #define MODULE ui_button
 
 #include <logging/log.h>
-LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(MODULE, CONFIG_UI_LOG_LEVEL);
 
 
 static void dk_button_event_handler(uint32_t button_states, uint32_t has_changed);
