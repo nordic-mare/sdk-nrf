@@ -9,7 +9,7 @@
 #include <lwm2m_resource_ids.h>
 #include <stdio.h>
 
-#include "measurement_event.h"
+#include "sensor_event.h"
 #include "light_sensor.h"
 
 #define MODULE app_lwm2m_light_sensor
@@ -120,25 +120,28 @@ int lwm2m_init_light_sensor(void)
 
 static bool event_handler(const struct event_header *eh)
 {
-    if (is_measurement_event(eh)) {
-        struct measurement_event *event = cast_measurement_event(eh);
+    if (is_sensor_event(eh)) {
+        struct sensor_event *event = cast_sensor_event(eh);
         char measurement_value_str[RGBIR_STR_LENGTH];
 
-        snprintf(measurement_value_str, RGBIR_STR_LENGTH,
-                    "0x%08X", event->unsigned_val);
+        
 
         switch (event->type)
         {
-        case LightMeasurement:
-            LOG_DBG("Light measurement event received! Val: %s", measurement_value_str);
+        case LightSensor:
+            snprintf(measurement_value_str, RGBIR_STR_LENGTH,
+                    "0x%08X", event->unsigned_val);
+            LOG_DBG("Light sensor event received! Val: %s", measurement_value_str);
 
             lwm2m_engine_set_string(
                 LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, LIGHT_OBJ_INSTANCE, COLOUR_RID),
                 measurement_value_str);
             break;
         
-        case ColourMeasurement:
-            LOG_DBG("Colour measurement event received! Val: %s", measurement_value_str);
+        case ColourSensor:
+            snprintf(measurement_value_str, RGBIR_STR_LENGTH,
+                    "0x%08X", event->unsigned_val);
+            LOG_DBG("Colour sensor event received! Val: %s", measurement_value_str);
 
             lwm2m_engine_set_string(
                 LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, COLOUR_OBJ_INSTANCE, COLOUR_RID),
@@ -156,4 +159,4 @@ static bool event_handler(const struct event_header *eh)
 }
 
 EVENT_LISTENER(MODULE, event_handler);
-EVENT_SUBSCRIBE(MODULE, measurement_event);
+EVENT_SUBSCRIBE(MODULE, sensor_event);

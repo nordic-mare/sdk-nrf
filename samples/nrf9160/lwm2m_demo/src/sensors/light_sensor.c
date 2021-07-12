@@ -2,7 +2,6 @@
 #include <drivers/sensor.h>
 #include <stdio.h>
 
-#include "measurement_event.h"
 #include "ui_sense_led.h"
 
 #define MODULE light_sensor
@@ -96,7 +95,7 @@ int colour_sensor_read(uint32_t *measurement)
 }
 
 
-int light_sensor_init(struct measurement_event *event)
+int light_sensor_init(void)
 {
     ui_sense_led_init();
 

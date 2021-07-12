@@ -29,6 +29,7 @@ LOG_MODULE_REGISTER(app_lwm2m_client, CONFIG_APP_LOG_LEVEL);
 
 #include "lwm2m_client.h"
 #include "ipso_objects.h"
+#include "sensor_module.h"
 
 #if !defined(CONFIG_LTE_LINK_CONTROL)
 #error "Missing CONFIG_LTE_LINK_CONTROL"
@@ -472,6 +473,11 @@ void main(void)
 		LOG_ERR("Error registering rsrp handler (%d)", ret);
 	}
 #endif
+
+	ret = sensor_module_init();
+	if (ret) {
+		LOG_ERR("Error %d: could not initialize sensor module", ret);
+	}
 
 	while (true) {
 		lwm2m_rd_client_start(&client, endpoint_name, flags,

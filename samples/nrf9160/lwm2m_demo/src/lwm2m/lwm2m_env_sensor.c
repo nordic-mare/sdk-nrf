@@ -8,7 +8,7 @@
 #include <net/lwm2m.h>
 #include <lwm2m_resource_ids.h>
 
-#include "measurement_event.h"
+#include "sensor_event.h"
 #include "env_sensor.h"
 
 #define MODULE app_lwm2m_env_sens
@@ -152,8 +152,8 @@ int lwm2m_init_env_sensor(void)
 
 static bool event_handler(const struct event_header *eh)
 {
-    if (is_measurement_event(eh)) {
-        struct measurement_event *event = cast_measurement_event(eh);
+    if (is_sensor_event(eh)) {
+        struct sensor_event *event = cast_sensor_event(eh);
 		float32_value_t measurement_val = {
 			.val1 = event->float_val1,
 			.val2 = event->float_val2
@@ -161,8 +161,8 @@ static bool event_handler(const struct event_header *eh)
 
 		switch (event->type)
 		{
-		case TemperatureMeasurement:
-			LOG_DBG("Temperature measurement event received! val1: 0x%08X, val2: 0x%08X", 
+		case TemperatureSensor:
+			LOG_DBG("Temperature sensor event received! val1: 0x%08X, val2: 0x%08X", 
 					event->float_val1, event->float_val2);
 
 			lwm2m_engine_set_float32(
@@ -170,8 +170,8 @@ static bool event_handler(const struct event_header *eh)
 				&(measurement_val));
 			break;
 
-		case PressureMeasurement:
-			LOG_DBG("Pressure measurement event received! val1: 0x%08X, val2: 0x%08X", 
+		case PressureSensor:
+			LOG_DBG("Pressure sensor event received! val1: 0x%08X, val2: 0x%08X", 
 					event->float_val1, event->float_val2);
 
 			lwm2m_engine_set_float32(
@@ -179,8 +179,8 @@ static bool event_handler(const struct event_header *eh)
 				&(measurement_val));
 			break;
 
-		case HumidityMeasurement:
-			LOG_DBG("Humidity measurement event received! val1: 0x%08X, val2: 0x%08X", 
+		case HumiditySensor:
+			LOG_DBG("Humidity sensor event received! val1: 0x%08X, val2: 0x%08X", 
 					event->float_val1, event->float_val2);
 
 			lwm2m_engine_set_float32(
@@ -188,8 +188,8 @@ static bool event_handler(const struct event_header *eh)
 				&(measurement_val));
 			break;
 
-		case GasResistanceMeasurement:
-			LOG_DBG("Gas resistance measurement event received! val1: 0x%08X, val2: 0x%08X", 
+		case GasResistanceSensor:
+			LOG_DBG("Gas resistance sensor event received! val1: 0x%08X, val2: 0x%08X", 
 					event->float_val1, event->float_val2);
 
 			lwm2m_engine_set_float32(
@@ -208,4 +208,4 @@ static bool event_handler(const struct event_header *eh)
 }
 
 EVENT_LISTENER(MODULE, event_handler);
-EVENT_SUBSCRIBE(MODULE, measurement_event);
+EVENT_SUBSCRIBE(MODULE, sensor_event);

@@ -1,0 +1,29 @@
+
+
+
+menu "Modules"
+
+menu "Sensor Module"
+
+config SENSOR_MODULE_TEMP_DELAY
+    int "Delay between temperature readings"
+    default 60
+    help
+        Time in seconds before a new temperature work is submitted to the
+        system work queue. Actual delay between temperature sensor
+        reads will vary on the execution time of the other works 
+        in the queue when the temperature is added.
+
+config SENSOR_MODULE_TEMP_DELTA
+    int "Variation in temperature required to register a measurement"
+    default 100
+    help
+        Variation in temperature between the last registered temperature
+        and any newly measured temperature required to register that measurement.
+        Value is hundredths of a degree Celsius. Set to 0 to always register the latest
+        measurement.
+    
+
+endmenu # Sensor Module
+
+endmenu # Modules

@@ -7,6 +7,7 @@
 menu "Application sample"
 
 rsource "src/ui/Kconfig"
+rsource "src/modules/Kconfig"
 
 config APP_LWM2M_SERVER
 	string "LwM2M server name or IP address"
