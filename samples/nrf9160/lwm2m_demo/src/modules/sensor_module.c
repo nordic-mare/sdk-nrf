@@ -21,60 +21,55 @@ static struct k_work_delayable press_work;
 static struct k_work_delayable humid_work;
 static struct k_work_delayable gas_res_work;
 
-
 static void light_work_cb(struct k_work *work);
+
 static void colour_work_cb(struct k_work *work);
-static void temp_work_cb(struct k_work *work);
-static void press_work_cb(struct k_work *work);
-static void humid_work_cb(struct k_work *work);
-static void gas_res_work_cb(struct k_work *work);
 
-static bool env_sensor_sufficient_diff(uint32_t diff_val1, uint32_t diff_val2, 
-                        uint32_t req_diff_va1, uint32_t req_diff_val2);
-
-
-int sensor_module_init(void)
+static bool float32_sufficient_diff(uint32_t diff_val1, uint32_t diff_val2, 
+						uint32_t req_diff_va1, uint32_t req_diff_val2)
 {
-    k_work_init_delayable(&temp_work, temp_work_cb);
-
-    k_work_schedule(&temp_work, K_NO_WAIT);
-
-    return 0;
-} 
-
+	if (diff_val1 > req_diff_va1) {
+		return true;
+	}
+	else if (diff_val1 == req_diff_va1 && diff_val2 >= req_diff_val2) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
 
 static void temp_work_cb(struct k_work *work) 
 {
-    int32_t temp_val1, temp_val2; 
-    int32_t old_temp_val1 = 0; 
-    int32_t old_temp_val2 = 0;
+	int32_t temp_val1, temp_val2; 
+	int32_t old_temp_val1 = 0; 
+	int32_t old_temp_val2 = 0;
 
-    env_sensor_read_temp(&temp_val1, &temp_val2);
+	env_sensor_read_temp(&temp_val1, &temp_val2);
 
-    LOG_DBG("Temperature work: %d.%d", temp_val1, temp_val2);
+	LOG_DBG("Temperature work: %d.%d", temp_val1, temp_val2);
 
-    uint32_t diff1 = fabs(temp_val1 - old_temp_val1);
-    uint32_t diff2 = fabs(temp_val2 - old_temp_val2);
+	uint32_t diff1 = fabs(temp_val1 - old_temp_val1);
+	uint32_t diff2 = fabs(temp_val2 - old_temp_val2);
 
-    if (float32_sufficient_diff(diff1, diff2, TEMP_DELTA_VAL1, TEMP_DELTA_VAL2)) {
-        LOG_DBG("CREATE TEMP EVENT");
-    }
+	if (float32_sufficient_diff(diff1, diff2, TEMP_DELTA_VAL1, TEMP_DELTA_VAL2)) {
+		LOG_DBG("CREATE TEMP EVENT");
+	}
 
-    k_work_schedule(&temp_work, K_SECONDS(10));
+	k_work_schedule(&temp_work, K_SECONDS(10));
 }
 
+static void press_work_cb(struct k_work *work);
 
-static bool float32_sufficient_diff(uint32_t diff_val1, uint32_t diff_val2, 
-                        uint32_t req_diff_va1, uint32_t req_diff_val2)
+static void humid_work_cb(struct k_work *work);
+
+static void gas_res_work_cb(struct k_work *work);
+
+int sensor_module_init(void)
 {
-    if (diff_val1 > req_diff_va1) {
-        return true;
-    }
-    else if (diff_val1 == req_diff_va1 && diff_val2 >= req_diff_val2) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
+	k_work_init_delayable(&temp_work, temp_work_cb);
 
+	k_work_schedule(&temp_work, K_NO_WAIT);
+
+	return 0;
+} 

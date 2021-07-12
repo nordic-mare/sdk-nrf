@@ -34,23 +34,6 @@ static int buzzer_state_cb(uint16_t obj_inst_id,
 	return 0;
 }
 
-// static int buzzer_frequency_cb(uint16_t obj_inst_id,
-// 			   uint16_t res_id, uint16_t res_inst_id,
-// 			   uint8_t *data, uint16_t data_len,
-// 			   bool last_block, size_t total_size)
-// {
-// 	int ret;
-// 	uint32_t frequency = *(uint32_t *)data;
-
-// 	ret = ui_buzzer_set_frequency(*data);
-// 	if (ret) {
-// 		LOG_ERR("Error %d: set buzzer frequency failed", ret);
-// 		return ret;
-// 	}
-
-// 	return 0; 
-// }
-
 static int buzzer_intensity_cb(uint16_t obj_inst_id,
 			   uint16_t res_id, uint16_t res_inst_id,
 			   uint8_t *data, uint16_t data_len,
@@ -75,7 +58,6 @@ static int buzzer_intensity_cb(uint16_t obj_inst_id,
 	return 0; 
 }
 
-
 int lwm2m_init_buzzer(void)
 {
 	ui_buzzer_init();
@@ -88,9 +70,6 @@ int lwm2m_init_buzzer(void)
 	lwm2m_engine_register_post_write_callback(
 			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, LEVEL_RID),
 			buzzer_intensity_cb);
-	// lwm2m_engine_register_post_write_callback(
-	// 		LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, DIGITAL_INPUT_STATE_RID)"3338/0/7001",
-	// 					  buzzer_frequency_cb);
 	lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, APPLICATION_TYPE_RID),
 			BUZZER_APP_TYPE, sizeof(BUZZER_APP_TYPE),

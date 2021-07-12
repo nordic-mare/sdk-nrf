@@ -32,7 +32,6 @@ static float32_value_t press_float;
 static float32_value_t humid_float;
 static float32_value_t gas_res_float;	
 
-
 static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
@@ -111,7 +110,7 @@ int lwm2m_init_env_sensor(void)
 			LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_UNITS_RID), 
 			TEMP_UNIT, sizeof(TEMP_UNIT), LWM2M_RES_DATA_FLAG_RO);
 
-    lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0));
+	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0));
 	lwm2m_engine_register_read_callback(
 			LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID), pressure_read_cb);
 	lwm2m_engine_set_res_data(
@@ -121,7 +120,7 @@ int lwm2m_init_env_sensor(void)
 			LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_UNITS_RID), 
 			PRESS_UNIT, sizeof(PRESS_UNIT), LWM2M_RES_DATA_FLAG_RO);
 	
-    lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0));
+	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0));
 	lwm2m_engine_register_read_callback(
 			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID), humidity_read_cb);
 	lwm2m_engine_set_res_data(
@@ -142,18 +141,17 @@ int lwm2m_init_env_sensor(void)
 			GAS_RES_UNIT, sizeof(GAS_RES_UNIT), LWM2M_RES_DATA_FLAG_RO);
 	lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, APPLICATION_TYPE_RID),
-            GENERIC_SENSOR_APP_TYPE, sizeof(GENERIC_SENSOR_APP_TYPE), LWM2M_RES_DATA_FLAG_RO);
+			GENERIC_SENSOR_APP_TYPE, sizeof(GENERIC_SENSOR_APP_TYPE), LWM2M_RES_DATA_FLAG_RO);
 	lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_TYPE_RID),
 			GENERIC_SENSOR_TYPE, sizeof(GENERIC_SENSOR_TYPE), LWM2M_RES_DATA_FLAG_RO);
 	return 0;
 }
 
-
 static bool event_handler(const struct event_header *eh)
 {
-    if (is_sensor_event(eh)) {
-        struct sensor_event *event = cast_sensor_event(eh);
+	if (is_sensor_event(eh)) {
+		struct sensor_event *event = cast_sensor_event(eh);
 		float32_value_t measurement_val = {
 			.val1 = event->float_val1,
 			.val2 = event->float_val2
@@ -202,9 +200,9 @@ static bool event_handler(const struct event_header *eh)
 		} 
 
 		return true;
-    } 
+	} 
 
-    return false;
+	return false;
 }
 
 EVENT_LISTENER(MODULE, event_handler);

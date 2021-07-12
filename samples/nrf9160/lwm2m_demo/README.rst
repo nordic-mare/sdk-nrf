@@ -2,8 +2,8 @@ nRF9160: LwM2M Demo
 #####################
 
 .. contents::
-   :local:
-   :depth: 2
+	 :local:
+	 :depth: 2
 
 The LwM2M Demo demonstrates usage of the Lightweight Machine to Machine (LwM2M) protocol to send info to an LwM2M server via LTE.
 Once connected, the device can be queried to obtain GPS and sensor data, and to retrieve information about the modem.
@@ -26,22 +26,22 @@ The Thingy:91 sends data such as button and switch states, accelerometer data, t
 It can also receive activation commands such as buzzer activation and light control.
 
 .. list-table::
-   :align: center
+	 :align: center
 
-   * - Button states
-     - DOWN/UP
-   * - Switch states
-     - ON/OFF
-   * - Accelerometer data
-     - FLIP
-   * - Temperature
-     - TEMP
-   * - GPS coordinates
-     - GPS
-   * - Buzzer
-     - TRIGGER
-   * - Light control
-     - ON/OFF
+	 * - Button states
+		 - DOWN/UP
+	 * - Switch states
+		 - ON/OFF
+	 * - Accelerometer data
+		 - FLIP
+	 * - Temperature
+		 - TEMP
+	 * - GPS coordinates
+		 - GPS
+	 * - Buzzer
+		 - TRIGGER
+	 * - Light control
+		 - ON/OFF
 
 .. _dtls_support:
 
@@ -62,10 +62,10 @@ The following instructions describe how to register your device and these instru
 #. Click on "Add new client security configuration".
 #. Enter the following data and click "Create":
 
-    * Client endpoint - nrf-{your Device IMEI}
-    * Security mode - Pre-Shared Key
-    * Identity: - nrf-{your Device IMEI}
-    * Key - 000102030405060708090a0b0c0d0e0f
+		* Client endpoint - nrf-{your Device IMEI}
+		* Security mode - Pre-Shared Key
+		* Identity: - nrf-{your Device IMEI}
+		* Key - 000102030405060708090a0b0c0d0e0f
 
 #. Build and run the LwM2M Demo.
 
@@ -79,8 +79,8 @@ Check and configure the following configuration options for the sample:
 
 .. option:: CONFIG_APP_LWM2M_SERVER - LWM2M Server configuration
 
-   This configuration specifies the LWM2M Server to be used.
-   In this sample, you can set this option to ``leshan.eclipseprojects.io`` (`public Leshan Demo Server`_).
+	 This configuration specifies the LWM2M Server to be used.
+	 In this sample, you can set this option to ``leshan.eclipseprojects.io`` (`public Leshan Demo Server`_).
 
 Configuration files
 ===================
@@ -115,15 +115,15 @@ The following instructions describe how to register your device and these instru
 #. Enter the client endpoint - nrf-{your device IMEI}
 #. In the ``LWM2M Bootstrap Server`` tab, enter the following data:
 
-    * Security mode - Pre-Shared Key
-    * Identity - nrf-{your device IMEI}
-    * Key - 000102030405060708090a0b0c0d0e0f
+		* Security mode - Pre-Shared Key
+		* Identity - nrf-{your device IMEI}
+		* Key - 000102030405060708090a0b0c0d0e0f
 
 #. In the ``LWM2M Server`` section, choose the desired configuration (``No security`` or ``Pre-Shared Key``).
-   If you choose ``Pre-Shared Key``, add the values for ``Identity`` and ``Key`` fields (the configured Identity/Key need not match the Bootstrap Server configuration).
-   The same credentials will be provided in the Leshan Demo Server Security configuration page.
-   If ``No Security`` is chosen, no further configuration is needed.
-   Note that in this mode, no DTLS will be used for the communication with the LwM2M server.
+	 If you choose ``Pre-Shared Key``, add the values for ``Identity`` and ``Key`` fields (the configured Identity/Key need not match the Bootstrap Server configuration).
+	 The same credentials will be provided in the Leshan Demo Server Security configuration page.
+	 If ``No Security`` is chosen, no further configuration is needed.
+	 Note that in this mode, no DTLS will be used for the communication with the LwM2M server.
 #. After adding values for the fields under both the ``LWM2M Bootstrap Server`` and ``LWM2M Server`` tabs, click ``Create``.
 #. Build and run the LwM2M Demo.
 

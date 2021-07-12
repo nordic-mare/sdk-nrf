@@ -59,13 +59,12 @@ static struct lwm2m_ctx client;
 static struct k_sem lwm2m_restart;
 
 static void rd_client_event(struct lwm2m_ctx *client,
-			    enum lwm2m_rd_client_event client_event);
+				enum lwm2m_rd_client_event client_event);
 
 void client_acknowledge(void)
 {
 	lwm2m_acknowledge(&client);
 }
-
 
 static int remove_whitespace(char *buf)
 {
@@ -301,7 +300,7 @@ static void provision_credentials(void)
 }
 
 static void rd_client_event(struct lwm2m_ctx *client,
-			    enum lwm2m_rd_client_event client_event)
+				enum lwm2m_rd_client_event client_event)
 {
 	switch (client_event) {
 
@@ -395,7 +394,7 @@ static void modem_connect(void)
 void main(void)
 {
 	uint32_t flags = IS_ENABLED(CONFIG_LWM2M_RD_CLIENT_SUPPORT_BOOTSTRAP) ?
-				    LWM2M_RD_CLIENT_FLAG_BOOTSTRAP : 0;
+					LWM2M_RD_CLIENT_FLAG_BOOTSTRAP : 0;
 	int ret;
 
 	LOG_INF(APP_BANNER);
@@ -434,10 +433,10 @@ void main(void)
 		return;
 	}
 	ret = lte_lc_edrx_req(true);
-    if (ret) {
+	if (ret) {
 		LOG_ERR("Error requesting Extended Discontinuous Reception (eDRX): %d", ret);
 		return;
-    }
+	}
 
 	/* query IMEI */
 	query_modem("AT+CGSN", imei_buf, sizeof(imei_buf));
@@ -496,7 +495,7 @@ void main(void)
 
 	while (true) {
 		lwm2m_rd_client_start(&client, endpoint_name, flags,
-				      rd_client_event);
+					  rd_client_event);
 
 		k_sem_take(&lwm2m_restart, K_FOREVER);
 

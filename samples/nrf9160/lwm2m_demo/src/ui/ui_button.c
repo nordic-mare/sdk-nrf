@@ -14,24 +14,6 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_UI_LOG_LEVEL);
 
-
-static void dk_button_event_handler(uint32_t button_states, uint32_t has_changed);
-
-
-int ui_button_init(void)
-{
-	int ret;
-
-	ret = dk_buttons_init(dk_button_event_handler);
-	if (ret) {
-		LOG_ERR("Error %d: could not initialize buttons", ret);
-		return ret;
-	}
-
-	return 0;
-}
-
-
 /**@brief Callback for button events from the DK buttons and LEDs library. */
 static void dk_button_event_handler(uint32_t button_states, uint32_t has_changed)
 {
@@ -58,4 +40,17 @@ static void dk_button_event_handler(uint32_t button_states, uint32_t has_changed
 
 		EVENT_SUBMIT(event);
 	}
+}
+
+int ui_button_init(void)
+{
+	int ret;
+
+	ret = dk_buttons_init(dk_button_event_handler);
+	if (ret) {
+		LOG_ERR("Error %d: could not initialize buttons", ret);
+		return ret;
+	}
+
+	return 0;
 }

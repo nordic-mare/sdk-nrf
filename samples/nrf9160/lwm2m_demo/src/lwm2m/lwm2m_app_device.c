@@ -31,7 +31,7 @@ static uint8_t bat_status = LWM2M_DEVICE_BATTERY_STATUS_CHARGING;
 static int mem_total = (CLIENT_FLASH_SIZE / 1024);
 
 static int device_factory_default_cb(uint16_t obj_inst_id, uint8_t *args,
-				     uint16_t args_len)
+					 uint16_t args_len)
 {
 	ARG_UNUSED(args);
 	ARG_UNUSED(args_len);

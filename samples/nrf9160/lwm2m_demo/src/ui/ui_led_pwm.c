@@ -29,83 +29,75 @@ static uint8_t green_val;
 static uint8_t blue_val;
 static bool is_on;
 
-
-static uint32_t calculate_pulse_width(uint8_t colour_val);
-
+static uint32_t calculate_pulse_width(uint8_t colour_val)
+{
+	return PERIOD_USEC * is_on * colour_val * current_dutycycle 
+			/ (COLOUR_RESOLUTION * DUTYCYCLE_RESOLUTION);
+}
 
 int ui_led_pwm_on_off(bool new_state)
 {
-    int ret;
-    uint32_t pulse_width_red, pulse_width_green, pulse_width_blue;
+	int ret;
+	uint32_t pulse_width_red, pulse_width_green, pulse_width_blue;
 
-    is_on = new_state;
+	is_on = new_state;
 
-    pulse_width_red = calculate_pulse_width(red_val);
-    pulse_width_green = calculate_pulse_width(green_val);
-    pulse_width_blue = calculate_pulse_width(blue_val);
+	pulse_width_red = calculate_pulse_width(red_val);
+	pulse_width_green = calculate_pulse_width(green_val);
+	pulse_width_blue = calculate_pulse_width(blue_val);
 
-    ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(0), PERIOD_USEC, pulse_width_red, LED_PWM_FLAGS);
-    if (ret != 0) {
-        LOG_ERR("Error %d: set red pin failed", ret);
-        return ret;
-    }
-    ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(1), PERIOD_USEC, pulse_width_green, LED_PWM_FLAGS);
-    if (ret != 0) {
-        LOG_ERR("Error %d: set green pin failed", ret);
-        return ret;
-    }
-    ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(2), PERIOD_USEC, pulse_width_blue, LED_PWM_FLAGS);
-    if (ret != 0) {
-        LOG_ERR("Error %d: set blue pin failed", ret);
-        return ret;
-    }
+	ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(0), PERIOD_USEC, pulse_width_red, LED_PWM_FLAGS);
+	if (ret != 0) {
+		LOG_ERR("Error %d: set red pin failed", ret);
+		return ret;
+	}
+	ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(1), PERIOD_USEC, pulse_width_green, LED_PWM_FLAGS);
+	if (ret != 0) {
+		LOG_ERR("Error %d: set green pin failed", ret);
+		return ret;
+	}
+	ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(2), PERIOD_USEC, pulse_width_blue, LED_PWM_FLAGS);
+	if (ret != 0) {
+		LOG_ERR("Error %d: set blue pin failed", ret);
+		return ret;
+	}
 
-    return 0;
+	return 0;
 }
-
 
 int ui_led_pwm_set_colour(uint32_t colour_values)
 {
-    red_val = (uint8_t)(colour_values >> 16);
-    green_val = (uint8_t)(colour_values >> 8);
-    blue_val = (uint8_t)colour_values;
+	red_val = (uint8_t)(colour_values >> 16);
+	green_val = (uint8_t)(colour_values >> 8);
+	blue_val = (uint8_t)colour_values;
 
-    if (!is_on) {
-        return 0;
-    }
+	if (!is_on) {
+		return 0;
+	}
 
-    return ui_led_pwm_on_off(true);
+	return ui_led_pwm_on_off(true);
 }
-
 
 int ui_led_pwm_set_dutycycle(uint8_t dutycycle)
 {
-    current_dutycycle = dutycycle;
+	current_dutycycle = dutycycle;
 
-    if (!is_on) {
-        return 0;
-    }
+	if (!is_on) {
+		return 0;
+	}
 
-    return ui_led_pwm_on_off(is_on);
+	return ui_led_pwm_on_off(is_on);
 }
-
 
 int ui_led_pwm_init(void)
 {
 	led_pwm_dev = device_get_binding(LED_PWM_NAME);
-    if (!led_pwm_dev) {
+	if (!led_pwm_dev) {
 		LOG_ERR("Error %d: could not bind to LED PWM device", -ENODEV);
 		return -ENODEV;
 	}
 
-    current_dutycycle = 100;
+	current_dutycycle = 100;
 
-    return 0;
-}
-
-
-static uint32_t calculate_pulse_width(uint8_t colour_val)
-{
-    return PERIOD_USEC * is_on * colour_val * current_dutycycle 
-            / (COLOUR_RESOLUTION * DUTYCYCLE_RESOLUTION);
+	return 0;
 }

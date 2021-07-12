@@ -21,7 +21,6 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
 static uint64_t counter = 0;
 
-
 int lwm2m_init_button(void)
 {
 	ui_button_init();
@@ -40,7 +39,6 @@ int lwm2m_init_button(void)
 
 	return 0;
 }
-
 
 static bool event_handler(const struct event_header *eh)
 {
@@ -74,7 +72,6 @@ static bool event_handler(const struct event_header *eh)
 
 	return false;
 }
-
 
 EVENT_LISTENER(MODULE, event_handler);
 EVENT_SUBSCRIBE(MODULE, button_event);

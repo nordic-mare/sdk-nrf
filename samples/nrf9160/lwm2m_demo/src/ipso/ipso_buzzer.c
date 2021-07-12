@@ -24,7 +24,6 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 
 #define BUZZER_VERSION_MAJOR 1
 
-
 #if defined(CONFIG_LWM2M_IPSO_BUZZER_VERSION_1_1)
 #define BUZZER_VERSION_MINOR 1
 #define BUZZER_MAX_ID 8
@@ -155,9 +154,9 @@ static int stop_buzzer(struct ipso_buzzer_data *buzzer, bool cancel)
 }
 
 static int onoff_post_write_cb(uint16_t obj_inst_id,
-			       uint16_t res_id, uint16_t res_inst_id,
-			       uint8_t *data, uint16_t data_len,
-			       bool last_block, size_t total_size)
+				   uint16_t res_id, uint16_t res_inst_id,
+				   uint8_t *data, uint16_t data_len,
+				   bool last_block, size_t total_size)
 {
 	int i;
 
@@ -178,8 +177,8 @@ static int onoff_post_write_cb(uint16_t obj_inst_id,
 static void buzzer_work_cb(struct k_work *work)
 {
 	struct ipso_buzzer_data *buzzer = CONTAINER_OF(work,
-						      struct ipso_buzzer_data,
-						      buzzer_work);
+							  struct ipso_buzzer_data,
+							  buzzer_work);
 	stop_buzzer(buzzer, false);
 }
 
@@ -215,14 +214,14 @@ static struct lwm2m_engine_obj_inst *buzzer_create(uint16_t obj_inst_id)
 	buzzer_data[avail].obj_inst_id = obj_inst_id;
 
 	(void)memset(res[avail], 0,
-		     sizeof(res[avail][0]) * ARRAY_SIZE(res[avail]));
+			 sizeof(res[avail][0]) * ARRAY_SIZE(res[avail]));
 	init_res_instance(res_inst[avail], ARRAY_SIZE(res_inst[avail]));
 
 	/* initialize instance resource data */
 	INIT_OBJ_RES(ON_OFF_RID, res[avail], i, res_inst[avail], j, 1, false,
-		     true, &buzzer_data[avail].onoff,
-		     sizeof(buzzer_data[avail].onoff),
-		     NULL, NULL, NULL, onoff_post_write_cb, NULL);
+			 true, &buzzer_data[avail].onoff,
+			 sizeof(buzzer_data[avail].onoff),
+			 NULL, NULL, NULL, onoff_post_write_cb, NULL);
 	INIT_OBJ_RES_DATA(LEVEL_RID, res[avail], i, res_inst[avail], j,
 			  &buzzer_data[avail].level,
 			  sizeof(buzzer_data[avail].level));
@@ -233,14 +232,14 @@ static struct lwm2m_engine_obj_inst *buzzer_create(uint16_t obj_inst_id)
 			  j, &buzzer_data[avail].min_off_time,
 			  sizeof(buzzer_data[avail].min_off_time));
 	INIT_OBJ_RES_OPTDATA(APPLICATION_TYPE_RID, res[avail], i,
-			     res_inst[avail], j);
+				 res_inst[avail], j);
 	INIT_OBJ_RES_DATA(DIGITAL_INPUT_STATE_RID, res[avail], i,
 			  res_inst[avail], j, &buzzer_data[avail].active,
 			  sizeof(buzzer_data[avail].active));
 #if defined(CONFIG_LWM2M_IPSO_BUZZER_VERSION_1_1)
 	INIT_OBJ_RES_OPTDATA(TIMESTAMP_RID, res[avail], i, res_inst[avail], j);
 	INIT_OBJ_RES_OPTDATA(FRACTIONAL_TIMESTAMP_RID, res[avail], i,
-			     res_inst[avail], j);
+				 res_inst[avail], j);
 #endif
 
 

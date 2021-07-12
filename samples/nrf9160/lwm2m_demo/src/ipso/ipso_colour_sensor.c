@@ -40,8 +40,8 @@ static char app_type[MAX_INSTANCE_COUNT][APP_TYPE_STR_MAX_SIZE];
 
 static struct lwm2m_engine_obj sensor;
 static struct lwm2m_engine_obj_field fields[] = {
-    OBJ_FIELD_DATA(COLOUR_RID, R, STRING),
-    OBJ_FIELD_DATA(SENSOR_UNITS_RID, R_OPT, STRING),
+	OBJ_FIELD_DATA(COLOUR_RID, R, STRING),
+	OBJ_FIELD_DATA(SENSOR_UNITS_RID, R_OPT, STRING),
 	OBJ_FIELD_DATA(APPLICATION_TYPE_RID, RW_OPT, STRING),
 #ifdef CONFIG_LWM2M_IPSO_COLOUR_SENSOR_VERSION_1_1
 	OBJ_FIELD_DATA(TIMESTAMP_RID, R_OPT, TIME),
@@ -55,7 +55,6 @@ static struct lwm2m_engine_obj_inst inst[MAX_INSTANCE_COUNT];
 static struct lwm2m_engine_res res[MAX_INSTANCE_COUNT][NUMBER_OF_OBJECT_FIELDS];
 static struct lwm2m_engine_res_inst
 		res_inst[MAX_INSTANCE_COUNT][RESOURCE_INSTANCE_COUNT];
-
 
 static struct lwm2m_engine_obj_inst *colour_sensor_create(uint16_t obj_inst_id)
 {
@@ -88,14 +87,14 @@ static struct lwm2m_engine_obj_inst *colour_sensor_create(uint16_t obj_inst_id)
 	app_type[index][0] = '\0';
 
 	(void)memset(res[index], 0,
-		     sizeof(res[index][0]) * ARRAY_SIZE(res[index]));
+			 sizeof(res[index][0]) * ARRAY_SIZE(res[index]));
 	init_res_instance(res_inst[index], ARRAY_SIZE(res_inst[index]));
 
 	/* initialize instance resource data */
 	INIT_OBJ_RES(COLOUR_RID, res[index], i,
-		    res_inst[index], j, 1, false, true,
-		    &colour[index], sizeof(*colour),
-		    NULL, NULL, NULL, NULL, NULL);
+			res_inst[index], j, 1, false, true,
+			&colour[index], sizeof(*colour),
+			NULL, NULL, NULL, NULL, NULL);
 	INIT_OBJ_RES_DATA(SENSOR_UNITS_RID, res[index], i, res_inst[index], j,
 			units[index], UNIT_STR_MAX_SIZE);
 	INIT_OBJ_RES_DATA(APPLICATION_TYPE_RID, res[index], i, res_inst[index],
@@ -103,11 +102,11 @@ static struct lwm2m_engine_obj_inst *colour_sensor_create(uint16_t obj_inst_id)
 #ifdef CONFIG_LWM2M_IPSO_COLOUR_SENSOR_VERSION_1_1
 	INIT_OBJ_RES_OPTDATA(TIMESTAMP_RID, res[index], i, res_inst[index], j);
 	INIT_OBJ_RES_OPTDATA(FRACTIONAL_TIMESTAMP_RID, res[index], i,
-			     res_inst[index], j);
+				 res_inst[index], j);
 	INIT_OBJ_RES_OPTDATA(MEASUREMENT_QUALITY_INDICATOR_RID, res[index],
-			     i, res_inst[index], j);
+				 i, res_inst[index], j);
 	INIT_OBJ_RES_OPTDATA(MEASUREMENT_QUALITY_LEVEL_RID, res[index], i,
-			     res_inst[index], j);
+				 res_inst[index], j);
 #endif
 
 	inst[index].resources = res[index];
@@ -115,7 +114,6 @@ static struct lwm2m_engine_obj_inst *colour_sensor_create(uint16_t obj_inst_id)
 	LOG_DBG("Created IPSO %s Sensor instance: %d", SENSOR_NAME,
 		obj_inst_id);
 	return &inst[index];
-    
 }
 
 static int ipso_colour_sensor_init()

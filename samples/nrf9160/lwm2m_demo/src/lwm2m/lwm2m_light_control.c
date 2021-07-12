@@ -22,7 +22,6 @@ LOG_MODULE_REGISTER(app_lwm2m_light_control, CONFIG_APP_LOG_LEVEL);
 
 static bool led_state;
 
-
 static int lc_on_off_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			uint8_t *data, uint16_t data_len, bool last_block, size_t total_size)
 {
@@ -52,7 +51,6 @@ static int lc_on_off_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 	return 0;
 }
 
-
 static int lc_colour_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			uint8_t *data, uint16_t data_len, bool last_block, size_t total_size)
 {
@@ -72,7 +70,6 @@ static int lc_colour_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 	return 0;
 }
 
-
 static int lc_dimmer_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			uint8_t *data, uint16_t data_len,
 			bool last_block, size_t total_size)
@@ -90,7 +87,6 @@ static int lc_dimmer_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 
 	return 0;
 }
-
 
 int lwm2m_init_light_control(void)
 {

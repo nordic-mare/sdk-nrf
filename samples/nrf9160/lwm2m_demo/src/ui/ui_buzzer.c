@@ -26,7 +26,6 @@ static bool state;
 static uint32_t frequency;
 static uint8_t dutycycle;
 
-
 int ui_buzzer_on_off(bool new_state)
 {
 	int ret;
@@ -56,7 +55,6 @@ int ui_buzzer_on_off(bool new_state)
 	return 0;
 }
 
-
 int ui_buzzer_set_frequency(uint32_t freq)
 {
 	int ret;
@@ -78,7 +76,6 @@ int ui_buzzer_set_frequency(uint32_t freq)
 	
 	return 0;
 }
-
 
 int ui_buzzer_set_dutycycle(uint8_t duty)
 {
@@ -102,13 +99,11 @@ int ui_buzzer_set_dutycycle(uint8_t duty)
 	return 0;
 }
 
-
-
 int ui_buzzer_init(void)
 {
 	buzzer_pwm_dev = device_get_binding(BUZZER_PWM_NAME);
 	if (!buzzer_pwm_dev) {
-        LOG_ERR("Error %d: could not bind to LED GPIO device", -ENODEV);
+		LOG_ERR("Error %d: could not bind to LED GPIO device", -ENODEV);
 		return -ENODEV;
 	}
 
@@ -117,7 +112,6 @@ int ui_buzzer_init(void)
 
 	return 0;
 }
-
 
 // Kept temporarily for inspiration. Safe to remove
 static int pwm_out(uint32_t frequency, uint8_t intensity)

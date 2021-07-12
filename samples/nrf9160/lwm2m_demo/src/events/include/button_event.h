@@ -5,10 +5,10 @@
 #include <event_manager.h>
 
 struct button_event {
-    struct event_header header;
+	struct event_header header;
 
-    uint8_t button_number;
-    uint8_t button_state;
+	uint8_t button_number;
+	uint8_t button_state;
 };
 
 EVENT_TYPE_DECLARE(button_event);
