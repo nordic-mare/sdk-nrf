@@ -1,4 +1,5 @@
 #include <zephyr.h>
+#include <drivers/sensor.h>
 #include <math.h>
 
 #include "sensor_event.h"
@@ -41,16 +42,16 @@ static bool float32_sufficient_diff(uint32_t diff_val1, uint32_t diff_val2,
 
 static void temp_work_cb(struct k_work *work) 
 {
-	int32_t temp_val1, temp_val2; 
+	struct sensor_value temp_val;
 	int32_t old_temp_val1 = 0; 
 	int32_t old_temp_val2 = 0;
 
-	env_sensor_read_temp(&temp_val1, &temp_val2);
+	env_sensor_read_temp(&temp_val);
 
-	LOG_DBG("Temperature work: %d.%d", temp_val1, temp_val2);
+	LOG_DBG("Temperature work: %d.%d", temp_val.val1, temp_val.val2);
 
-	uint32_t diff1 = fabs(temp_val1 - old_temp_val1);
-	uint32_t diff2 = fabs(temp_val2 - old_temp_val2);
+	uint32_t diff1 = fabs(temp_val.val1 - old_temp_val1);
+	uint32_t diff2 = fabs(temp_val.val2 - old_temp_val2);
 
 	if (float32_sufficient_diff(diff1, diff2, TEMP_DELTA_VAL1, TEMP_DELTA_VAL2)) {
 		LOG_DBG("CREATE TEMP EVENT");
@@ -69,7 +70,7 @@ int sensor_module_init(void)
 {
 	k_work_init_delayable(&temp_work, temp_work_cb);
 
-	k_work_schedule(&temp_work, K_NO_WAIT);
+	//k_work_schedule(&temp_work, K_NO_WAIT);
 
 	return 0;
 } 

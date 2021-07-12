@@ -30,23 +30,24 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define COLOUR_SENSOR_APP_NAME  "Colour sensor"
 #define LIGHT_UNIT              "RGB-IR"
 
+static struct sensor_value light_value;
 static char light_value_str[RGBIR_STR_LENGTH] = "Unread";
+static struct sensor_value colour_value;
 static char colour_value_str[RGBIR_STR_LENGTH] = "Unread";
 
 static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len) 
 {
 	int ret;
-	uint32_t light_measurement;
-
-	ret = light_sensor_read(&light_measurement);
+	
+	ret = light_sensor_read(&light_value);
 	if (ret) {
 		LOG_ERR("Error %d: read light sensor failed", ret);
 		return NULL;
 	}
 
 	snprintf(light_value_str, RGBIR_STR_LENGTH,    
-				"0x%08X", light_measurement);
+				"0x%08X", light_value.val1);
 
 	return &light_value_str;
 }
@@ -55,16 +56,15 @@ static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16
 			  size_t *data_len)
 {
 	int ret;
-	uint32_t colour_measurement;
 
-	ret = colour_sensor_read(&colour_measurement);
+	ret = colour_sensor_read(&colour_value);
 	if (ret) {
 		LOG_ERR("Error %d: read colour sensor failed", ret);
 		return NULL;
 	}
 
 	snprintf(colour_value_str, RGBIR_STR_LENGTH,
-				"0x%08X", colour_measurement);
+				"0x%08X", colour_value.val1);
 
 	return &colour_value_str;
 }
@@ -118,30 +118,28 @@ static bool event_handler(const struct event_header *eh)
 {
 	if (is_sensor_event(eh)) {
 		struct sensor_event *event = cast_sensor_event(eh);
-		char measurement_value_str[RGBIR_STR_LENGTH];
-
-		
 
 		switch (event->type)
 		{
 		case LightSensor:
-			snprintf(measurement_value_str, RGBIR_STR_LENGTH,
-					"0x%08X", event->unsigned_val);
-			LOG_DBG("Light sensor event received! Val: %s", measurement_value_str);
+			snprintf(light_value_str, RGBIR_STR_LENGTH,    
+				"0x%08X", event->value.val1);
+			LOG_DBG("Light sensor event received! Val: %s", light_value_str);
 
 			lwm2m_engine_set_string(
 				LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, LIGHT_OBJ_INSTANCE, COLOUR_RID),
-				measurement_value_str);
+				light_value_str);
 			break;
 		
 		case ColourSensor:
-			snprintf(measurement_value_str, RGBIR_STR_LENGTH,
-					"0x%08X", event->unsigned_val);
-			LOG_DBG("Colour sensor event received! Val: %s", measurement_value_str);
+			snprintf(colour_value_str, RGBIR_STR_LENGTH,
+				"0x%08X", event->value.val1);
+
+			LOG_DBG("Colour sensor event received! Val: %s", colour_value_str);
 
 			lwm2m_engine_set_string(
 				LWM2M_PATH(IPSO_COLOUR_OBJECT_ID, COLOUR_OBJ_INSTANCE, COLOUR_RID),
-				measurement_value_str);
+				colour_value_str);
 			break;
 
 		default:

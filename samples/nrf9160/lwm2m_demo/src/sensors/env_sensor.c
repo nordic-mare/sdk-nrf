@@ -13,9 +13,8 @@ LOG_MODULE_REGISTER(env_sensor, CONFIG_APP_LOG_LEVEL);
 #define GAS_RES_UNIT 	"Ohm"
 
 static const struct device *env_sensor_dev;
-static struct sensor_value env_sensor_val;
 
-static int read_sensor(enum sensor_channel channel)
+static int read_sensor(struct sensor_value *value, enum sensor_channel channel)
 {
 	int ret;
 
@@ -25,7 +24,7 @@ static int read_sensor(enum sensor_channel channel)
 		return ret;
 	}
 
-	ret = sensor_channel_get(env_sensor_dev, channel, &env_sensor_val);
+	ret = sensor_channel_get(env_sensor_dev, channel, value);
 	if (ret) {
 		LOG_ERR("Error %d: get channel failed", ret);
 		return ret;
@@ -34,78 +33,66 @@ static int read_sensor(enum sensor_channel channel)
 	return 0;
 }
 
-int env_sensor_read_temp(int32_t *temp_float_val1, int32_t *temp_float_val2)
+int env_sensor_read_temp(struct sensor_value *temp_val)
 {
 	int ret;
 
-	ret = read_sensor(SENSOR_CHAN_AMBIENT_TEMP);
+	ret = read_sensor(temp_val, SENSOR_CHAN_AMBIENT_TEMP);
 	if (ret) {
 		LOG_ERR("Error %d: read temperatur sensor failed", ret);
 		return ret;
 	}
 
 	LOG_DBG("%s: read %d.%d %s", env_sensor_dev->name, 
-			env_sensor_val.val1, env_sensor_val.val2, TEMP_UNIT);
-
-	*temp_float_val1 = env_sensor_val.val1;
-	*temp_float_val2 = env_sensor_val.val2;
+			temp_val->val1, temp_val->val2, TEMP_UNIT);
 
 	return 0;
 }
 
-int env_sensor_read_pressure(int32_t *press_float_val1, int32_t *press_float_val2)
+int env_sensor_read_pressure(struct sensor_value *press_value)
 {
 	int ret;
 
-	ret = read_sensor(SENSOR_CHAN_PRESS);
+	ret = read_sensor(press_value, SENSOR_CHAN_PRESS);
 	if (ret) {
 		LOG_ERR("Error %d: read pressure sensor failed", ret);
 		return ret;
 	}
 
 	LOG_DBG("%s: read %d.%d %s", env_sensor_dev->name, 
-			env_sensor_val.val1, env_sensor_val.val2, PRESS_UNIT);
-
-	*press_float_val1 = env_sensor_val.val1;
-	*press_float_val2 = env_sensor_val.val2;
+			press_value->val1, press_value->val2, PRESS_UNIT);
 
 	return 0;
 }
 
-int env_sensor_read_humidity(int32_t *humid_float_val1, int32_t *humid_float_val2)
+int env_sensor_read_humidity(struct sensor_value *humid_val)
 {
 	int ret;
 
-	ret = read_sensor(SENSOR_CHAN_HUMIDITY);
+	ret = read_sensor(humid_val, SENSOR_CHAN_HUMIDITY);
 	if (ret) {
 		LOG_ERR("Error %d: read humidity sensor failed", ret);
 		return ret;
 	}
 
 	LOG_DBG("%s: read %d.%d %s", env_sensor_dev->name, 
-			env_sensor_val.val1, env_sensor_val.val2, HUMID_UNIT);
-
-	*humid_float_val1 = env_sensor_val.val1;
-	*humid_float_val2 = env_sensor_val.val2;
+			humid_val->val1, humid_val->val2, HUMID_UNIT);
 
 	return 0;
 }
 
-int env_sensor_read_gas_resistance(int32_t *gas_res_float_val1, int32_t *gas_res_float_val2)
+int env_sensor_read_gas_resistance(struct sensor_value *gas_res_val)
 {
 	int ret;
 
-	ret = read_sensor(SENSOR_CHAN_GAS_RES);
+	ret = read_sensor(gas_res_val, SENSOR_CHAN_GAS_RES);
 	if (ret) {
 		LOG_ERR("Error %d: read gas resistance sensor failed", ret);
 		return ret;
 	}
 
 	LOG_DBG("%s: read %d.%d %s", env_sensor_dev->name, 
-			env_sensor_val.val1, env_sensor_val.val2, GAS_RES_UNIT);
-
-	*gas_res_float_val1 = env_sensor_val.val1;
-	*gas_res_float_val2 = env_sensor_val.val2;
+			gas_res_val->val1, gas_res_val->val2, GAS_RES_UNIT);
 
 	return 0;
 }

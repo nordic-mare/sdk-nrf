@@ -35,10 +35,9 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
 static const struct device *light_sensor_dev;
 
-static int sensor_read(uint32_t measurement_values[])
+static int sensor_read(struct sensor_value channel_values[])
 {
 	int ret;
-	struct sensor_value sensor_val;
 
 	ret = sensor_sample_fetch_chan(light_sensor_dev, SENSOR_CHAN_ALL);
 	if (ret) {
@@ -46,43 +45,38 @@ static int sensor_read(uint32_t measurement_values[])
 		return ret;
 	}
 
-	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_RED, &sensor_val);
+	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_RED, &channel_values[0]);
 	if (ret) {
 		LOG_ERR("Error %d: get red channel failed", ret);
 		return ret;
 	}
-	measurement_values[0] = (uint32_t)sensor_val.val1;
-	LOG_DBG("Light sensor raw red value: %i", sensor_val.val1);
+	LOG_DBG("Light sensor raw red value: %i", channel_values[0].val1);
 
-	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_GREEN, &sensor_val);
+	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_GREEN, &channel_values[1]);
 	if (ret) {
 		LOG_ERR("Error %d: get green channel failed", ret);
 		return ret;
 	}
-	measurement_values[1] = (uint32_t)sensor_val.val1;
-	LOG_DBG("Light sensor raw green value: %i", sensor_val.val1);
+	LOG_DBG("Light sensor raw green value: %i", channel_values[1].val1);
 
-	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_BLUE, &sensor_val);
+	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_BLUE, &channel_values[2]);
 	if (ret) {
 		LOG_ERR("Error %d: get blue channel failed", ret);
 		return ret;
 	}
-	measurement_values[2] = (uint32_t)sensor_val.val1;
-	LOG_DBG("Light sensor raw blue value: %i", sensor_val.val1);
+	LOG_DBG("Light sensor raw blue value: %i", channel_values[2].val1);
 
-	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_IR, &sensor_val);
+	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_IR, &channel_values[3]);
 	if (ret) {
 		LOG_ERR("Error %d: get IR channel failed", ret);
 		return ret;
 	}
-	measurement_values[3] = (uint32_t)sensor_val.val1;
-	LOG_DBG("Light sensor raw IR value: %i", sensor_val.val1);
+	LOG_DBG("Light sensor raw IR value: %i", channel_values[3].val1);
 
 	return 0;
 }
 
 #ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE
-// TODO: Generate events when trigger fires
 static void trigger_handler(const struct device *dev, struct sensor_trigger *trigger) 
 {
 	ARG_UNUSED(dev);
@@ -93,6 +87,8 @@ static void trigger_handler(const struct device *dev, struct sensor_trigger *tri
 		int ret; 
 
 		LOG_DBG("Threshold trigger fired!");
+
+		// TODO: Generate sensor event
 
 		k_sleep(K_SECONDS(30));
 
@@ -110,6 +106,8 @@ static void trigger_handler(const struct device *dev, struct sensor_trigger *tri
 
 		LOG_DBG("Data ready trigger fired!");
 
+		// TODO: Generate sensor event
+
 		k_sleep(K_SECONDS(30));
 
 		ret = sensor_sample_fetch_chan(light_sensor_dev, SENSOR_CHAN_ALL);
@@ -125,38 +123,40 @@ static void trigger_handler(const struct device *dev, struct sensor_trigger *tri
 }
 #endif
 
-int light_sensor_read(uint32_t *measurement)
+int light_sensor_read(struct sensor_value *light_value)
 {
 	int ret;
-	uint32_t measurement_values[NUM_COLOURS];
+	struct sensor_value channel_values[NUM_COLOURS];
 
-	ret = sensor_read(measurement_values);
+	ret = sensor_read(channel_values);
 	if (ret) {
 		LOG_ERR("Error %d: read light sensor failed", ret);
 		return ret;
 	}
 
-	*measurement = 0;
+	light_value->val1 = 0;
+	light_value->val2 = 0;
+
 	for (int i = 0; i < 4; ++i) {
-		measurement_values[i] = SCALE_LIGHT_MEAS(measurement_values[i]);
-		LOG_DBG("Scaled value: %d", measurement_values[i]);
-		*measurement |= measurement_values[i] << (NUM_COLOURS - 1 - i)*NUM_BITS_PER_COLOUR;
+		channel_values[i].val1 = SCALE_LIGHT_MEAS(channel_values[i].val1);
+		LOG_DBG("Scaled value: %d", channel_values[i].val1);
+		light_value->val1 |= channel_values[i].val1 << (NUM_COLOURS - 1 - i)*NUM_BITS_PER_COLOUR;
 	}
 	
-	LOG_DBG("Light value: 0x%08X", *measurement);
+	LOG_DBG("Light value: 0x%08X", light_value->val1);
 
 	return 0;
 }
 
-int colour_sensor_read(uint32_t *measurement)
+int colour_sensor_read(struct sensor_value *colour_value)
 {
 	int ret;
-	uint32_t measurement_values[NUM_COLOURS];
+	struct sensor_value channel_values[NUM_COLOURS];
 
 	ui_sense_led_on_off(true);
 	k_sleep(K_MSEC(SENSE_LED_ON_TIME_MS));
 
-	ret = sensor_read(measurement_values);
+	ret = sensor_read(channel_values);
 	if (ret) {
 		LOG_ERR("Error %d: read colour sensor failed", ret);
 		return ret;
@@ -164,14 +164,16 @@ int colour_sensor_read(uint32_t *measurement)
 
 	ui_sense_led_on_off(false);
 
-	*measurement = 0;
+	colour_value->val1 = 0;
+	colour_value->val2 = 0;
+
 	for (int i = 0; i < NUM_COLOURS; ++i) {
-		measurement_values[i] = SCALE_COLOUR_MEAS(measurement_values[i]);
-		LOG_DBG("Scaled value: %d", measurement_values[i]);
-		*measurement |= measurement_values[i] << (NUM_COLOURS -1 - i)*NUM_BITS_PER_COLOUR;
+		channel_values[i].val1 = SCALE_COLOUR_MEAS(channel_values[i].val1);
+		LOG_DBG("Scaled value: %d", channel_values[i].val1);
+		colour_value->val1 |= channel_values[i].val1 << (NUM_COLOURS -1 - i)*NUM_BITS_PER_COLOUR;
 	}
 	
-	LOG_DBG("Light value: 0x%08X", *measurement);
+	LOG_DBG("Colour value: 0x%08X", colour_value->val1);
 	
 	return 0;
 }

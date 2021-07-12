@@ -2,11 +2,12 @@
 #define ENV_SENSOR_H__
 
 #include <zephyr.h>
+#include <drivers/sensor.h>
 
-int env_sensor_read_temp(int32_t *temp_float_val1, int32_t *temp_float_val2);
-int env_sensor_read_pressure(int32_t *press_float_val1, int32_t *press_float_val2);
-int env_sensor_read_humidity(int32_t *humid_float_val1, int32_t *humid_float_val2);
-int env_sensor_read_gas_resistance(int32_t *gas_res_float_val1, int32_t *gas_res_float_val2);
+int env_sensor_read_temp(struct sensor_value *temp_val);
+int env_sensor_read_pressure(struct sensor_value *press_val);
+int env_sensor_read_humidity(struct sensor_value *humid_val);
+int env_sensor_read_gas_resistance(struct sensor_value *gas_res_val);
 
 int env_sensor_init(void);
 

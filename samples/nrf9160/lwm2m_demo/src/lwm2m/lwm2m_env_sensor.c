@@ -36,12 +36,16 @@ static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_in
 			  size_t *data_len)
 {
 	int ret;
+	struct sensor_value temp_val;
 
-	ret = env_sensor_read_temp(&(temp_float.val1), &(temp_float.val2));
+	ret = env_sensor_read_temp(&temp_val);
 	if (ret) {
 		LOG_ERR("Error %d: read temperature sensor failed", ret);
 		return NULL;
 	}
+
+	temp_float.val1 = temp_val.val1;
+	temp_float.val2 = temp_val.val2;
 
 	*data_len = sizeof(temp_float);
 
@@ -52,12 +56,16 @@ static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 			  size_t *data_len)
 {
 	int ret;
+	struct sensor_value press_val;
 
-	ret = env_sensor_read_pressure(&(press_float.val1), &(press_float.val2));
+	ret = env_sensor_read_pressure(&press_val);
 	if (ret) {
 		LOG_ERR("Error %d: read pressure sensor failed", ret);
 		return NULL;
 	}
+
+	press_float.val1 = press_val.val1;
+	press_float.val2 = press_val.val2;
 
 	*data_len = sizeof(press_float);
 
@@ -68,12 +76,16 @@ static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 			  size_t *data_len)
 {
 	int ret;
+	struct sensor_value humid_val;
 
-	ret = env_sensor_read_humidity(&(humid_float.val1), &(humid_float.val2));
+	ret = env_sensor_read_humidity(&humid_val);
 	if (ret) {
 		LOG_ERR("Error %d: read humidity sensor failed", ret);
 		return NULL;
 	}
+
+	humid_float.val1 = humid_val.val1;
+	humid_float.val2 = humid_val.val2;
 
 	*data_len = sizeof(humid_float);
 
@@ -84,12 +96,16 @@ static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint1
 			  size_t *data_len)
 {
 	int ret;
+	struct sensor_value gas_res_val;
 	
-	ret = env_sensor_read_gas_resistance(&(gas_res_float.val1), &(gas_res_float.val2));
+	ret = env_sensor_read_gas_resistance(&gas_res_val);
 	if (ret) {
 		LOG_ERR("Error %d: read gas resistance sensor failed", ret);
 		return NULL;
 	}
+
+	gas_res_float.val1 = gas_res_val.val1;
+	gas_res_float.val2 = gas_res_val.val2;
 
 	*data_len = sizeof(gas_res_float);
 
@@ -152,47 +168,55 @@ static bool event_handler(const struct event_header *eh)
 {
 	if (is_sensor_event(eh)) {
 		struct sensor_event *event = cast_sensor_event(eh);
-		float32_value_t measurement_val = {
-			.val1 = event->float_val1,
-			.val2 = event->float_val2
-		};
 
 		switch (event->type)
 		{
 		case TemperatureSensor:
 			LOG_DBG("Temperature sensor event received! val1: 0x%08X, val2: 0x%08X", 
-					event->float_val1, event->float_val2);
+					event->value.val1, event->value.val2);
+
+			temp_float.val1 = event->value.val1;
+			temp_float.val2 = event->value.val2;
 
 			lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID),
-				&(measurement_val));
+				&temp_float);
 			break;
 
 		case PressureSensor:
 			LOG_DBG("Pressure sensor event received! val1: 0x%08X, val2: 0x%08X", 
-					event->float_val1, event->float_val2);
+					event->value.val1, event->value.val2);
+
+			press_float.val1 = event->value.val1;
+			press_float.val2 = event->value.val2;
 
 			lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID),
-				&(measurement_val));
+				&press_float);
 			break;
 
 		case HumiditySensor:
 			LOG_DBG("Humidity sensor event received! val1: 0x%08X, val2: 0x%08X", 
-					event->float_val1, event->float_val2);
+					event->value.val1, event->value.val2);
+
+			humid_float.val1 = event->value.val1;
+			humid_float.val2 = event->value.val2;
 
 			lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID),
-				&(measurement_val));
+				&humid_float);
 			break;
 
 		case GasResistanceSensor:
 			LOG_DBG("Gas resistance sensor event received! val1: 0x%08X, val2: 0x%08X", 
-					event->float_val1, event->float_val2);
+					event->value.val1, event->value.val2);
+
+			gas_res_float.val1 = event->value.val1;
+			gas_res_float.val2 = event->value.val2;
 
 			lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID),
-				&(measurement_val));
+				&gas_res_float);
 			break;
 
 		default:
