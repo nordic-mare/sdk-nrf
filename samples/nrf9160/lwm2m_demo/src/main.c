@@ -28,8 +28,8 @@ LOG_MODULE_REGISTER(app_lwm2m_client, CONFIG_APP_LOG_LEVEL);
 #endif
 
 #include "lwm2m_client.h"
-#include "ipso_objects.h"
 #include "sensor_module.h"
+
 
 #if !defined(CONFIG_LTE_LINK_CONTROL)
 #error "Missing CONFIG_LTE_LINK_CONTROL"
@@ -117,10 +117,8 @@ static int lwm2m_setup(void)
 	/* use IMEI as serial number */
 	lwm2m_app_init_device(imei_buf);
 	lwm2m_init_security(&client, endpoint_name);
-#if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
-	lwm2m_init_location();
-#endif
-#if defined(CONFIG_LWM2M_FIRMWARE_UPDATE_OBJ_SUPPORT)
+
+#if defined(CONFIG_LWM2M_CLIENT_UTILS_FIRMWARE_UPDATE_OBJ_SUPPORT)
 	lwm2m_init_firmware();
 #endif
 #if defined(CONFIG_LWM2M_CLIENT_UTILS_CONN_MON_OBJ_SUPPORT)
@@ -142,6 +140,9 @@ static int lwm2m_setup(void)
 	lwm2m_init_accel();
 #endif
 	lwm2m_init_light_sensor();
+#if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
+	lwm2m_app_init_location();
+#endif
 	return 0;
 }
 
@@ -328,6 +329,10 @@ static void rd_client_event(struct lwm2m_ctx *client,
 
 	case LWM2M_RD_CLIENT_EVENT_REGISTRATION_COMPLETE:
 		LOG_DBG("Registration complete");
+#if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
+		// Ensure that GPS search is only started after bootstrap process is complete.
+		lwm2m_app_start_gps();
+#endif
 		break;
 
 	case LWM2M_RD_CLIENT_EVENT_REG_UPDATE_FAILURE:
@@ -423,6 +428,16 @@ void main(void)
 		LOG_ERR("Unable to init modem (%d)", ret);
 		return;
 	}
+	ret = lte_lc_psm_req(true);
+	if (ret) {
+		LOG_ERR("Error requesting Power Saving Mode: %d", ret);
+		return;
+	}
+	ret = lte_lc_edrx_req(true);
+    if (ret) {
+		LOG_ERR("Error requesting Extended Discontinuous Reception (eDRX): %d", ret);
+		return;
+    }
 
 	/* query IMEI */
 	query_modem("AT+CGSN", imei_buf, sizeof(imei_buf));

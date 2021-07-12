@@ -26,15 +26,9 @@ LOG_MODULE_REGISTER(app_lwm2m_accel, CONFIG_APP_LOG_LEVEL);
 
 #ifdef CONFIG_ACCEL_USE_SIM
 #define FLIP_INPUT			CONFIG_FLIP_INPUT
-#define CALIBRATION_INPUT		-1
 #else
 #define FLIP_INPUT			-1
-#ifdef CONFIG_ACCEL_CALIBRATE
-#define CALIBRATION_INPUT		CONFIG_CALIBRATION_INPUT
-#else
-#define CALIBRATION_INPUT		-1
-#endif /* CONFIG_ACCEL_CALIBRATE */
-#endif /* CONFIG_ACCEL_USE_SIM */
+#endif
 
 /**@brief Orientation states. */
 enum orientation_state {
@@ -63,19 +57,19 @@ static struct accelerometer_sensor_data read_accelerometer() {
 	int err;
 	err = sensor_sample_fetch(accel_dev);
 	if (err) {
-		LOG_ERR("Sensor sample fetch failed");
+		LOG_ERR("Sensor sample fetch failed: %d", err);
 	}
 	err = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_X, &(sensor_data.x));
 	if (err) {
-		LOG_ERR("Accelerometer failed getting x value");
+		LOG_ERR("Accelerometer failed getting x value: %d", err);
 	}
 	err = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_Y, &(sensor_data.y));
 	if (err) {
-		LOG_ERR("Accelerometer failed getting y value");
+		LOG_ERR("Accelerometer failed getting y value: %d", err);
 	}
 	err = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_Z, &(sensor_data.z));
 	if (err) {
-		LOG_ERR("Accelerometer failed getting z value");
+		LOG_ERR("Accelerometer failed getting z value: %d", err);
 	}
 	double x_temp, y_temp, z_temp;
 	double x_int, y_int, z_int;
@@ -125,7 +119,7 @@ static int accel_calibrate(void) {
 		LOG_INF("CALIBRATING %i of %i", i, CALIBRATION_ITERATIONS);
 		err = sensor_sample_fetch(accel_dev);
 		if (err) {
-			LOG_ERR("Sensor sample fetch failed while calibrating accelerometer");
+			LOG_ERR("Sensor sample fetch failed while calibrating accelerometer: %d", err);
 			return err;
 		}
 		err = sensor_channel_get(accel_dev,
@@ -136,7 +130,7 @@ static int accel_calibrate(void) {
 				SENSOR_CHAN_ACCEL_Z, &(accel_data[2]));
 
 		if (err) {
-			LOG_ERR("Sensor channel get failed while calibrating accelerometer");
+			LOG_ERR("Sensor channel get failed while calibrating accelerometer: %d", err);
 			return err;
 		}
 

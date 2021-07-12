@@ -267,4 +267,5 @@ static int ipso_buzzer_init(const struct device *dev)
 	return 0;
 }
 
-SYS_INIT(ipso_buzzer_init, APPLICATION, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);
+SYS_INIT(ipso_buzzer_init, APPLICATION,
+	 CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);

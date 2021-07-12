@@ -37,7 +37,7 @@ config APP_MCUBOOT_FLASH_BUF_SZ
 
 choice
 	prompt "GPS device"
-	default GPS_USE_SIM
+	default GPS_USE_EXTERNAL
 	help
 		Select from which device GPS data will be fetched.
 
@@ -71,15 +71,28 @@ endif
 if GPS_USE_EXTERNAL
 config GPS_DEV_NAME
 	string "GPS device name"
+	default "NRF9160_GPS"
 	help
 		GPS device from which location data will be fetched and sent
 		to nRF Cloud.
 
+config GPS_SEARCH_INTERVAL_TIME
+	int "GPS search interval [s]"
+	default 300
+	help
+		Length of time between GPS searches in seconds.
+
+config GPS_SEARCH_TIMEOUT_TIME
+	int "GPS search timeout [s]"
+	default 150
+	help
+		Length of time the GPS can spend looking for a fix in seconds. 
+		In areas with poor connection, this should be increased.
 endif
 
 choice
 	prompt "Accelerometer device"
-	default ACCEL_USE_SIM
+	default ACCEL_USE_EXTERNAL
 	help
 		Select which device will provide accelerometer data.
 
@@ -143,6 +156,7 @@ if ACCEL_USE_EXTERNAL
 
 config ACCEL_DEV_NAME
 	string "Accelerometer device name"
+	default "ADXL362"
 	help
 		Device from which accelerometer data will be fetched and used
 		for orientation detection and sent to nRF Cloud.
@@ -165,19 +179,12 @@ config ACCEL_CALIBRATE
 if ACCEL_CALIBRATE
 config ACCEL_CALIBRATION_ITERATIONS
 	int "Number of readings for calibration"
+	default 5
 	help
 		Number of measurement readings to average over to find the
 		static offset in the readings when calibrating the
 		accelerometer.
 
-config CALIBRATION_INPUT
-	int "Button to trigger accelerometer calibration"
-	range 1 2 if BOARD_NRF9160DK_NRF9160NS
-	default 1 if BOARD_NRF9160DK_NRF9160NS
-	help
-		Button number to use to trigger accelerometer calibration:
-		1 - Button 1
-		2 - Button 2
 endif
 
 if !ACCEL_CALIBRATE

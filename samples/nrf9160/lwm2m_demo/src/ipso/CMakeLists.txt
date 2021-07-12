@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
-zephyr_include_directories(include)
 target_sources_ifdef(CONFIG_LWM2M_IPSO_COLOUR_SENSOR
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ipso_colour_sensor.c
 	)
