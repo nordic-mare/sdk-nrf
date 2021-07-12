@@ -7,6 +7,8 @@
 #include <zephyr.h>
 #include <drivers/sensor.h>
 #include <net/lwm2m.h>
+#include <net/lwm2m_path.h>
+#include <lwm2m_resource_ids.h>
 #include <math.h>
 
 #include <logging/log.h>
@@ -165,14 +167,17 @@ int lwm2m_init_accel(void)
 	}
 
 	/* create accel object */
-	lwm2m_engine_create_obj_inst("3313/0");
-	lwm2m_engine_set_res_data("3313/0/5701",
+	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0));
+	lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, SENSOR_UNITS_RID),
 				  SENSOR_UNIT_NAME, sizeof(SENSOR_UNIT_NAME),
 				  LWM2M_RES_DATA_FLAG_RO);
-	lwm2m_engine_register_read_callback("3313/0/5702", accel_x_read_cb);
-	lwm2m_engine_register_read_callback("3313/0/5703", accel_y_read_cb);
-	lwm2m_engine_register_read_callback("3313/0/5704", accel_z_read_cb);
-	lwm2m_engine_set_res_data("3313/0/5518",
+	lwm2m_engine_register_read_callback(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, X_VALUE_RID),
+				  accel_x_read_cb);
+	lwm2m_engine_register_read_callback(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Y_VALUE_RID),
+				  accel_y_read_cb);
+	lwm2m_engine_register_read_callback(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Z_VALUE_RID), 
+				  accel_z_read_cb);
+	lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, TIMESTAMP_RID),
 				  &timestamp, sizeof(timestamp), 0);
 
 	return 0;

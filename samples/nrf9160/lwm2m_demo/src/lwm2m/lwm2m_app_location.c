@@ -8,11 +8,17 @@
 #include <drivers/gps.h>
 #include <stdio.h>
 #include <net/lwm2m.h>
-#include <lwm2m_util.h>
 #include <net/lwm2m_client_utils.h>
+#include <net/lwm2m_path.h>
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(lwm2m_app_loc, CONFIG_APP_LOG_LEVEL);
+
+#define LATITUDE_RID 0
+#define LONGITUDE_RID 1
+#define ALTITUDE_RID 2
+#define RADIUS_RID 3
+#define SPEED_RID 6
 
 static struct gps_pvt pvt_data;
 static const struct device *gps_dev;
@@ -46,11 +52,11 @@ static void handle_pvt_fix(struct gps_pvt *pvt)
 	float32_value_t speed = float_to_lwm2m_float(pvt->speed);
 	float32_value_t radius = float_to_lwm2m_float(pvt->accuracy);
 
-	lwm2m_engine_set_float32("6/0/0", &latitude);
-	lwm2m_engine_set_float32("6/0/1", &longitude);
-	lwm2m_engine_set_float32("6/0/2", &altitude);
-	lwm2m_engine_set_float32("6/0/3", &radius);
-	lwm2m_engine_set_float32("6/0/6", &speed);
+	lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, LATITUDE_RID), &latitude);
+	lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, LONGITUDE_RID), &longitude);
+	lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, ALTITUDE_RID), &altitude);
+	lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, RADIUS_RID), &radius);
+	lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, SPEED_RID), &speed);
 }
 
 /**@brief Callback for GPS events */
