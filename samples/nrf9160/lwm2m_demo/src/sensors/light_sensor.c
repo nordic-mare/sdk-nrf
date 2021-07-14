@@ -1,6 +1,7 @@
 #include <zephyr.h>
 #include <drivers/sensor.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "ui_sense_led.h"
 
@@ -12,71 +13,78 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define LIGHT_SENSOR_NODE_ID	DT_PATH(soc, peripheral_40000000, i2c_a000, bh1749_38)
 #define LIGHT_SENSOR_NAME	    DT_LABEL(LIGHT_SENSOR_NODE_ID)
 
-/* Each channel measurement needs to be scaled to uint8_t */
-#define LIGHT_MEAS_MAX_VAL              CONFIG_UI_LIGHT_SENSOR_MEASUREMENT_MAX_VALUE
-#define COLOUR_MEAS_MAX_VAL             CONFIG_UI_COLOUR_SENSOR_MEASUREMENT_MAX_VALUE
-#define SCALE_LIGHT_MEAS(raw_value)     (raw_value * 255 / LIGHT_MEAS_MAX_VAL)
-#define SCALE_COLOUR_MEAS(raw_value)    (raw_value * 255 / COLOUR_MEAS_MAX_VAL)
-
 /* Trigger values */
-#ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE
-#ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_THRESH
-#define THRESH_UPPER            50
-#define THRESH_LOWER            0
-#endif /* CONFIG_UI_LIGHT_SENSOR_TRIGGER_THRESH */
-#define TRIGGER_CHANEL          SENSOR_CHAN_RED
-#endif /* CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE */
+#ifdef CONFIG_LIGHT_SENSOR_TRIGGER_ENABLE
+#define TRIGGER_CHANEL          CONFIG_LIGHT_SENSOR_TRIGGER_THRESH_CHANNEL
+#ifdef CONFIG_LIGHT_SENSOR_TRIGGER_THRESH
+#define THRESH_UPPER            CONFIG_LIGHT_SENSOR_TRIGGER_THRESH_UPPER
+#define THRESH_LOWER            CONFIG_LIGHT_SENSOR_TRIGGER_THRESH_LOWER
+#endif /* CONFIG_LIGHT_SENSOR_TRIGGER_THRESH */
+#endif /* CONFIG_LIGHT_SENSOR_TRIGGER_ENABLE */
 
-#define NUM_COLOURS             4
-#define NUM_BITS_PER_COLOUR     8
-#define RGBIR_STR_LENGTH        11  // '0xRRGGBBIR\0'
+#define RGBIR_STR_LENGTH        11U  /* Format: '0xRRGGBBIR\0'. */
 
-#define SENSE_LED_ON_TIME_MS    500
+#define SENSOR_FETCH_DELAY_MS	200U /* Time before a new fetch can be tried. */
+#define SENSE_LED_ON_TIME_MS    300U /* Time the sense LED stays on during colour read. */
 
 static const struct device *light_sensor_dev;
+static int64_t fetch_timestamp;
 
-static int sensor_read(struct sensor_value channel_values[])
+/* sensor_sample_fetch_chan fails if called multiple times in a row with no delay. */
+static bool fetch_ready()
+{
+	return k_uptime_get() > fetch_timestamp + SENSOR_FETCH_DELAY_MS;
+}
+
+static int sensor_read(struct sensor_value measurements[])
 {
 	int ret;
 
-	ret = sensor_sample_fetch_chan(light_sensor_dev, SENSOR_CHAN_ALL);
-	if (ret) {
-		LOG_ERR("Error %d: fetch sample failed", ret);
-		return ret;
+	if (fetch_ready()) {
+		ret = sensor_sample_fetch_chan(light_sensor_dev, SENSOR_CHAN_ALL);
+		if (ret) {
+			LOG_ERR("Error %d: fetch sample failed", ret);
+			return ret;
+		}
+		fetch_timestamp = k_uptime_get();
+	}
+	else {
+		LOG_DBG("Sensor fetch not ready");
+		return -EBUSY;
 	}
 
-	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_RED, &channel_values[0]);
-	if (ret) {
-		LOG_ERR("Error %d: get red channel failed", ret);
-		return ret;
-	}
-	LOG_DBG("Light sensor raw red value: %i", channel_values[0].val1);
-
-	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_GREEN, &channel_values[1]);
-	if (ret) {
-		LOG_ERR("Error %d: get green channel failed", ret);
-		return ret;
-	}
-	LOG_DBG("Light sensor raw green value: %i", channel_values[1].val1);
-
-	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_BLUE, &channel_values[2]);
-	if (ret) {
-		LOG_ERR("Error %d: get blue channel failed", ret);
-		return ret;
-	}
-	LOG_DBG("Light sensor raw blue value: %i", channel_values[2].val1);
-
-	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_IR, &channel_values[3]);
+	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_IR, &measurements[0]);
 	if (ret) {
 		LOG_ERR("Error %d: get IR channel failed", ret);
 		return ret;
 	}
-	LOG_DBG("Light sensor raw IR value: %i", channel_values[3].val1);
+	LOG_DBG("VAL IR, %u", measurements[0].val1);
+
+	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_BLUE, &measurements[1]);
+	if (ret) {
+		LOG_ERR("Error %d: get blue channel failed", ret);
+		return ret;
+	}
+	LOG_DBG("VAL B, %d", measurements[1].val1);
+
+	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_GREEN, &measurements[2]);
+	if (ret) {
+		LOG_ERR("Error %d: get green channel failed", ret);
+		return ret;
+	}
+	LOG_DBG("VAL G, %d", measurements[2].val1);
+
+	ret = sensor_channel_get(light_sensor_dev, SENSOR_CHAN_RED, &measurements[3]);
+	if (ret) {
+		LOG_ERR("Error %d: get red channel failed", ret);
+		return ret;
+	}
+	LOG_DBG("VAL R, %d", measurements[3].val1);
 
 	return 0;
 }
 
-#ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE
+#ifdef CONFIG_LIGHT_SENSOR_TRIGGER_ENABLE
 static void trigger_handler(const struct device *dev, struct sensor_trigger *trigger) 
 {
 	ARG_UNUSED(dev);
@@ -121,66 +129,63 @@ static void trigger_handler(const struct device *dev, struct sensor_trigger *tri
 		break;
 	}
 }
-#endif
+#endif /* CONFIG_LIGHT_SENSOR_TRIGGER_ENABLE */
 
-int light_sensor_read(struct sensor_value *light_value)
+int light_sensor_read(struct sensor_value light_values[], size_t size)
 {
 	int ret;
-	struct sensor_value channel_values[NUM_COLOURS];
 
-	ret = sensor_read(channel_values);
-	if (ret) {
-		LOG_ERR("Error %d: read light sensor failed", ret);
+	if ((size / sizeof(struct sensor_value)) != 4) {
+		LOG_ERR("Error %d: Invalid array size", -EINVAL);
+		return -EINVAL;
+	}
+
+	ret = sensor_read(light_values);
+	if (ret == -EBUSY) {
 		return ret;
 	}
-
-	light_value->val1 = 0;
-	light_value->val2 = 0;
-
-	for (int i = 0; i < 4; ++i) {
-		channel_values[i].val1 = SCALE_LIGHT_MEAS(channel_values[i].val1);
-		LOG_DBG("Scaled value: %d", channel_values[i].val1);
-		light_value->val1 |= channel_values[i].val1 << (NUM_COLOURS - 1 - i)*NUM_BITS_PER_COLOUR;
+	else if (ret) {
+		LOG_ERR("Error %d: sensor read failed", ret);
+		return ret;
 	}
-	
-	LOG_DBG("Light value: 0x%08X", light_value->val1);
 
 	return 0;
 }
 
-int colour_sensor_read(struct sensor_value *colour_value)
+int colour_sensor_read(struct sensor_value colour_values[], size_t size)
 {
 	int ret;
-	struct sensor_value channel_values[NUM_COLOURS];
+
+	if ((size / sizeof(struct sensor_value)) != 4) {
+		LOG_ERR("Error %d: Invalid array size", -EINVAL);
+		return -EINVAL;
+	}
 
 	ui_sense_led_on_off(true);
 	k_sleep(K_MSEC(SENSE_LED_ON_TIME_MS));
 
-	ret = sensor_read(channel_values);
-	if (ret) {
-		LOG_ERR("Error %d: read colour sensor failed", ret);
-		return ret;
-	}
+	ret = sensor_read(colour_values);
 
 	ui_sense_led_on_off(false);
 
-	colour_value->val1 = 0;
-	colour_value->val2 = 0;
-
-	for (int i = 0; i < NUM_COLOURS; ++i) {
-		channel_values[i].val1 = SCALE_COLOUR_MEAS(channel_values[i].val1);
-		LOG_DBG("Scaled value: %d", channel_values[i].val1);
-		colour_value->val1 |= channel_values[i].val1 << (NUM_COLOURS -1 - i)*NUM_BITS_PER_COLOUR;
+	if (ret == -EBUSY) {
+		return ret;
 	}
-	
-	LOG_DBG("Colour value: 0x%08X", colour_value->val1);
+	else if (ret) {
+		LOG_ERR("Error %d: sensor read failed", ret);
+		return ret;
+	}
 	
 	return 0;
 }
 
 int light_sensor_init(void)
 {
+	fetch_timestamp = 0;
+
+#ifdef CONFIG_COLOUR_SENSOR	
 	ui_sense_led_init();
+#endif
 
 	light_sensor_dev = device_get_binding(LIGHT_SENSOR_NAME);
 	if (!light_sensor_dev) {
@@ -188,10 +193,9 @@ int light_sensor_init(void)
 		return -ENODEV;
 	}
 
-#ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE
+#ifdef CONFIG_LIGHT_SENSOR_TRIGGER_ENABLE
 	int ret;
-	
-#ifdef CONFIG_UI_LIGHT_SENSOR_TRIGGER_THRESH
+#ifdef CONFIG_LIGHT_SENSOR_TRIGGER_THRESH
 	struct sensor_value temp_val;
 	struct sensor_trigger sensor_trigger_config = {
 		.type = SENSOR_TRIG_THRESHOLD,
@@ -219,7 +223,7 @@ int light_sensor_init(void)
 		.type = SENSOR_TRIG_DATA_READY,
 		.chan = TRIGGER_CHANEL
 	};
-#endif /* CONFIG_UI_LIGHT_SENSOR_TRIGGER_THRESH */
+#endif /* CONFIG_LIGHT_SENSOR_TRIGGER_THRESH */
 	
 	ret = sensor_trigger_set(light_sensor_dev, &sensor_trigger_config,
 					trigger_handler);
@@ -227,7 +231,7 @@ int light_sensor_init(void)
 		LOG_ERR("Error %d: set trigger handler failed", ret);
 		return ret;
 	}
-#endif /* CONFIG_UI_LIGHT_SENSOR_TRIGGER_ENABLE */
+#endif /* CONFIG_LIGHT_SENSOR_TRIGGER_ENABLE */
 
 	return 0;
 }

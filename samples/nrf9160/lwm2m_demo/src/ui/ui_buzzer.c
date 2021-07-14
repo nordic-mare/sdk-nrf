@@ -41,12 +41,12 @@ int ui_buzzer_on_off(bool new_state)
 	}
 	else {
 		LOG_DBG("ON/OFF period: %u", PERIOD(frequency));
-		LOG_DBG("ON/OFF pulse width: %u", PULSE_WIDTH(frequency * state, dutycycle));
+		LOG_DBG("ON/OFF pulse width: %u", PULSE_WIDTH(frequency, dutycycle * state));
 		ret = pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN,
-			PERIOD(frequency), PULSE_WIDTH(frequency * state, dutycycle),
+			PERIOD(frequency), PULSE_WIDTH(frequency, dutycycle * state),
 			BUZZER_PWM_FLAGS);
 	}
-	
+
 	if (ret) {
 		LOG_ERR("Error %d: set pwm pin failed", ret);
 		return ret;

@@ -12,7 +12,7 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_ipso_colour_sensor, CONFIG_LWM2M_LOG_LEVEL);
 
-#define IPSO_COLOUR_OBJECT_ID 3335
+#define IPSO_OBJECT_COLOUR_ID 3335
 
 #define MAX_INSTANCE_COUNT CONFIG_LWM2M_IPSO_COLOUR_SENSOR_INSTANCE_COUNT
 
@@ -118,7 +118,7 @@ static struct lwm2m_engine_obj_inst *colour_sensor_create(uint16_t obj_inst_id)
 
 static int ipso_colour_sensor_init()
 {
-	sensor.obj_id = IPSO_COLOUR_OBJECT_ID;
+	sensor.obj_id = IPSO_OBJECT_COLOUR_ID;
 	sensor.version_major = COLOUR_VERSION_MAJOR;
 	sensor.version_minor = COLOUR_VERSION_MINOR;
 	sensor.is_core = false;

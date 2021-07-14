@@ -19,7 +19,8 @@ struct sensor_event {
 	struct event_header header;
 
 	enum sensor_type type;
-	struct sensor_value value;
+	struct sensor_value sensor_value;
+	uint32_t unsigned_value;
 };
 
 EVENT_TYPE_DECLARE(sensor_event);

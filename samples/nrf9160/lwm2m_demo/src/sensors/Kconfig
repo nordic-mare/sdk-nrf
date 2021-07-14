@@ -1,0 +1,95 @@
+menu "Sensors"
+
+config ENVIRONMENT_SENSOR
+	bool "Enable environment sensor"
+	default y
+
+
+config LIGHT_SENSOR
+    bool "Enable light sensor"
+	default y
+
+config LIGHT_SENSOR_MEASUREMENT_MAX_VALUE
+    int "Max expected light sensor output value"
+	default 500
+	depends on LIGHT_SENSOR
+	help
+		Maximum value expected from the light sensor. 
+		Reasonable values will depend on the sensors environment.
+		Raw measurements in different use conditions can give a 
+		good estimate for this value.
+
+config LIGHT_SENSOR_TRIGGER_ENABLE
+	bool "Enable sensor trigger"
+	default n
+	depends on LIGHT_SENSOR
+	help
+		Enable trigger for the light sensor
+
+choice
+	prompt "Light sensor trigger source"
+	default LIGHT_SENSOR_TRIGGER_THRESH
+	help
+	  	Select light sensor trigger source.
+
+config LIGHT_SENSOR_TRIGGER_THRESH
+	bool "Threshold trigger"
+	depends on LIGHT_SENSOR_TRIGGER_ENABLE
+	help
+		Trigger fires when sensor values exceeds the 
+		threshold values.
+
+config LIGHT_SENSOR_TRIGGER_DATA_READY
+	bool "Data ready trigger"
+	depends on LIGHT_SENSOR_TRIGGER_ENABLE
+	help
+		Trigger fires when new data is ready
+		to be read.
+endchoice # Light sensor trigger source
+
+config LIGHT_SENSOR_TRIGGER_THRESH_CHANNEL
+    string "Sensor channel used by the threshold trigger"
+    default SENSOR_CHAN_RED
+    depends on LIGHT_SENSOR_TRIGGER_THRESH
+    help
+        The channel that is read and used to determine whether
+        the threshold trigger should fire.
+        Valid channels: SENSOR_CHAN_RED, SENSOR_CHAN_GREEN,
+        SENSOR_CHAN_BLUE or SENSOR_CHAN_IR.
+        Trigger is only supported for one channel, thus
+        SENSOR_CHAN_ALL is not a valid option.
+
+config LIGHT_SENSOR_TRIGGER_THRESH_UPPER
+    int "Upper threshold for trigger"
+    default 100
+    depends on LIGHT_SENSOR_TRIGGER_THRESH
+    help
+        Upper threshold needed to fire the threshold trigger that
+        generates a light sensor event.
+
+config LIGHT_SENSOR_TRIGGER_THRESH_LOWER
+    int "UpLowerper threshold for trigger"
+    default 0
+    depends on LIGHT_SENSOR_TRIGGER_THRESH
+    help
+        Lower threshold needed to fire the threshold trigger that
+        generates a light sensor event.
+
+
+
+config COLOUR_SENSOR
+    bool "Enable colour sensor"
+    default y
+    depends on LIGHT_SENSOR
+
+config COLOUR_SENSOR_MEASUREMENT_MAX_VALUE
+	int "Max expected colour sensor output value"
+	default 500
+	depends on COLOUR_SENSOR
+	help
+		Maximum value expected from the colour sensor. 
+		Reasonable values will depend on the sensors environment.
+		Raw measurements in different use conditions can give a 
+		good estimate for this value.
+
+endmenu # Sensors
