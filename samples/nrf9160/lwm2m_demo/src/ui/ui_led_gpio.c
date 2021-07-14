@@ -23,28 +23,29 @@ LOG_MODULE_REGISTER(ui_led_gpio, CONFIG_UI_LOG_LEVEL);
 #define LED_GPIO_FLAGS	    DT_GPIO_FLAGS(LED_RED_GPIO_NODE, gpios)
 
 static const struct device *led_gpio_dev;
+
 static uint8_t red_val;
 static uint8_t green_val;
 static uint8_t blue_val;
-static bool is_on;
+static bool current_state;
 
 int ui_led_gpio_on_off(bool new_state)
 {
 	int ret;
 
-	is_on = new_state;
+	current_state = new_state;
 	
-	ret = gpio_pin_set(led_gpio_dev, LED_RED_GPIO_PIN, is_on * red_val);
+	ret = gpio_pin_set(led_gpio_dev, LED_RED_GPIO_PIN, current_state * red_val);
 	if (ret) {
 		LOG_ERR("Error %d: set red pin failed", ret);
 		return ret;
 	}
-	ret = gpio_pin_set(led_gpio_dev, LED_GREEN_GPIO_PIN, is_on * green_val);
+	ret = gpio_pin_set(led_gpio_dev, LED_GREEN_GPIO_PIN, current_state * green_val);
 	if (ret) {
 		LOG_ERR("Error %d: set green pin failed", ret);
 		return ret;
 	}
-	ret = gpio_pin_set(led_gpio_dev, LED_BLUE_GPIO_PIN, is_on * blue_val);
+	ret = gpio_pin_set(led_gpio_dev, LED_BLUE_GPIO_PIN, current_state * blue_val);
 	if (ret) {
 		LOG_ERR("Error %d: set blue pin failed", ret);
 		return ret;
@@ -58,7 +59,7 @@ int ui_led_gpio_set_colour(uint32_t colour_values)
 	green_val = (uint8_t)(colour_values >> 8);
 	blue_val = (uint8_t)colour_values;
 
-	if (!is_on) {
+	if (!current_state) {
 		return 0;
 	}
 	return ui_led_gpio_on_off(true);

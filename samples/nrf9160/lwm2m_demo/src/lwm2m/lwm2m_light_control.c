@@ -75,10 +75,10 @@ static int lc_dimmer_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 			bool last_block, size_t total_size)
 {
 	int ret;
-	uint8_t dutycycle = *data;
+	uint8_t intensity = *data;
 	
 #ifdef CONFIG_UI_LED_USE_PWM
-	ret = ui_led_pwm_set_dutycycle(dutycycle);
+	ret = ui_led_pwm_set_intensity(intensity);
 	if (ret) {
 		LOG_ERR("Error %d: set dutycycle failed", ret);
 		return ret;
