@@ -75,13 +75,6 @@ config LIGHT_SENSOR_TRIGGER_THRESH_LOWER
         Lower threshold needed to fire the threshold trigger that
         generates a light sensor event.
 
-
-
-config COLOUR_SENSOR
-    bool "Enable colour sensor"
-    default y
-    depends on LIGHT_SENSOR
-
 config COLOUR_SENSOR_MEASUREMENT_MAX_VALUE
 	int "Max expected colour sensor output value"
 	default 500

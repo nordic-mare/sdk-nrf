@@ -14,32 +14,62 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
+#ifdef CONFIG_SENSOR_MODULE_TEMP_ENABLE
+#define TEMP_STARTUP_TIME	K_SECONDS(CONFIG_SENSOR_MODULE_TEMP_STARTUP_DELAY)
+#else
+#define TEMP_STARTUP_TIME	K_FOREVER
+#endif
 #define TEMP_DELAY          CONFIG_SENSOR_MODULE_TEMP_DELAY
 #define TEMP_DELTA			((float32_value_t){ \
 							.val1 = CONFIG_SENSOR_MODULE_TEMP_DELTA_INT, \
 							.val2 = CONFIG_SENSOR_MODULE_TEMP_DELTA_DEC})
 
+#ifdef CONFIG_SENSOR_MODULE_PRESS_ENABLE
+#define PRESS_STARTUP_TIME	K_SECONDS(CONFIG_SENSOR_MODULE_PRESS_STARTUP_DELAY)
+#else
+#define PRESS_STARTUP_TIME	K_FOREVER
+#endif
 #define PRESS_DELAY			CONFIG_SENSOR_MODULE_PRESS_DELAY
 #define PRESS_DELTA			((float32_value_t){ \
 							.val1 = CONFIG_SENSOR_MODULE_PRESS_DELTA_INT,\
 							.val2 = CONFIG_SENSOR_MODULE_PRESS_DELTA_DEC})
 
+#ifdef CONFIG_SENSOR_MODULE_HUMID_ENABLE
+#define HUMID_STARTUP_TIME	K_SECONDS(CONFIG_SENSOR_MODULE_HUMID_STARTUP_DELAY)
+#else
+#define HUMID_STARTUP_TIME	K_FOREVER
+#endif
 #define HUMID_DELAY			CONFIG_SENSOR_MODULE_HUMID_DELAY
 #define HUMID_DELTA			((float32_value_t){ \
 							.val1 = CONFIG_SENSOR_MODULE_HUMID_DELTA_INT, \
 							.val2 = CONFIG_SENSOR_MODULE_HUMID_DELTA_DEC})
 
+#ifdef CONFIG_SENSOR_MODULE_GAS_RES_ENABLE
+#define GAS_RES_STARTUP_TIME	K_SECONDS(CONFIG_SENSOR_MODULE_GAS_RES_STARTUP_DELAY)
+#else
+#define GAS_RES_STARTUP_TIME	K_FOREVER
+#endif
 #define GAS_RES_DELAY		CONFIG_SENSOR_MODULE_GAS_RES_DELAY
 #define GAS_RES_DELTA		((float32_value_t){ \
 							.val1 = CONFIG_SENSOR_MODULE_GAS_RES_DELTA, \
 							.val2 = 0})
 
+#ifdef CONFIG_SENSOR_MODULE_LIGHT_ENABLE
+#define LIGHT_STARTUP_TIME	K_SECONDS(CONFIG_SENSOR_MODULE_LIGHT_STARTUP_DELAY)
+#else
+#define LIGHT_STARTUP_TIME	K_FOREVER
+#endif
 #define LIGHT_DELAY			CONFIG_SENSOR_MODULE_LIGHT_DELAY
 #define LIGHT_DELTA			((uint32_t)((CONFIG_SENSOR_MODULE_LIGHT_DELTA_R << 24) | \
 										(CONFIG_SENSOR_MODULE_LIGHT_DELTA_G << 16) | \
 										(CONFIG_SENSOR_MODULE_LIGHT_DELTA_B << 8)  | \
 										(CONFIG_SENSOR_MODULE_LIGHT_DELTA_IR)))
 
+#ifdef CONFIG_SENSOR_MODULE_COLOUR_ENABLE
+#define COLOUR_STARTUP_TIME	K_SECONDS(CONFIG_SENSOR_MODULE_COLOUR_STARTUP_DELAY)
+#else
+#define COLOUR_STARTUP_TIME	K_FOREVER
+#endif
 #define COLOUR_DELAY		CONFIG_SENSOR_MODULE_COLOUR_DELAY
 #define COLOUR_DELTA		((uint32_t)((CONFIG_SENSOR_MODULE_COLOUR_DELTA_R << 24) | \
 										(CONFIG_SENSOR_MODULE_COLOUR_DELTA_G << 16) | \
@@ -104,6 +134,7 @@ static void temp_work_cb(struct k_work *work)
 
 	LOG_DBG("TEMP WORK CB");
 	
+	/* Get latest registered temperature value */
 	lwm2m_engine_get_res_data(
 		LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID),
 		(void **)(&old_temp_val), &dummy_data_len, &dummy_data_flags);
@@ -131,6 +162,7 @@ static void press_work_cb(struct k_work *work)
 
 	LOG_DBG("PRESS WORK CB");
 
+	/* Get latest registered pressure value */
 	lwm2m_engine_get_res_data(
 		LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID),
 		(void **)(&old_press_val), &dummy_data_len, &dummy_data_flags);
@@ -158,6 +190,7 @@ static void humid_work_cb(struct k_work *work)
 
 	LOG_DBG("HUMID WORK CB");
 
+	/* Get latest registered humidity value */
 	lwm2m_engine_get_res_data(
 		LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID),
 		(void **)(&old_humid_val), &dummy_data_len, &dummy_data_flags);
@@ -185,6 +218,7 @@ static void gas_res_work_cb(struct k_work *work)
 
 	LOG_DBG("GAS RES WORK CB");
 
+	/* Get latest registered gas resistance value */
 	lwm2m_engine_get_res_data(
 		LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID),
 		(void **)(&old_gas_res_val), &dummy_data_len, &dummy_data_flags);
@@ -320,27 +354,22 @@ static void colour_work_cb(struct k_work *work)
 int sensor_module_init(void)
 {
 	k_work_init_delayable(&temp_work, temp_work_cb);
+	k_work_schedule(&temp_work, TEMP_STARTUP_TIME);
+
 	k_work_init_delayable(&press_work, press_work_cb);
+	k_work_schedule(&press_work, PRESS_STARTUP_TIME);
+	
 	k_work_init_delayable(&humid_work, humid_work_cb);
+	k_work_schedule(&humid_work, HUMID_STARTUP_TIME);
+	
 	k_work_init_delayable(&gas_res_work, gas_res_work_cb);
-
-	k_work_schedule(&temp_work, K_SECONDS(1000));
-	k_work_schedule(&press_work, K_SECONDS(1000));
-	k_work_schedule(&humid_work, K_SECONDS(1000));
-	k_work_schedule(&gas_res_work, K_SECONDS(1000));
-
-#ifdef CONFIG_LIGHT_SENSOR
+	k_work_schedule(&gas_res_work, GAS_RES_STARTUP_TIME);
+	
 	k_work_init_delayable(&light_work, light_work_cb);
-	k_work_schedule(&light_work, K_SECONDS(1000));
-#endif
-
-#ifdef CONFIG_COLOUR_SENSOR
+	k_work_schedule(&light_work, LIGHT_STARTUP_TIME);
+	
 	k_work_init_delayable(&colour_work, colour_work_cb);
-	k_work_schedule(&colour_work, K_SECONDS(1000));
-#endif
-	
-
-	
+	k_work_schedule(&colour_work, COLOUR_STARTUP_TIME);
 
 	return 0;
 } 

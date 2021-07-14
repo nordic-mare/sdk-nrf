@@ -157,7 +157,6 @@ int lwm2m_init_light_sensor(void)
 			sizeof(LIGHT_UNIT),
 			LWM2M_RES_DATA_FLAG_RO);
 
-#ifdef CONFIG_COLOUR_SENSOR
 	/* Surface colour sensor */
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, COLOUR_OBJ_INSTANCE_ID));
 	lwm2m_engine_register_read_callback(
@@ -176,7 +175,6 @@ int lwm2m_init_light_sensor(void)
 			LIGHT_UNIT, 
 			sizeof(LIGHT_UNIT),
 			LWM2M_RES_DATA_FLAG_RO);
-#endif
 
 	return 0;
 }
@@ -186,8 +184,8 @@ static bool event_handler(const struct event_header *eh)
 	if (is_sensor_event(eh)) {
 		struct sensor_event *event = cast_sensor_event(eh);
 		char temp_value_str[RGBIR_STR_LENGTH];
-		/* If a notification is triggered due to lwm2m_engine_set_string(), this prevents
-		   re-reading the sensor when a callback is called by the notification event.
+		/* This prevents re-reading the sensor when a callback is called because of
+		   a notification event.
 		   Ensures that the value received by the server is the same as the value in the
 		   event received below. */
 		read_sensor = false;

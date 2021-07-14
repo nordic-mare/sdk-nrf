@@ -2,6 +2,19 @@ menu "Modules"
 
 menu "Sensor Module"
 
+config SENSOR_MODULE_TEMP_ENABLE
+	bool "Enable value tracking of temperature"
+	default n
+	help
+		Enable value tracking of temperature values.
+
+config SENSOR_MODULE_TEMP_STARTUP_DELAY
+	int "Time before first sensor read"
+	default 30
+	help
+		Time in seconds before the first temperature read 
+		is executed. 
+
 config SENSOR_MODULE_TEMP_DELAY
 	int "Delay between temperature readings"
 	default 120
@@ -27,6 +40,21 @@ config SENSOR_MODULE_TEMP_DELTA_DEC
 		Unit is decimal part of degrees Celsius. 
 		Divide by 1E6 to get actual decimal value. 
 		Set this and the integer part to 0 to always register the latest measurement.
+
+
+
+config SENSOR_MODULE_PRESS_ENABLE
+	bool "Enable value tracking of pressure"
+	default n
+	help
+		Enable value tracking of pressure values.
+
+config SENSOR_MODULE_PRESS_STARTUP_DELAY
+	int "Time before first sensor read"
+	default 30
+	help
+		Time in seconds before the first pressure read 
+		is executed. 
 
 config SENSOR_MODULE_PRESS_DELAY
 	int "Delay between pressure readings"
@@ -54,6 +82,20 @@ config SENSOR_MODULE_PRESS_DELTA_DEC
 		Divide by 1E6 to get actual decimal value. 
 		Set this and the integer part to 0 to always register the latest measurement.
 
+
+config SENSOR_MODULE_HUMID_ENABLE
+	bool "Enable value tracking of humidity"
+	default n
+	help
+		Enable value tracking of humidity values.
+
+config SENSOR_MODULE_HUMID_STARTUP_DELAY
+	int "Time before first sensor read"
+	default 30
+	help
+		Time in seconds before the first humidity read 
+		is executed. 
+
 config SENSOR_MODULE_HUMID_DELAY
 	int "Delay between humidity readings"
 	default 120
@@ -80,6 +122,20 @@ config SENSOR_MODULE_HUMID_DELTA_DEC
 		Divide by 1E6 to get actual decimal value. 
 		Set this and the integer part to 0 to always register the latest measurement.
 
+
+config SENSOR_MODULE_GAS_RES_ENABLE
+	bool "Enable value tracking of gas resistance"
+	default n
+	help
+		Enable value tracking of gas resistance values.
+
+config SENSOR_MODULE_GAS_RES_STARTUP_DELAY
+	int "Time before first sensor read"
+	default 30
+	help
+		Time in seconds before the first gas resistance
+		read is executed. 
+
 config SENSOR_MODULE_GAS_RES_DELAY
 	int "Delay between gas resistance readings"
 	default 120
@@ -97,6 +153,20 @@ config SENSOR_MODULE_GAS_RES_DELTA
 		Unit is Ohm. 
 		Set this to 0 to always register the latest measurement.
 
+
+config SENSOR_MODULE_LIGHT_ENABLE
+	bool "Enable value tracking of light"
+	default n
+	help
+		Enable value tracking of light values.
+
+config SENSOR_MODULE_LIGHT_STARTUP_DELAY
+	int "Time before first sensor read"
+	default 30
+	help
+		Time in seconds before the first light read 
+		is executed. 
+
 config SENSOR_MODULE_LIGHT_DELAY
 	int "Delay between light sensor readings"
 	default 120
@@ -107,7 +177,6 @@ config SENSOR_MODULE_LIGHT_DELAY
 		in the queue at the time the light work is added.
 
 menu "Light minimum change"
-
 config SENSOR_MODULE_LIGHT_DELTA_R
 	int "Variation in red light required to register a measurement."
 	range 0 255
@@ -139,8 +208,21 @@ config SENSOR_MODULE_LIGHT_DELTA_IR
 	help
 		Required difference in infrared light to register a new measurement.
 		Set this to 0 to always register the latest measurement.
-
 endmenu # Light minimum change
+
+
+config SENSOR_MODULE_COLOUR_ENABLE
+	bool "Enable value tracking of colour"
+	default n
+	help
+		Enable value tracking of colour values.
+
+config SENSOR_MODULE_COLOUR_STARTUP_DELAY
+	int "Time before first sensor read"
+	default 30
+	help
+		Time in seconds before the first colour read 
+		is executed. 
 
 config SENSOR_MODULE_COLOUR_DELAY
 	int "Delay between colour sensor readings"
@@ -152,7 +234,6 @@ config SENSOR_MODULE_COLOUR_DELAY
 		in the queue at the time the colour work is added.
 
 menu "Colour minimum change"
-
 config SENSOR_MODULE_COLOUR_DELTA_R
 	int "Variation in red colour required to register a measurement."
 	range 0 255
@@ -184,7 +265,6 @@ config SENSOR_MODULE_COLOUR_DELTA_IR
 	help
 		Required difference in infrared colour to register a new measurement.
 		Set this to 0 to always register the latest measurement.
-
 endmenu # Colour minimum change
 
 endmenu # Sensor Module

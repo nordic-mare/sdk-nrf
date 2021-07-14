@@ -183,9 +183,7 @@ int light_sensor_init(void)
 {
 	fetch_timestamp = 0;
 
-#ifdef CONFIG_COLOUR_SENSOR	
 	ui_sense_led_init();
-#endif
 
 	light_sensor_dev = device_get_binding(LIGHT_SENSOR_NAME);
 	if (!light_sensor_dev) {
