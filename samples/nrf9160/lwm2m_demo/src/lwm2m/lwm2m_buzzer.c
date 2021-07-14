@@ -49,7 +49,7 @@ static int buzzer_intensity_cb(uint16_t obj_inst_id,
 		return -EINVAL;
 	}
 
-	ret = ui_buzzer_set_dutycycle(intensity / 2);
+	ret = ui_buzzer_set_dutycycle(intensity);
 	if (ret) {
 		LOG_ERR("Error %d: set dutycycle failed", ret);
 		return ret;

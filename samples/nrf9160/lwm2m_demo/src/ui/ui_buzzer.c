@@ -15,16 +15,20 @@ LOG_MODULE_REGISTER(ui_buzzer, CONFIG_UI_LOG_LEVEL);
 #define BUZZER_PWM_PIN			DT_PROP(BUZZER_PWM_NODE, ch0_pin)
 #define BUZZER_PWM_FLAGS        DT_PWMS_FLAGS(BUZZER_PWM_NODE)
 
-#define PERIOD(freq)				(USEC_PER_SEC / freq)
-#define PULSE_WIDTH(freq, duty)		(PERIOD(freq) * (uint32_t)duty / 100U)
+#define PERIOD(freq)				((USEC_PER_SEC) / (freq))
+#define PULSE_WIDTH(freq, duty)		(PERIOD(freq) * ((uint32_t)duty) / (100U))
 
-#define FREQUENCE_MAX				10000U
-#define DUTYCYCLE_MAX				50U
+#define FREQUENCY_MAX				10000U
+#define DUTYCYCLE_MAX				100U
 
 static const struct device *buzzer_pwm_dev;
 static bool state;
 static uint32_t frequency;
 static uint8_t dutycycle;
+
+static uint32_t calculate_pulse_width(uint8_t dutycycle, uint32_t period) {
+	return (period / ((-98 * dutycycle) / 100 + 100) - period / 200);
+}
 
 int ui_buzzer_on_off(bool new_state)
 {
@@ -33,17 +37,16 @@ int ui_buzzer_on_off(bool new_state)
 	state = new_state;
 
 	LOG_DBG("Frequency: %u", frequency);
-
+	uint32_t pulse_width = state ? calculate_pulse_width(dutycycle, PERIOD(frequency)) : 0;
 	if (frequency == 0) {
 		ret = pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN,
-			UINT32_MAX, 0,
+			1000000, 0,
 			BUZZER_PWM_FLAGS);
-	}
-	else {
+	} else {
 		LOG_DBG("ON/OFF period: %u", PERIOD(frequency));
-		LOG_DBG("ON/OFF pulse width: %u", PULSE_WIDTH(frequency, dutycycle * state));
+		LOG_DBG("ON/OFF pulse width: %u", pulse_width);
 		ret = pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN,
-			PERIOD(frequency), PULSE_WIDTH(frequency, dutycycle * state),
+			PERIOD(frequency), pulse_width,
 			BUZZER_PWM_FLAGS);
 	}
 
@@ -59,7 +62,7 @@ int ui_buzzer_set_frequency(uint32_t freq)
 {
 	int ret;
 
-	if (freq > FREQUENCE_MAX) {
+	if (freq > FREQUENCY_MAX) {
 		LOG_ERR("Error %d: frequency too high", -EINVAL);
 		return -EINVAL;
 	}
@@ -108,7 +111,7 @@ int ui_buzzer_init(void)
 	}
 
 	frequency = 440;
-	dutycycle = 50;
+	dutycycle = 25;
 
 	return 0;
 }
