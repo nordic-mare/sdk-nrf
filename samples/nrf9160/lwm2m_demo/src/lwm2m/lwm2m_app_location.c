@@ -26,7 +26,7 @@ static struct gps_config gps_cfg = {
 	.nav_mode = GPS_NAV_MODE_PERIODIC,
 	.power_mode = GPS_POWER_MODE_DISABLED,
 	.interval = CONFIG_GPS_SEARCH_INTERVAL_TIME,
-	.timeout = CONFIG_GPS_SEARCH_TIMEOUT_TIME + 100,
+	.timeout = CONFIG_GPS_SEARCH_TIMEOUT_TIME,
 	.accuracy = GPS_ACCURACY_NORMAL,
 	.priority = true
 };
