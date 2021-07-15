@@ -427,16 +427,6 @@ void main(void)
 		LOG_ERR("Unable to init modem (%d)", ret);
 		return;
 	}
-	ret = lte_lc_psm_req(true);
-	if (ret) {
-		LOG_ERR("Error requesting Power Saving Mode: %d", ret);
-		return;
-	}
-	ret = lte_lc_edrx_req(true);
-	if (ret) {
-		LOG_ERR("Error requesting Extended Discontinuous Reception (eDRX): %d", ret);
-		return;
-	}
 
 	/* query IMEI */
 	query_modem("AT+CGSN", imei_buf, sizeof(imei_buf));

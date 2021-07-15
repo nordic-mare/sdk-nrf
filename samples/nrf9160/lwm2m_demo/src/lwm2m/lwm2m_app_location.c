@@ -26,8 +26,9 @@ static struct gps_config gps_cfg = {
 	.nav_mode = GPS_NAV_MODE_PERIODIC,
 	.power_mode = GPS_POWER_MODE_DISABLED,
 	.interval = CONFIG_GPS_SEARCH_INTERVAL_TIME,
-	.timeout = CONFIG_GPS_SEARCH_TIMEOUT_TIME,
-	.priority = false
+	.timeout = CONFIG_GPS_SEARCH_TIMEOUT_TIME + 100,
+	.accuracy = GPS_ACCURACY_NORMAL,
+	.priority = true
 };
 
 static float32_value_t float_to_lwm2m_float(float val) {
@@ -84,6 +85,7 @@ static void gps_event_handler(const struct device *dev, struct gps_event *evt)
 			LOG_DBG("Recieved PVT Fix. GPS search completed.");
 			memcpy(&pvt_data, &evt->pvt, sizeof(struct gps_pvt));
 			handle_pvt_fix(&pvt_data);
+			gps_cfg.priority = false;
 			timestamp_prev = k_uptime_get_32();
 			break;
 		case GPS_EVT_NMEA:
