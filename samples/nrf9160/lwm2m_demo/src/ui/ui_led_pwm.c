@@ -18,21 +18,22 @@ LOG_MODULE_REGISTER(ui_led_pwm, CONFIG_UI_LOG_LEVEL);
 
 #define PERIOD_USEC	            (USEC_PER_SEC / 100U)
 
-#define COLOUR_RESOLUTION       255U
-#define DUTYCYCLE_RESOLUTION    100U
+#define COLOUR_MAX       255U
+#define INTENSITY_MAX    100U
 
 static const struct device *led_pwm_dev;
 
 static uint8_t red_val;
 static uint8_t green_val;
 static uint8_t blue_val;
-static uint8_t current_intensity;
-static bool current_state;
+static uint8_t intensity;
+static bool state;
 
-static uint32_t calculate_pulse_width(uint8_t colour_val)
+
+static uint32_t calculate_pulse_width(uint8_t colour_val, uint8_t intensity)
 {
-	return PERIOD_USEC * current_state * colour_val * current_intensity 
-			/ (COLOUR_RESOLUTION * DUTYCYCLE_RESOLUTION);
+	return PERIOD_USEC * colour_val * intensity 
+			/ (COLOUR_MAX * INTENSITY_MAX);
 }
 
 int ui_led_pwm_on_off(bool new_state)
@@ -40,23 +41,26 @@ int ui_led_pwm_on_off(bool new_state)
 	int ret;
 	uint32_t pulse_width_red, pulse_width_green, pulse_width_blue;
 
-	current_state = new_state;
+	state = new_state;
 
-	pulse_width_red = calculate_pulse_width(red_val);
-	pulse_width_green = calculate_pulse_width(green_val);
-	pulse_width_blue = calculate_pulse_width(blue_val);
+	pulse_width_red = calculate_pulse_width(red_val, intensity);
+	pulse_width_green = calculate_pulse_width(green_val, intensity);
+	pulse_width_blue = calculate_pulse_width(blue_val, intensity);
 
-	ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(0), PERIOD_USEC, pulse_width_red, LED_PWM_FLAGS);
+	ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(0), 
+				PERIOD_USEC, pulse_width_red * state, LED_PWM_FLAGS);
 	if (ret != 0) {
 		LOG_ERR("Error %d: set red pin failed", ret);
 		return ret;
 	}
-	ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(1), PERIOD_USEC, pulse_width_green, LED_PWM_FLAGS);
+	ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(1), 
+				PERIOD_USEC, pulse_width_green * state, LED_PWM_FLAGS);
 	if (ret != 0) {
 		LOG_ERR("Error %d: set green pin failed", ret);
 		return ret;
 	}
-	ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(2), PERIOD_USEC, pulse_width_blue, LED_PWM_FLAGS);
+	ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN(2), 
+				PERIOD_USEC, pulse_width_blue * state, LED_PWM_FLAGS);
 	if (ret != 0) {
 		LOG_ERR("Error %d: set blue pin failed", ret);
 		return ret;
@@ -67,26 +71,43 @@ int ui_led_pwm_on_off(bool new_state)
 
 int ui_led_pwm_set_colour(uint32_t colour_values)
 {
+	int ret;
+
 	red_val = (uint8_t)(colour_values >> 16);
 	green_val = (uint8_t)(colour_values >> 8);
 	blue_val = (uint8_t)colour_values;
 
-	if (!current_state) {
-		return 0;
+	if (state) {
+		ret = ui_led_pwm_on_off(state);
+		if (ret) {
+			LOG_ERR("Error %d: LED pwm on/off failed", ret);
+			return ret;
+		}
 	}
 
-	return ui_led_pwm_on_off(current_state);
+	return 0;
 }
 
-int ui_led_pwm_set_intensity(uint8_t intensity)
+int ui_led_pwm_set_intensity(uint8_t new_intensity)
 {
-	current_intensity = intensity;
+	int ret;
 
-	if (!current_state) {
-		return 0;
+	if (new_intensity > INTENSITY_MAX) {
+		LOG_ERR("Error %d: intensity too large. Max 100", -EINVAL);
+		return -EINVAL;
 	}
 
-	return ui_led_pwm_on_off(current_state);
+	intensity = new_intensity;
+
+	if (state) {
+		ret = ui_led_pwm_on_off(state);
+		if (ret) {
+			LOG_ERR("Error %d: LED pwm on/off failed", ret);
+			return ret;
+		}
+	}
+
+	return 0;
 }
 
 int ui_led_pwm_init(void)

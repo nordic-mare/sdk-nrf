@@ -27,42 +27,50 @@ static const struct device *led_gpio_dev;
 static uint8_t red_val;
 static uint8_t green_val;
 static uint8_t blue_val;
-static bool current_state;
+static bool state;
 
 int ui_led_gpio_on_off(bool new_state)
 {
 	int ret;
 
-	current_state = new_state;
+	state = new_state;
 	
-	ret = gpio_pin_set(led_gpio_dev, LED_RED_GPIO_PIN, current_state * red_val);
+	ret = gpio_pin_set(led_gpio_dev, LED_RED_GPIO_PIN, state * red_val);
 	if (ret) {
 		LOG_ERR("Error %d: set red pin failed", ret);
 		return ret;
 	}
-	ret = gpio_pin_set(led_gpio_dev, LED_GREEN_GPIO_PIN, current_state * green_val);
+	ret = gpio_pin_set(led_gpio_dev, LED_GREEN_GPIO_PIN, state * green_val);
 	if (ret) {
 		LOG_ERR("Error %d: set green pin failed", ret);
 		return ret;
 	}
-	ret = gpio_pin_set(led_gpio_dev, LED_BLUE_GPIO_PIN, current_state * blue_val);
+	ret = gpio_pin_set(led_gpio_dev, LED_BLUE_GPIO_PIN, state * blue_val);
 	if (ret) {
 		LOG_ERR("Error %d: set blue pin failed", ret);
 		return ret;
 	}
+
 	return 0;
 }
 
 int ui_led_gpio_set_colour(uint32_t colour_values)
 {
+	int ret;
+
 	red_val = (uint8_t)(colour_values >> 16);
 	green_val = (uint8_t)(colour_values >> 8);
 	blue_val = (uint8_t)colour_values;
 
-	if (!current_state) {
-		return 0;
+	if (state) {
+		ret = ui_led_gpio_on_off(state);
+		if (ret) {
+			LOG_ERR("Error %d: LED pwm on/off failed", ret);
+			return ret;
+		}
 	}
-	return ui_led_gpio_on_off(true);
+
+	return 0;
 }
 
 int ui_led_gpio_init(void)
@@ -93,5 +101,6 @@ int ui_led_gpio_init(void)
 		LOG_ERR("Error %d: configure blue pin failed", ret);
 		return ret;
 	}
+	
 	return 0;
 }

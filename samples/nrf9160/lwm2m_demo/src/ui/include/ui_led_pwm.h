@@ -40,7 +40,7 @@ int ui_led_pwm_on_off(bool new_state);
 int ui_led_pwm_set_colour(uint32_t colour_values);
 
 /**
- * @brief Set intensity of LEDs.
+ * @brief Set the intensity of the LEDs.
  * 
  * @param[in] intensity Integer between [0, 100], describing
  * a percentage of the maximum LED intensity.

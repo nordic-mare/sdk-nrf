@@ -15,6 +15,17 @@
 LOG_MODULE_REGISTER(MODULE, CONFIG_UI_LOG_LEVEL);
 
 /**@brief Callback for button events from the DK buttons and LEDs library. */
+
+/**
+ * @brief Callback used by the DK buttons and LEDs library.
+ * 
+ * Submits a button event when a button changes states. 
+ * 
+ * @param button_states Bitmask containing the buttons state, 
+ * i.e. bit 1 corresponds to the state of button 1 etc.
+ * @param has_changed Bitmask indicating whether a button's state has
+ * changed.
+ */
 static void dk_button_event_handler(uint32_t button_states, uint32_t has_changed)
 {
 	uint8_t btn_num;
