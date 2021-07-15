@@ -15,19 +15,40 @@ LOG_MODULE_REGISTER(ui_buzzer, CONFIG_UI_LOG_LEVEL);
 #define BUZZER_PWM_PIN			DT_PROP(BUZZER_PWM_NODE, ch0_pin)
 #define BUZZER_PWM_FLAGS        DT_PWMS_FLAGS(BUZZER_PWM_NODE)
 
-#define PERIOD(freq)				((USEC_PER_SEC) / (freq))
-#define PULSE_WIDTH(freq, duty)		(PERIOD(freq) * ((uint32_t)duty) / (100U))
+/* Transform frequency in Hz to period in microseconds */
+#define PERIOD(freq)			((USEC_PER_SEC) / (freq))
 
-#define FREQUENCY_MAX				10000U
-#define DUTYCYCLE_MAX				100U
+#define FREQUENCY_MAX			10000
+#define INTENSITY_MAX			100
+
+/* Affects curvature of pulse width graph */
+#define CURVE_CONST				50						
 
 static const struct device *buzzer_pwm_dev;
-static bool state;
-static uint32_t frequency;
-static uint8_t dutycycle;
 
-static uint32_t calculate_pulse_width(uint8_t dutycycle, uint32_t period) {
-	return (period / ((-98 * dutycycle) / 100 + 100) - period / 200);
+static uint32_t frequency;
+static uint8_t intensity;
+static bool state;
+
+/**
+ * @brief Calculate pulse width.
+ * 
+ * Perceived sound level is logarithmic with respect to the pulse width,
+ * this calculation is exponential to try and get a linear relationship
+ * between intensity and perceived sound level.
+ * 
+ * Designed to achieve pulse width = 0 with intensity = 0,
+ * and pulse width = period/2 with intensity = 100.
+ * 
+ * @param period Period in microseconds.
+ * @param intensity Integer between [0, 100], describing
+ * a percentage of the maximum buzzer volume intensity.
+ * @return uint32_t Pulse width in microseconds.
+ */
+static uint32_t calculate_pulse_width(int32_t period, int32_t intensity) {
+	int32_t divisor = CURVE_CONST + ((2 - CURVE_CONST) * intensity) / INTENSITY_MAX;
+	int32_t offset = (period * (INTENSITY_MAX - intensity)) / (CURVE_CONST * INTENSITY_MAX);
+	return (uint32_t)(period/divisor - offset);
 }
 
 int ui_buzzer_on_off(bool new_state)
@@ -36,18 +57,16 @@ int ui_buzzer_on_off(bool new_state)
 
 	state = new_state;
 
-	LOG_DBG("Frequency: %u", frequency);
-	uint32_t pulse_width = state ? calculate_pulse_width(dutycycle, PERIOD(frequency)) : 0;
 	if (frequency == 0) {
+		/* Turn off buzzer when frequency = 0 */
 		ret = pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN,
-			1000000, 0,
+			USEC_PER_SEC, 0,
 			BUZZER_PWM_FLAGS);
 	} else {
-		LOG_DBG("ON/OFF period: %u", PERIOD(frequency));
-		LOG_DBG("ON/OFF pulse width: %u", pulse_width);
+		uint32_t period = PERIOD(frequency);
+		uint32_t pulse_width = calculate_pulse_width(period, intensity);
 		ret = pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN,
-			PERIOD(frequency), pulse_width,
-			BUZZER_PWM_FLAGS);
+					period, pulse_width * state, BUZZER_PWM_FLAGS);
 	}
 
 	if (ret) {
@@ -80,16 +99,16 @@ int ui_buzzer_set_frequency(uint32_t freq)
 	return 0;
 }
 
-int ui_buzzer_set_dutycycle(uint8_t duty)
+int ui_buzzer_set_intensity(uint8_t new_intensity)
 {
 	int ret;
 
-	if (duty > DUTYCYCLE_MAX) {
+	if (new_intensity > INTENSITY_MAX) {
 		LOG_ERR("Error %d: dutycycle too large", -EINVAL);
 		return -EINVAL;
 	}
 
-	dutycycle = duty;
+	intensity = new_intensity;
 
 	if (state) {
 		ret = ui_buzzer_on_off(state);
@@ -106,36 +125,9 @@ int ui_buzzer_init(void)
 {
 	buzzer_pwm_dev = device_get_binding(BUZZER_PWM_NAME);
 	if (!buzzer_pwm_dev) {
-		LOG_ERR("Error %d: could not bind to LED GPIO device", -ENODEV);
+		LOG_ERR("Error %d: could not bind to buzzer PWM device", -ENODEV);
 		return -ENODEV;
 	}
 
-	frequency = 440;
-	dutycycle = 25;
-
 	return 0;
-}
-
-// Kept temporarily for inspiration. Safe to remove
-static int pwm_out(uint32_t frequency, uint8_t intensity)
-{
-	static uint32_t prev_period;
-	uint32_t period = (frequency > 0) ? USEC_PER_SEC / frequency : 0;
-	uint32_t duty_cycle = 0; //(intensity == 0) ? 0 :
-		//period / intensity_to_duty_cycle_divisor();
-
-	/* Applying workaround due to limitations in PWM driver that doesn't
-	 * allow changing period while PWM is running. Setting pulse to 0
-	 * disables the PWM, but not before the current period is finished.
-	 */
-	if (prev_period) {
-		pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN,
-				 prev_period, 0, 0);
-		k_sleep(K_MSEC(MAX((prev_period / USEC_PER_MSEC), 1)));
-	}
-
-	prev_period = period;
-
-	return pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN,
-				period, duty_cycle, 0);
 }

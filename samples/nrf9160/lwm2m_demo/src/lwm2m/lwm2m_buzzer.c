@@ -13,7 +13,11 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_buzzer, CONFIG_APP_LOG_LEVEL);
 
-#define BUZZER_APP_TYPE	"BUZZER"
+#define LWM2M_RES_DATA_FLAG_RW	0
+
+#define BUZZER_FREQUENCY_START_VAL	440U
+#define BUZZER_INTENSITY_START_VAL	100U
+#define BUZZER_APP_TYPE				"BUZZER"
 
 static int buzzer_state_cb(uint16_t obj_inst_id,
 			   uint16_t res_id, uint16_t res_inst_id,
@@ -49,7 +53,7 @@ static int buzzer_intensity_cb(uint16_t obj_inst_id,
 		return -EINVAL;
 	}
 
-	ret = ui_buzzer_set_dutycycle(intensity);
+	ret = ui_buzzer_set_intensity(intensity);
 	if (ret) {
 		LOG_ERR("Error %d: set dutycycle failed", ret);
 		return ret;
@@ -60,7 +64,16 @@ static int buzzer_intensity_cb(uint16_t obj_inst_id,
 
 int lwm2m_init_buzzer(void)
 {
-	ui_buzzer_init();
+	int ret;
+	
+	ret = ui_buzzer_init();
+	if (ret) {
+		LOG_ERR("Error %d: init ui buzzer failed", ret);
+		return ret;
+	}
+
+	ui_buzzer_set_intensity(BUZZER_INTENSITY_START_VAL);
+	ui_buzzer_set_frequency(BUZZER_FREQUENCY_START_VAL);
 	
 	lwm2m_engine_create_obj_inst(
 			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0));
@@ -74,6 +87,11 @@ int lwm2m_init_buzzer(void)
 			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, APPLICATION_TYPE_RID),
 			BUZZER_APP_TYPE, sizeof(BUZZER_APP_TYPE),
 			LWM2M_RES_DATA_FLAG_RO);
+	
+	float64_value_t start_intensity = {.val1 = BUZZER_INTENSITY_START_VAL, .val2 = 0};
+	lwm2m_engine_set_float64(
+			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, LEVEL_RID),
+			&start_intensity);
 
 	return 0;
 }
