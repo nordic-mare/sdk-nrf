@@ -2,6 +2,10 @@ menu "Modules"
 
 menu "Sensor Module"
 
+config SENSOR_MODULE
+	bool "Enable sensor module"
+	default n
+
 config SENSOR_MODULE_TEMP_ENABLE
 	bool "Enable value tracking of temperature"
 	default n

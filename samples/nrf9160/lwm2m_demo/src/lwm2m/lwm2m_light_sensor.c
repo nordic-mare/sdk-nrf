@@ -23,7 +23,7 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define LIGHT_OBJ_INSTANCE_ID 	0
 #define COLOUR_OBJ_INSTANCE_ID  1
 
-#define RGBIR_STR_LENGTH      11  // '0xRRGGBBIR\0'
+#define RGBIR_STR_LENGTH      	11  // '0xRRGGBBIR\0'
 
 #define SENSOR_FETCH_DELAY_MS	200
 
@@ -31,13 +31,17 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define COLOUR_SENSOR_APP_NAME  "Colour sensor"
 #define LIGHT_UNIT              "RGB-IR"
 
-static char light_value_str[RGBIR_STR_LENGTH] = "Unread";
-static char colour_value_str[RGBIR_STR_LENGTH] = "Unread";
+static char light_value_str[RGBIR_STR_LENGTH] = "-";
+static char colour_value_str[RGBIR_STR_LENGTH] = "-";
+
+#if defined(CONFIG_BOARD_THINGY91_NRF9160NS)
 static bool read_sensor;
+#endif
 
 static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len) 
 {
+#if defined(CONFIG_BOARD_THINGY91_NRF9160NS)
 	int ret;
 	struct sensor_value light_measurements[LIGHT_SENSOR_NUM_CHANNELS];
 	uint32_t scaled_measurement;
@@ -77,8 +81,7 @@ static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_
 	else {
 		read_sensor = true;
 	}
-
-	
+#endif /* if defined(CONFIG_BOARD_THINGY91_NRF9160NS) */
 
 	*data_len = sizeof(light_value_str);
 
@@ -88,6 +91,7 @@ static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_
 static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
+#if defined(CONFIG_BOARD_THINGY91_NRF9160NS)
 	int ret;
 	struct sensor_value colour_measurements[LIGHT_SENSOR_NUM_CHANNELS];
 	uint32_t scaled_measurement;
@@ -126,6 +130,7 @@ static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16
 	else {
 		read_sensor = true;
 	}
+#endif /* if defined(CONFIG_BOARD_THINGY91_NRF9160NS) */
 
 	*data_len = sizeof(colour_value_str);
 
@@ -134,9 +139,13 @@ static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16
 
 int lwm2m_init_light_sensor(void) 
 {
+#if defined(CONFIG_BOARD_THINGY91_NRF9160NS)
 	read_sensor = true;
-
-	light_sensor_init();    
+	light_sensor_init();
+#else
+	snprintk(light_value_str, RGBIR_STR_LENGTH, "0x2F110903");
+	snprintk(colour_value_str, RGBIR_STR_LENGTH, "0x567EEB10");
+#endif
 
 	/* Ambient light sensor */
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, LIGHT_OBJ_INSTANCE_ID));
@@ -179,6 +188,7 @@ int lwm2m_init_light_sensor(void)
 	return 0;
 }
 
+#if defined(CONFIG_BOARD_THINGY91_NRF9160NS)
 static bool event_handler(const struct event_header *eh)
 {
 	if (is_sensor_event(eh)) {
@@ -226,3 +236,4 @@ static bool event_handler(const struct event_header *eh)
 
 EVENT_LISTENER(MODULE, event_handler);
 EVENT_SUBSCRIBE(MODULE, sensor_event);
+#endif /* if defined(CONFIG_BOARD_THINGY91_NRF9160NS) */

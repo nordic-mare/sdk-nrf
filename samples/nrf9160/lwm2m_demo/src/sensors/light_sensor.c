@@ -10,8 +10,8 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
-#define LIGHT_SENSOR_NODE_ID	DT_PATH(soc, peripheral_40000000, i2c_a000, bh1749_38)
-#define LIGHT_SENSOR_NAME	    DT_LABEL(LIGHT_SENSOR_NODE_ID)
+#define LIGHT_SENSOR_NODE		DT_PATH(soc, peripheral_40000000, i2c_a000, bh1749_38)
+#define LIGHT_SENSOR_DEV_LABEL	DT_LABEL(LIGHT_SENSOR_NODE)
 
 /* Trigger values */
 #ifdef CONFIG_LIGHT_SENSOR_TRIGGER_ENABLE
@@ -185,7 +185,7 @@ int light_sensor_init(void)
 
 	ui_sense_led_init();
 
-	light_sensor_dev = device_get_binding(LIGHT_SENSOR_NAME);
+	light_sensor_dev = device_get_binding(LIGHT_SENSOR_DEV_LABEL);
 	if (!light_sensor_dev) {
 		LOG_ERR("Error %d: could not bind to Light Sensor device", -ENODEV);
 		return -ENODEV;

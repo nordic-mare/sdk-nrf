@@ -10,64 +10,45 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(ui_led_gpio, CONFIG_UI_LOG_LEVEL);
 
-#define LED_RED_GPIO_NODE   DT_NODELABEL(red_led)
-#define LED_GREEN_GPIO_NODE DT_NODELABEL(green_led)
-#define LED_BLUE_GPIO_NODE  DT_NODELABEL(blue_led)
-
-#define LED_GPIO_NAME	    DT_GPIO_LABEL(LED_RED_GPIO_NODE, gpios)
-
-#define LED_RED_GPIO_PIN	DT_GPIO_PIN(LED_RED_GPIO_NODE, gpios)
-#define LED_GREEN_GPIO_PIN	DT_GPIO_PIN(LED_GREEN_GPIO_NODE, gpios)
-#define LED_BLUE_GPIO_PIN	DT_GPIO_PIN(LED_BLUE_GPIO_NODE, gpios)
-
-#define LED_GPIO_FLAGS	    DT_GPIO_FLAGS(LED_RED_GPIO_NODE, gpios)
+#define LED_GPIO_NODE(number)	DT_ALIAS(led##number)
+#define LED_GPIO_PIN(number)	DT_GPIO_PIN(LED_GPIO_NODE(number), gpios)
+#define LED_GPIO_FLAGS	    	DT_GPIO_FLAGS(LED_GPIO_NODE(0), gpios)
+#define LED_GPIO_DEV_LABEL	    DT_GPIO_LABEL(LED_GPIO_NODE(0), gpios)
 
 static const struct device *led_gpio_dev;
 
-static uint8_t red_val;
-static uint8_t green_val;
-static uint8_t blue_val;
-static bool state;
-
-int ui_led_gpio_on_off(bool new_state)
+int ui_led_gpio_on_off(uint8_t led_num, bool new_state)
 {
 	int ret;
+	gpio_pin_t pin;
 
-	state = new_state;
+	switch (led_num)
+	{
+	case 0:
+		pin = LED_GPIO_PIN(0);
+		break;
+
+	case 1:
+		pin = LED_GPIO_PIN(1);
+		break;
+
+	case 2:
+		pin = LED_GPIO_PIN(2);
+		break;
+
+	case 3:
+		pin = LED_GPIO_PIN(3);
+		break;
 	
-	ret = gpio_pin_set(led_gpio_dev, LED_RED_GPIO_PIN, state * red_val);
-	if (ret) {
-		LOG_ERR("Error %d: set red pin failed", ret);
-		return ret;
+	default:
+		LOG_ERR("Error %d: LED %d not supported", -ENOTSUP, led_num);
+		return -ENOTSUP;
 	}
-	ret = gpio_pin_set(led_gpio_dev, LED_GREEN_GPIO_PIN, state * green_val);
+	
+	ret = gpio_pin_set(led_gpio_dev, pin, new_state);
 	if (ret) {
-		LOG_ERR("Error %d: set green pin failed", ret);
+		LOG_ERR("Error %d: set LED %u pin failed", ret, led_num);
 		return ret;
-	}
-	ret = gpio_pin_set(led_gpio_dev, LED_BLUE_GPIO_PIN, state * blue_val);
-	if (ret) {
-		LOG_ERR("Error %d: set blue pin failed", ret);
-		return ret;
-	}
-
-	return 0;
-}
-
-int ui_led_gpio_set_colour(uint32_t colour_values)
-{
-	int ret;
-
-	red_val = (uint8_t)(colour_values >> 16);
-	green_val = (uint8_t)(colour_values >> 8);
-	blue_val = (uint8_t)colour_values;
-
-	if (state) {
-		ret = ui_led_gpio_on_off(state);
-		if (ret) {
-			LOG_ERR("Error %d: LED pwm on/off failed", ret);
-			return ret;
-		}
 	}
 
 	return 0;
@@ -77,28 +58,35 @@ int ui_led_gpio_init(void)
 {
 	int ret;
 
-	led_gpio_dev = device_get_binding(LED_GPIO_NAME);
+	led_gpio_dev = device_get_binding(LED_GPIO_DEV_LABEL);
 	if (!led_gpio_dev) {
 		LOG_ERR("Error %d: could not bind to LED GPIO device", -ENODEV);
 		return -ENODEV;
 	}
+	LOG_DBG("LED GPIO INIT SUCCESS");
 
-	ret = gpio_pin_configure(led_gpio_dev, LED_RED_GPIO_PIN, 
+	ret = gpio_pin_configure(led_gpio_dev, LED_GPIO_PIN(0), 
 					LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
-		LOG_ERR("Error %d: configure red pin failed", ret);
+		LOG_ERR("Error %d: configure LED 0 pin failed", ret);
 		return ret;
 	}
-	ret = gpio_pin_configure(led_gpio_dev, LED_GREEN_GPIO_PIN, 
+	ret = gpio_pin_configure(led_gpio_dev, LED_GPIO_PIN(1), 
 					LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
-		LOG_ERR("Error %d: configure green pin failed", ret);
+		LOG_ERR("Error %d: configure LED 1 pin failed", ret);
 		return ret;
 	}                            
-	ret = gpio_pin_configure(led_gpio_dev, LED_BLUE_GPIO_PIN, 
+	ret = gpio_pin_configure(led_gpio_dev, LED_GPIO_PIN(2), 
 					LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
-		LOG_ERR("Error %d: configure blue pin failed", ret);
+		LOG_ERR("Error %d: configure LED 2 pin failed", ret);
+		return ret;
+	}
+	ret = gpio_pin_configure(led_gpio_dev, LED_GPIO_PIN(3), 
+					LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
+	if (ret) {
+		LOG_ERR("Error %d: configure LED 3 pin failed", ret);
 		return ret;
 	}
 	

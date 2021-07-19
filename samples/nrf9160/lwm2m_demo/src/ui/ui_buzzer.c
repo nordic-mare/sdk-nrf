@@ -33,8 +33,8 @@ static bool state;
 /**
  * @brief Calculate pulse width.
  * 
- * Perceived sound level is logarithmic with respect to the pulse width,
- * this calculation is exponential to try and get a linear relationship
+ * Perceived sound level is logarithmic with respect to the pulse width.
+ * This transformation is exponential to try to get a linear relationship
  * between intensity and perceived sound level.
  * 
  * Designed to achieve pulse width = 0 with intensity = 0,

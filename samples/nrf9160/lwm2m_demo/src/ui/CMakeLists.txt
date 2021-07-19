@@ -7,17 +7,28 @@
 zephyr_include_directories(include)
 
 target_sources_ifdef(CONFIG_UI_BUTTON
-	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_button.c
-	)
-target_sources_ifdef(CONFIG_UI_BUZZER
-	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_buzzer.c
-	)
+	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_button.c)
+
+
+if(CONFIG_BOARD_THINGY91_NRF9160NS)
 target_sources_ifdef(CONFIG_UI_LED_USE_PWM
-	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_led_pwm.c
-	)
+	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_rgb_led_pwm.c)
+
 target_sources_ifdef(CONFIG_UI_LED_USE_GPIO
-	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_led_gpio.c
-	)
+	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_rgb_led_gpio.c)
+
 target_sources_ifdef(CONFIG_UI_SENSE_LED
-	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_sense_led.c
-	)
+	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_sense_led.c)
+
+target_sources_ifdef(CONFIG_UI_BUZZER
+	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_buzzer.c)
+endif() # if(CONFIG_BOARD_THINGY91_NRF9160NS)
+
+
+if(CONFIG_BOARD_NRF9160DK_NRF9160NS)
+target_sources_ifdef(CONFIG_UI_LED_USE_PWM
+	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_led_pwm.c)
+
+target_sources_ifdef(CONFIG_UI_LED_USE_GPIO
+	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_led_gpio.c)
+endif() # if(CONFIG_BOARD_NRF9160DK_NRF9160NS)

@@ -4,8 +4,8 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(env_sensor, CONFIG_APP_LOG_LEVEL);
 
-#define ENV_SENSOR_NODE	DT_PATH(soc, peripheral_40000000, i2c_a000, bme680_76)
-#define ENV_SENSOR_NAME	DT_LABEL(ENV_SENSOR_NODE)
+#define ENV_SENSOR_NODE			DT_PATH(soc, peripheral_40000000, i2c_a000, bme680_76)
+#define ENV_SENSOR_DEV_LABEL	DT_LABEL(ENV_SENSOR_NODE)
 
 static const struct device *env_sensor_dev;
 
@@ -38,7 +38,7 @@ int env_sensor_read_temp(struct sensor_value *temp_val)
 		return ret;
 	}
 
-	LOG_INF("%s: read %d.%d C", env_sensor_dev->name, 
+	LOG_INF("%s: read %d.%d °C", env_sensor_dev->name, 
 			temp_val->val1, temp_val->val2);
 
 	return 0;
@@ -94,7 +94,7 @@ int env_sensor_read_gas_resistance(struct sensor_value *gas_res_val)
 
 int env_sensor_init(void)
 {
-	env_sensor_dev = device_get_binding(ENV_SENSOR_NAME);
+	env_sensor_dev = device_get_binding(ENV_SENSOR_DEV_LABEL);
 	if (!env_sensor_dev) {
 		LOG_ERR("Error %d: could not bind to Environment Sensor device", -ENODEV);
 		return -ENODEV;
