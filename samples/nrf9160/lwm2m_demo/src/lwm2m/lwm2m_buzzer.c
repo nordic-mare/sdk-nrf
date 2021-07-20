@@ -13,7 +13,9 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_buzzer, CONFIG_APP_LOG_LEVEL);
 
-#define BUZZER_APP_TYPE	"BUZZER"
+#define BUZZER_FREQUENCY_START_VAL	440U
+#define BUZZER_INTENSITY_START_VAL	100U
+#define BUZZER_APP_TYPE				"BUZZER"
 
 static int buzzer_state_cb(uint16_t obj_inst_id,
 			   uint16_t res_id, uint16_t res_inst_id,
@@ -23,13 +25,13 @@ static int buzzer_state_cb(uint16_t obj_inst_id,
 	int ret;
 	bool state = *(bool *)data;
 
-	LOG_DBG("Buzzer on/off! State: %d", state);
-
 	ret = ui_buzzer_on_off(state);
 	if (ret) {
 		LOG_ERR("Error %d: set buzzer on/off failed", ret);
 		return ret;
 	}
+
+	LOG_DBG("Buzzer on/off: %d", state);
 
 	return 0;
 }
@@ -42,25 +44,40 @@ static int buzzer_intensity_cb(uint16_t obj_inst_id,
 	int ret;
 	uint8_t intensity = *data;
 
-	LOG_DBG("Intensity: %u", intensity);
-
 	if (intensity > 100) {
 		LOG_ERR("Error %d: intensity too high. Max 100", -EINVAL);
 		return -EINVAL;
 	}
 
-	ret = ui_buzzer_set_dutycycle(intensity);
+	ret = ui_buzzer_set_intensity(intensity);
 	if (ret) {
 		LOG_ERR("Error %d: set dutycycle failed", ret);
 		return ret;
 	}
+
+	LOG_DBG("Intensity: %u", intensity);
 
 	return 0; 
 }
 
 int lwm2m_init_buzzer(void)
 {
-	ui_buzzer_init();
+	int ret;
+	
+	ret = ui_buzzer_init();
+	if (ret) {
+		LOG_ERR("Error %d: init ui buzzer failed", ret);
+		return ret;
+	}
+
+	ret = ui_buzzer_set_intensity(BUZZER_INTENSITY_START_VAL);
+	if (ret) {
+		LOG_ERR("Error %d: set buzzer intensity failed", ret);
+	}
+	ret = ui_buzzer_set_frequency(BUZZER_FREQUENCY_START_VAL);
+	if (ret) {
+		LOG_ERR("Error %d: set buzzer frequency failed", ret);
+	}
 	
 	lwm2m_engine_create_obj_inst(
 			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0));
@@ -74,6 +91,11 @@ int lwm2m_init_buzzer(void)
 			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, APPLICATION_TYPE_RID),
 			BUZZER_APP_TYPE, sizeof(BUZZER_APP_TYPE),
 			LWM2M_RES_DATA_FLAG_RO);
+	
+	float64_value_t start_intensity = {.val1 = BUZZER_INTENSITY_START_VAL, .val2 = 0};
+	lwm2m_engine_set_float64(
+			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, LEVEL_RID),
+			&start_intensity);
 
 	return 0;
 }

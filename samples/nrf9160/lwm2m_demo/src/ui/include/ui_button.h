@@ -12,6 +12,13 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Initialize the dk_buttons_and_leds library
+ * with a callback function that submits a button event
+ * when a button's state changes.
+ * 
+ * @return int 0 if successful, negative error code if not.
+ */
 int ui_button_init(void);
 
 #ifdef __cplusplus

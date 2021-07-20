@@ -8,6 +8,9 @@ menu "Application sample"
 
 rsource "src/ui/Kconfig"
 rsource "src/modules/Kconfig"
+rsource "src/sensors/Kconfig"
+rsource "src/ipso/Kconfig"
+rsource "src/lwm2m/Kconfig"
 
 config APP_LWM2M_SERVER
 	string "LwM2M server name or IP address"
@@ -90,149 +93,10 @@ config GPS_SEARCH_TIMEOUT_TIME
 		Length of time the GPS can spend looking for a fix in seconds. 
 		In areas with poor connection, this should be increased.
 
-choice
-	prompt "Accelerometer device"
-	default ACCEL_USE_EXTERNAL
-	help
-		Select which device will provide accelerometer data.
-
-config ACCEL_USE_SIM
-	bool "Use simulated accelerometer data"
-	select SENSOR
-	select SENSOR_SIM
-	select SENSOR_SIM_TRIGGER
-	help
-		Use sensor simulator to generate accelerometer data for
-		flip detection data sent to nRF Cloud.
-
-config ACCEL_USE_EXTERNAL
-	bool "User provided accelerometer device"
-	help
-		The user will provide an accelerometer device that will
-		be used for flip detection.
-
-endchoice
-
-if ACCEL_USE_SIM
-config ACCEL_DEV_NAME
-	string
-	default SENSOR_SIM_DEV_NAME
-
-config ACCEL_TRIGGER
-	bool
-	default SENSOR_SIM_TRIGGER
-
-config FLIP_INPUT
-	int "Button or switch number to simulate flip"
-	range 1 4 if BOARD_NRF9160DK_NRF9160NS
-	default 3 if BOARD_NRF9160DK_NRF9160NS
-	default 0
-	help
-		Button or switch number to use for simulating
-		a board flip event.
-		0 - not set
-		1 - Button 1
-		2 - Button 2
-		3 - Switch 1
-		4 - Switch 2
-endif
-
-config FLIP_POLL
-	bool "Use polling to detect flip"
-	help
-		Poll the defined accelerometer device at interval determined by
-		FLIP_POLL_INTERVAL. Data will be sent to nRF Cloud if a flip
-		has happened and the orientation thus has changed.
-
-if FLIP_POLL
-config FLIP_POLL_INTERVAL
-	int "Flip detection poll interval"
-	default 1000
-	help
-		Flip polling interval in milliseconds.
-endif
-
-if ACCEL_USE_EXTERNAL
-
-config ACCEL_DEV_NAME
-	string "Accelerometer device name"
-	default "ADXL362"
-	help
-		Device from which accelerometer data will be fetched and used
-		for orientation detection and sent to the LWM2M server.
-
-endif
-
-config ACCEL_INVERTED
-	bool "Accelerometer inverted"
-	help
-		Enable if the accelerometer is mounted with the top side facing
-		down when the board itself is in normal position.
-
-config ACCEL_CALIBRATE
-	bool "Calibrate accelerometer"
-	help
-		Calibrate the accelerometer on a flat surface to filter away
-		static measurement offset that could affect orientation
-		detection.
-
-if ACCEL_CALIBRATE
-config ACCEL_CALIBRATION_ITERATIONS
-	int "Number of readings for calibration"
-	default 5
-	help
-		Number of measurement readings to average over to find the
-		static offset in the readings when calibrating the
-		accelerometer.
-
-endif
-
-if !ACCEL_CALIBRATE
-config ACCEL_CALIBRATION_ITERATIONS
-	int
-	default 0
-endif
-
-config ACCEL_ITERATIONS
-	int "Number of readings per measurement"
-	default 1
-	help
-		Number of measurement readings to average over for each time
-		the orientation detector determines the orientation of the
-		board. Used for simple filtering of noisy measurements.
-
 module = APP
 module-dep = LOG
 module-str = Log level for sample
 source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
-
-
-config LWM2M_IPSO_COLOUR_SENSOR
-	bool "IPSO Colour Sensor Support"
-	help
-	  This IPSO object should be used with a colour sensor to
-	  report a colour or light measurement.
-
-config LWM2M_IPSO_COLOUR_SENSOR_INSTANCE_COUNT
-	int "Number of colour sensors present on board"
-	default 1
-	help 
-		Number of colour sensors present on board.
-
-choice
-	prompt "IPSO Colour object version"
-	depends on LWM2M_IPSO_COLOUR_SENSOR
-	default LWM2M_IPSO_COLOUR_SENSOR_VERSION_1_0
-	help
-	  Select which version of the IPSO Colour object should be used.
-
-config LWM2M_IPSO_COLOUR_SENSOR_VERSION_1_0
-	bool "IPSO Colour object version 1.0"
-
-config LWM2M_IPSO_COLOUR_SENSOR_VERSION_1_1
-	bool "IPSO Colour object version 1.1"
-
-endchoice
 
 endmenu
 

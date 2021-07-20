@@ -1,0 +1,126 @@
+menu "Sensors"
+
+config ENVIRONMENT_SENSOR
+	bool "Enable environment sensor"
+	default y if BOARD_THINGY91_NRF9160NS
+	default n if BOARD_NRF9160DK_NRF9160NS
+	select BME680 if BOARD_THINGY91_NRF9160NS
+
+
+config ACCELEROMETER
+	bool "Enable accelerometer"
+	default y
+
+choice 
+	prompt "Accelerometer device"
+	default ACCEL_USE_EXTERNAL if BOARD_THINGY91_NRF9160NS
+	default ACCEL_USE_SIM if BOARD_NRF9160DK_NRF9160NS
+	depends on ACCELEROMETER
+
+config ACCEL_USE_EXTERNAL
+	bool "User provided accelerometer device"
+	select ADXL362 if BOARD_THINGY91_NRF9160NS
+	help
+		The user will provide an accelerometer device.
+
+config ACCEL_USE_SIM
+	bool "Simulate accelerometer sensor"
+	select SENSOR
+	select SENSOR_SIM
+	select SENSOR_SIM_TRIGGER
+	help
+		Use sensor simulator to generate accelerometer data.
+endchoice # Accelerometer device
+
+config ACCEL_CALIBRATE
+	bool "Calibrate the accelerometer on startup"
+	default y
+	help
+		Calibrate the accelerometer on a flat surface to filter away
+		static measurement offset that could affect orientation
+		detection.
+
+config ACCEL_CALIBRATION_ITERATIONS
+	int "Number of measurements per channel during calibration"
+	default 5
+
+
+config LIGHT_SENSOR
+    bool "Enable light sensor"
+	default y if BOARD_THINGY91_NRF9160NS
+	default n if BOARD_NRF9160DK_NRF9160NS
+	select BH1749 if BOARD_THINGY91_NRF9160NS
+
+config LIGHT_SENSOR_MEASUREMENT_MAX_VALUE
+    int "Max expected light sensor output value"
+	default 500
+	help
+		Maximum value expected from the light sensor.
+		Used to scale each color measurement to an 8-bit, unsigned
+		integer. 
+		Reasonable values will depend on the sensors environment.
+		Max of a series of raw measurements during particular use conditions
+		can give a good estimate (for that condition).
+
+config COLOUR_SENSOR_MEASUREMENT_MAX_VALUE
+	int "Max expected colour sensor output value"
+	default 500
+	help
+		Maximum value expected from the colour sensor. 
+		Used to scale each color measurement to an 8-bit, unsigned
+		integer. 
+		Reasonable values will depend on the sensors environment.
+		Max of a series of raw measurements during particular use conditions
+		can give a good estimate (for that condition).
+
+config LIGHT_SENSOR_TRIGGER_ENABLE
+	bool "Enable sensor trigger"
+	default n
+	help
+		Enable trigger for the light sensor
+
+choice
+	prompt "Light sensor trigger source"
+	default LIGHT_SENSOR_TRIGGER_THRESH
+	help
+	  	Select light sensor trigger source.
+
+config LIGHT_SENSOR_TRIGGER_THRESH
+	bool "Threshold trigger"
+	help
+		Trigger fires when sensor values exceeds the 
+		threshold values.
+
+config LIGHT_SENSOR_TRIGGER_DATA_READY
+	bool "Data ready trigger"
+	help
+		Trigger fires when new data is ready
+		to be read.
+endchoice # Light sensor trigger source
+
+config LIGHT_SENSOR_TRIGGER_THRESH_CHANNEL
+    string "Sensor channel used by the threshold trigger"
+    default SENSOR_CHAN_RED
+    help
+        The channel that is read and used to determine whether
+        the threshold trigger should fire.
+        Valid channels: SENSOR_CHAN_RED, SENSOR_CHAN_GREEN,
+        SENSOR_CHAN_BLUE or SENSOR_CHAN_IR.
+        Trigger is only supported for one channel, thus
+        SENSOR_CHAN_ALL is not a valid option.
+
+config LIGHT_SENSOR_TRIGGER_THRESH_UPPER
+    int "Upper threshold for trigger"
+    default 100
+    help
+        Upper threshold needed to fire the threshold trigger that
+        generates a light sensor event.
+
+config LIGHT_SENSOR_TRIGGER_THRESH_LOWER
+    int "UpLowerper threshold for trigger"
+    default 0
+    help
+        Lower threshold needed to fire the threshold trigger that
+        generates a light sensor event.
+
+endmenu # Sensors

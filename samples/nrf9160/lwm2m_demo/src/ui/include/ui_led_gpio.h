@@ -5,8 +5,7 @@
  */
 /**@file
  *
- * @brief   LED control for the User Interface module. The module uses PWM to
- *	    control RGB colors and light intensity.
+ * @brief   LED control for the User Interface module.
  */
 
 #ifndef UI_LED_GPIO_H__
@@ -18,10 +17,20 @@
 extern "C" {
 #endif
 
-int ui_led_gpio_on_off(bool new_state);
+/**
+ * @brief Turn the LED on or off. If false the 
+ * LEDs will be dark regardless of colour value.
+ * 
+ * @param new_state The LED's new state.
+ * @return int 0 if successful, negative error code if not.
+ */
+int ui_led_gpio_on_off(uint8_t led_num, bool new_state);
 
-int ui_led_gpio_set_colour(uint32_t colour_values);
-
+/**
+ * @brief Initialize the LED to use GPIO.
+ * 
+ * @return int 0 if successful, negative error code if not.
+ */
 int ui_led_gpio_init(void);
 
 #ifdef __cplusplus

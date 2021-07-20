@@ -3,8 +3,27 @@
 
 #include <zephyr.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief Turn the sense LEDs on or off.
+ * 
+ * @param[in] new_state The LEDs' new state.
+ * @return int 0 if successful, negative error code if not.
+ */
 int ui_sense_led_on_off(bool new_state);
 
+/**
+ * @brief Initialize the sense LEDs.
+ * 
+ * @return int 0 if successful, negative error code if not.
+ */
 int ui_sense_led_init(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

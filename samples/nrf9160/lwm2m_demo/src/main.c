@@ -123,24 +123,26 @@ static int lwm2m_setup(void)
 #if defined(CONFIG_LWM2M_CLIENT_UTILS_CONN_MON_OBJ_SUPPORT)
 	lwm2m_init_connmon();
 #endif
-#if defined(CONFIG_LWM2M_IPSO_LIGHT_CONTROL)
+#if defined(CONFIG_LWM2M_APP_LIGHT_CONTROL)
 	lwm2m_init_light_control();
 #endif
 #if defined(CONFIG_LWM2M_IPSO_TEMP_SENSOR)
 	lwm2m_init_env_sensor();
 #endif
-#if defined(CONFIG_UI_BUZZER)
+#if defined(CONFIG_LWM2M_APP_BUZZER)
 	lwm2m_init_buzzer();
 #endif
-#if defined(CONFIG_UI_BUTTON)
+#if defined(CONFIG_LWM2M_APP_PUSH_BUTTON)
 	lwm2m_init_button();
 #endif
-#if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER)
+#if defined(CONFIG_LWM2M_APP_ACCELEROMETER)
 	lwm2m_init_accel();
 #endif
+#if defined(CONFIG_LWM2M_APP_LIGHT_SENSOR)
 	lwm2m_init_light_sensor();
+#endif
 #if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
-	lwm2m_app_init_location();
+	//lwm2m_app_init_location();
 #endif
 	return 0;
 }
@@ -330,7 +332,7 @@ static void rd_client_event(struct lwm2m_ctx *client,
 		LOG_DBG("Registration complete");
 #if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
 		// Ensure that GPS search is only started after bootstrap process is complete.
-		lwm2m_app_start_gps();
+		//lwm2m_app_start_gps();
 #endif
 		break;
 
@@ -478,10 +480,12 @@ void main(void)
 	}
 #endif
 
+#ifdef CONFIG_SENSOR_MODULE
 	ret = sensor_module_init();
 	if (ret) {
 		LOG_ERR("Error %d: could not initialize sensor module", ret);
 	}
+#endif
 
 	while (true) {
 		lwm2m_rd_client_start(&client, endpoint_name, flags,
