@@ -42,12 +42,9 @@ int lwm2m_init_button(void)
 			LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON1_OBJ_INST_ID, APPLICATION_TYPE_RID),
 			BUTTON1_APP_NAME, sizeof(BUTTON1_APP_NAME), LWM2M_RES_DATA_FLAG_RO);
 
-#ifdef CONFIG_BOARD_NRF9160DK_NRF9160NS
-	/* create button1 object */
+#if (CONFIG_LWM2M_IPSO_PUSH_BUTTON_INSTANCE_COUNT == 2)
+	/* create button2 object */
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON2_OBJ_INST_ID));
-	/* Overwriting post write callback of Digital Input State, as the original callback in the ipso object directly 
-	   modifies the Digital Input Counter resource data buffer without notifying the engine, 
-	   which effectively disables Value Tracking functionality for the counter resource. Won't be needed with new Zephyr update.*/ 
 	lwm2m_engine_register_post_write_callback(
 			LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON2_OBJ_INST_ID, DIGITAL_INPUT_STATE_RID),
 			NULL);

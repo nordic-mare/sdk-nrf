@@ -63,7 +63,6 @@ int ui_led_gpio_init(void)
 		LOG_ERR("Error %d: could not bind to LED GPIO device", -ENODEV);
 		return -ENODEV;
 	}
-	LOG_DBG("LED GPIO INIT SUCCESS");
 
 	ret = gpio_pin_configure(led_gpio_dev, LED_GPIO_PIN(0), 
 					LED_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);

@@ -2,32 +2,52 @@ menu "Sensors"
 
 config ENVIRONMENT_SENSOR
 	bool "Enable environment sensor"
-	default y if BOARD_THINGY91_NRF9160NS
-	default n if BOARD_NRF9160DK_NRF9160NS
-	select BME680 if BOARD_THINGY91_NRF9160NS
 
+if ENVIRONMENT_SENSOR
+choice
+	prompt "Environment sensor device"
+	default ENV_SENSOR_USE_EXTERNAL
+
+config ENV_SENSOR_USE_EXTERNAL
+	bool "Use the BME680 environment sensor"
+	depends on BME680
+
+config ENV_SENSOR_USE_SIM
+	bool "Simulate environment sensor"
+	depends on SENSOR_SIM
+	help
+		Use sensor simulator to generate data.
+		Gas resistance is not supported by the sensor simulator,
+		and gas_res_read() will return an unchanged value.
+endchoice # Environment sensor device
+
+if ENV_SENSOR_USE_SIM
+config ENV_SENSOR_GAS_RES_SIM_VAL
+	int "Simulated gas resistance value"
+	default 10000
+	help
+		Gas resistance in Ohm that will be
+		returned when the environment sensor is simulated,
+		as the sensor simulator does not have generic sensor
+		support.
+endif # ENV_SENSOR_USE_SIM
+endif # ENVIRONMENT_SENSOR
 
 config ACCELEROMETER
 	bool "Enable accelerometer"
-	default y
 
+if ACCELEROMETER
 choice 
 	prompt "Accelerometer device"
-	default ACCEL_USE_EXTERNAL if BOARD_THINGY91_NRF9160NS
-	default ACCEL_USE_SIM if BOARD_NRF9160DK_NRF9160NS
-	depends on ACCELEROMETER
+	default ACCEL_USE_EXTERNAL
 
 config ACCEL_USE_EXTERNAL
-	bool "User provided accelerometer device"
-	select ADXL362 if BOARD_THINGY91_NRF9160NS
-	help
-		The user will provide an accelerometer device.
+	bool "Use the ADXL362 accelerometer"
+	depends on ADXL362
 
 config ACCEL_USE_SIM
-	bool "Simulate accelerometer sensor"
-	select SENSOR
-	select SENSOR_SIM
-	select SENSOR_SIM_TRIGGER
+	bool "Simulate accelerometer"
+	depends on SENSOR_SIM
 	help
 		Use sensor simulator to generate accelerometer data.
 endchoice # Accelerometer device
@@ -43,15 +63,27 @@ config ACCEL_CALIBRATE
 config ACCEL_CALIBRATION_ITERATIONS
 	int "Number of measurements per channel during calibration"
 	default 5
+endif # ACCELEROMETER
 
 
 config LIGHT_SENSOR
     bool "Enable light sensor"
-	default y if BOARD_THINGY91_NRF9160NS
-	default n if BOARD_NRF9160DK_NRF9160NS
-	select BH1749 if BOARD_THINGY91_NRF9160NS
 
-config LIGHT_SENSOR_MEASUREMENT_MAX_VALUE
+if LIGHT_SENSOR
+choice 
+	prompt "Light sensor device"
+	default LIGHT_SENSOR_USE_EXTERNAL
+
+config LIGHT_SENSOR_USE_EXTERNAL
+	bool "Use the BH1749 light sensor"
+	depends on BH1749
+	depends on UI_SENSE_LED
+
+config LIGHT_SENSOR_USE_SIM
+	bool "Simulate light sensor"
+endchoice # Light sensor device
+
+config LIGHT_SENSOR_LIGHT_MEASUREMENT_MAX_VALUE
     int "Max expected light sensor output value"
 	default 500
 	help
@@ -62,7 +94,7 @@ config LIGHT_SENSOR_MEASUREMENT_MAX_VALUE
 		Max of a series of raw measurements during particular use conditions
 		can give a good estimate (for that condition).
 
-config COLOUR_SENSOR_MEASUREMENT_MAX_VALUE
+config LIGHT_SENSOR_COLOUR_MEASUREMENT_MAX_VALUE
 	int "Max expected colour sensor output value"
 	default 500
 	help
@@ -73,54 +105,22 @@ config COLOUR_SENSOR_MEASUREMENT_MAX_VALUE
 		Max of a series of raw measurements during particular use conditions
 		can give a good estimate (for that condition).
 
-config LIGHT_SENSOR_TRIGGER_ENABLE
-	bool "Enable sensor trigger"
-	default n
+if LIGHT_SENSOR_USE_SIM
+config LIGHT_SENSOR_LIGHT_SIM_VAL
+	int "Simulated light value for all channels"
+	default 50
 	help
-		Enable trigger for the light sensor
+		Simulated light value. Wil be scaled to 
+		uint8_t, so this value should be smaller than
+		LIGHT_SENSOR_LIGHT_MEASUREMENT_MAX_VALUE. 
 
-choice
-	prompt "Light sensor trigger source"
-	default LIGHT_SENSOR_TRIGGER_THRESH
+config LIGHT_SENSOR_COLOUR_SIM_VAL
+	int "Simulated colour value for all channels"
+	default 250
 	help
-	  	Select light sensor trigger source.
-
-config LIGHT_SENSOR_TRIGGER_THRESH
-	bool "Threshold trigger"
-	help
-		Trigger fires when sensor values exceeds the 
-		threshold values.
-
-config LIGHT_SENSOR_TRIGGER_DATA_READY
-	bool "Data ready trigger"
-	help
-		Trigger fires when new data is ready
-		to be read.
-endchoice # Light sensor trigger source
-
-config LIGHT_SENSOR_TRIGGER_THRESH_CHANNEL
-    string "Sensor channel used by the threshold trigger"
-    default SENSOR_CHAN_RED
-    help
-        The channel that is read and used to determine whether
-        the threshold trigger should fire.
-        Valid channels: SENSOR_CHAN_RED, SENSOR_CHAN_GREEN,
-        SENSOR_CHAN_BLUE or SENSOR_CHAN_IR.
-        Trigger is only supported for one channel, thus
-        SENSOR_CHAN_ALL is not a valid option.
-
-config LIGHT_SENSOR_TRIGGER_THRESH_UPPER
-    int "Upper threshold for trigger"
-    default 100
-    help
-        Upper threshold needed to fire the threshold trigger that
-        generates a light sensor event.
-
-config LIGHT_SENSOR_TRIGGER_THRESH_LOWER
-    int "UpLowerper threshold for trigger"
-    default 0
-    help
-        Lower threshold needed to fire the threshold trigger that
-        generates a light sensor event.
-
+		Simulated colour value. Wil be scaled to 
+		uint8_t, so this value should be smaller than
+		LIGHT_SENSOR_COLOUR_MEASUREMENT_MAX_VALUE. 
+endif # LIGHT_SENSOR_USE_SIM
+endif # LIGHT_SENSOR
 endmenu # Sensors

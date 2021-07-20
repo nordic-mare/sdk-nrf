@@ -126,7 +126,7 @@ static int lwm2m_setup(void)
 #if defined(CONFIG_LWM2M_APP_LIGHT_CONTROL)
 	lwm2m_init_light_control();
 #endif
-#if defined(CONFIG_LWM2M_IPSO_TEMP_SENSOR)
+#if defined(CONFIG_LWM2M_APP_ENVIRONMENT_SENSOR)
 	lwm2m_init_env_sensor();
 #endif
 #if defined(CONFIG_LWM2M_APP_BUZZER)

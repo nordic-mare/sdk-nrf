@@ -26,27 +26,22 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define HUMID_UNIT 		"%"
 #define GAS_RES_UNIT 	"Ohm"
 	
-/* Default values used if no environment sensor present on board */
-static float32_value_t temp_float = {25, 0};
-static float32_value_t press_float = {101, 325000};
-static float32_value_t humid_float = {42, 0};
-static float32_value_t gas_res_float = {30000, 0};
-
-#if defined(CONFIG_BOARD_THINGY91_NRF9160NS)
 static bool read_sensor;
-#endif
+static float32_value_t temp_float;
+static float32_value_t press_float;
+static float32_value_t humid_float;
+
+/* Default gas res value used if using sensor simulator, 
+   as it does not have support for generic sensors. */
+static float32_value_t gas_res_float = {30000, 0};
 
 static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id, 
 					uint16_t res_inst_id, size_t *data_len)
 {
-#if defined(CONFIG_BOARD_THINGY91_NRF9160NS)
-	int ret;
-	struct sensor_value temp_val;
-
-	LOG_DBG("TEMP READ CALLBACK!!!");
-
+	/* Only read sensor if a regular request from server, i.e. not a notify request */
 	if (read_sensor) {
-		LOG_DBG("Reading sensor");
+		int ret;
+		struct sensor_value temp_val;
 
 		ret = env_sensor_read_temp(&temp_val);
 		if (ret) {
@@ -60,7 +55,6 @@ static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 	else {
 		read_sensor = true;
 	}
-#endif /* if defined(CONFIG_BOARD_THINGY91_NRF9160NS) */
 
 	*data_len = sizeof(temp_float);
 
@@ -70,14 +64,10 @@ static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-#if defined(CONFIG_BOARD_THINGY91_NRF9160NS)
-	int ret;
-	struct sensor_value press_val;
-
-	LOG_DBG("PRESS READ CALLBACK!!!");
-
+	/* Only read sensor if a regular request from server, i.e. not a notify request */
 	if (read_sensor) {
-		LOG_DBG("Reading sensor");
+		int ret;
+		struct sensor_value press_val;
 
 		ret = env_sensor_read_pressure(&press_val);
 		if (ret) {
@@ -91,7 +81,6 @@ static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 	else {
 		read_sensor = true;
 	}
-#endif /* if defined(CONFIG_BOARD_THINGY91_NRF9160NS) */
 
 	*data_len = sizeof(press_float);
 
@@ -101,11 +90,11 @@ static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-#if defined(CONFIG_BOARD_THINGY91_NRF9160NS)
-	int ret;
-	struct sensor_value humid_val;
-
+	/* Only read sensor if a regular request from server, i.e. not a notify request */
 	if (read_sensor) {
+		int ret;
+		struct sensor_value humid_val;
+
 		ret = env_sensor_read_humidity(&humid_val);
 		if (ret) {
 			LOG_ERR("Error %d: read humidity sensor failed", ret);
@@ -118,7 +107,6 @@ static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 	else {
 		read_sensor = true;
 	}
-#endif /* if defined(CONFIG_BOARD_THINGY91_NRF9160NS) */
 
 	*data_len = sizeof(humid_float);
 
@@ -128,11 +116,11 @@ static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-#if defined(CONFIG_BOARD_THINGY91_NRF9160NS)
-	int ret;
-	struct sensor_value gas_res_val;
-	
+	/* Only read sensor if a regular request from server, i.e. not a notify request */
 	if (read_sensor) {
+		int ret;
+		struct sensor_value gas_res_val;
+
 		ret = env_sensor_read_gas_resistance(&gas_res_val);
 		if (ret) {
 			LOG_ERR("Error %d: read gas resistance sensor failed", ret);
@@ -145,7 +133,6 @@ static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint1
 	else {
 		read_sensor = true;
 	}
-#endif /* if defined(CONFIG_BOARD_THINGY91_NRF9160NS) */
 
 	*data_len = sizeof(gas_res_float);
 
@@ -154,10 +141,8 @@ static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint1
 
 int lwm2m_init_env_sensor(void)
 {
-#if defined(CONFIG_BOARD_THINGY91_NRF9160NS)
 	read_sensor = true;
 	env_sensor_init();
-#endif
 
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0));
 	lwm2m_engine_register_read_callback(
@@ -207,12 +192,16 @@ int lwm2m_init_env_sensor(void)
 	return 0;
 }
 
-#if defined(CONFIG_BOARD_THINGY91_NRF9160NS)
 static bool event_handler(const struct event_header *eh)
 {
 	if (is_sensor_event(eh)) {
 		struct sensor_event *event = cast_sensor_event(eh);
 		float32_value_t received_value;
+
+		/* This prevents re-reading the sensor when a callback is called because of
+		   a notification event.
+		   Ensures that the value received by the server is the same as the value in the
+		   event received below. */
 		read_sensor = false;
 
 		switch (event->type)
@@ -278,4 +267,3 @@ static bool event_handler(const struct event_header *eh)
 
 EVENT_LISTENER(MODULE, event_handler);
 EVENT_SUBSCRIBE(MODULE, sensor_event);
-#endif /* if defined(CONFIG_BOARD_THINGY91_NRF9160NS) */

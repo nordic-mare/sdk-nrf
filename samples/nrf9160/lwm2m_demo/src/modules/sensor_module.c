@@ -273,9 +273,7 @@ static void light_work_cb(struct k_work *work)
 	uint16_t dummy_data_len;
 	uint8_t dummy_data_flags;
 	uint32_t old_light_val;
-	struct sensor_value light_measurements[LIGHT_SENSOR_NUM_CHANNELS];
-	uint32_t scaled_measurement;
-	uint32_t new_light_val = 0;;
+	uint32_t new_light_val;
 
 	LOG_DBG("LIGHT WORK CB");
 
@@ -286,15 +284,9 @@ static void light_work_cb(struct k_work *work)
 	old_light_val = strtol(old_light_val_str, NULL, 0);
 
 	/* Read sensor, try again later if busy */
-	if (light_sensor_read(light_measurements, sizeof(light_measurements)) == -EBUSY) {
+	if (light_sensor_read(&new_light_val) == -EBUSY) {
 		k_work_schedule(&light_work, K_MSEC(LIGHT_SENSOR_FETCH_DELAY_MS));
 		return;
-	}
-
-	/* Scale measurements and combine in 4-byte light value, one byte per colour channel */
-	for (int i = 0; i < 4; ++i) {
-			scaled_measurement = SCALE_LIGHT_MEAS(light_measurements[i].val1); 
-			new_light_val |= scaled_measurement << 8*i;
 	}
 
 	if (rgbir_sufficient_change(new_light_val, old_light_val, LIGHT_DELTA)) {
@@ -315,9 +307,7 @@ static void colour_work_cb(struct k_work *work)
 	uint16_t dummy_data_len;
 	uint8_t dummy_data_flags;
 	uint32_t old_colour_val;
-	struct sensor_value colour_measurements[LIGHT_SENSOR_NUM_CHANNELS];
-	uint32_t scaled_measurement;
-	uint32_t new_colour_val = 0;;
+	uint32_t new_colour_val;
 
 	LOG_DBG("COLOUR WORK CB");
 
@@ -328,15 +318,9 @@ static void colour_work_cb(struct k_work *work)
 	old_colour_val = strtol(old_colour_val_str, NULL, 0);
 
 	/* Read sensor, try again later if busy */
-	if (colour_sensor_read(colour_measurements, sizeof(colour_measurements)) == -EBUSY) {
+	if (colour_sensor_read(&new_colour_val) == -EBUSY) {
 		k_work_schedule(&colour_work, K_MSEC(COLOUR_SENSOR_FETCH_DELAY_MS));
 		return;
-	}
-
-	/* Scale measurements and combine in 4-byte light value, one byte per colour channel */
-	for (int i = 0; i < 4; ++i) {
-			scaled_measurement = SCALE_LIGHT_MEAS(colour_measurements[i].val1); 
-			new_colour_val |= scaled_measurement << 8*i;
 	}
 
 	if (rgbir_sufficient_change(new_colour_val, old_colour_val, COLOUR_DELTA)) {

@@ -8,7 +8,6 @@ menu "User Interface"
 
 config UI_LED
 	bool "Enable LEDs"
-	default y
 
 if UI_LED
 choice
@@ -35,29 +34,18 @@ endif # UI_LED
 
 config UI_BUZZER
 	bool "Enable buzzer"
-	depends on $(dt_alias_enabled,buzzer-pwm)
-	default y if BOARD_THINGY91_NRF9160NS
-	default n if BOARD_NRF9160DK_NRF9160NS
 	select PWM
 	select PWM_1
 	help
-		If enabled, a buzzer will be controllable with PWM. In
-		order to enable this option, the devicetree must have
-		a "buzzer-pwm" property in /aliases, which must point
-		to an enabled PWM node with compatible
-		"nordic,nrf-pwm". The buzzer must be connected to
-		channel 0 of this PWM.
+		If enabled, a buzzer will be controllable with PWM. 
 
 
 config UI_BUTTON
 	bool "Enable buttons"
-	default y
 
 
 config UI_SENSE_LED
 	bool "Enable sense LEDs"
-	default y if BOARD_THINGY91_NRF9160NS
-	default n if BOARD_NRF9160DK_NRF9160NS
 	help
 		Enables the sense LEDs available on the Thingy:91.
 

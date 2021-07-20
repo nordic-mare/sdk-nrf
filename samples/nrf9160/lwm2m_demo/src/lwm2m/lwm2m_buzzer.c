@@ -13,9 +13,10 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_buzzer, CONFIG_APP_LOG_LEVEL);
 
-#define BUZZER_FREQUENCY_START_VAL	440U
-#define BUZZER_INTENSITY_START_VAL	100U
-#define BUZZER_APP_TYPE				"BUZZER"
+#define INTENSITY_MAX			100U
+#define FREQUENCY_START_VAL		440U
+
+#define BUZZER_APP_TYPE			"BUZZER"
 
 static int buzzer_state_cb(uint16_t obj_inst_id,
 			   uint16_t res_id, uint16_t res_inst_id,
@@ -44,7 +45,7 @@ static int buzzer_intensity_cb(uint16_t obj_inst_id,
 	int ret;
 	uint8_t intensity = *data;
 
-	if (intensity > 100) {
+	if (intensity > INTENSITY_MAX) {
 		LOG_ERR("Error %d: intensity too high. Max 100", -EINVAL);
 		return -EINVAL;
 	}
@@ -70,11 +71,11 @@ int lwm2m_init_buzzer(void)
 		return ret;
 	}
 
-	ret = ui_buzzer_set_intensity(BUZZER_INTENSITY_START_VAL);
+	ret = ui_buzzer_set_intensity(INTENSITY_MAX);
 	if (ret) {
 		LOG_ERR("Error %d: set buzzer intensity failed", ret);
 	}
-	ret = ui_buzzer_set_frequency(BUZZER_FREQUENCY_START_VAL);
+	ret = ui_buzzer_set_frequency(FREQUENCY_START_VAL);
 	if (ret) {
 		LOG_ERR("Error %d: set buzzer frequency failed", ret);
 	}
@@ -92,7 +93,7 @@ int lwm2m_init_buzzer(void)
 			BUZZER_APP_TYPE, sizeof(BUZZER_APP_TYPE),
 			LWM2M_RES_DATA_FLAG_RO);
 	
-	float64_value_t start_intensity = {.val1 = BUZZER_INTENSITY_START_VAL, .val2 = 0};
+	float64_value_t start_intensity = {.val1 = INTENSITY_MAX, .val2 = 0};
 	lwm2m_engine_set_float64(
 			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, LEVEL_RID),
 			&start_intensity);
