@@ -26,5 +26,5 @@ target_sources_ifdef(CONFIG_LWM2M_APP_ENVIRONMENT_SENSOR
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_env_sensor.c)
 	
 
-target_sources_ifdef(CONFIG_LWM2M_IPSO_ACCELEROMETER
+target_sources_ifdef(CONFIG_LWM2M_APP_ACCELEROMETER
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_accelerometer.c)

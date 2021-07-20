@@ -7,6 +7,44 @@ config ENVIRONMENT_SENSOR
 	select BME680 if BOARD_THINGY91_NRF9160NS
 
 
+config ACCELEROMETER
+	bool "Enable accelerometer"
+	default y
+
+choice 
+	prompt "Accelerometer device"
+	default ACCEL_USE_EXTERNAL if BOARD_THINGY91_NRF9160NS
+	default ACCEL_USE_SIM if BOARD_NRF9160DK_NRF9160NS
+	depends on ACCELEROMETER
+
+config ACCEL_USE_EXTERNAL
+	bool "User provided accelerometer device"
+	select ADXL362 if BOARD_THINGY91_NRF9160NS
+	help
+		The user will provide an accelerometer device.
+
+config ACCEL_USE_SIM
+	bool "Simulate accelerometer sensor"
+	select SENSOR
+	select SENSOR_SIM
+	select SENSOR_SIM_TRIGGER
+	help
+		Use sensor simulator to generate accelerometer data.
+endchoice # Accelerometer device
+
+config ACCEL_CALIBRATE
+	bool "Calibrate the accelerometer on startup"
+	default y
+	help
+		Calibrate the accelerometer on a flat surface to filter away
+		static measurement offset that could affect orientation
+		detection.
+
+config ACCEL_CALIBRATION_ITERATIONS
+	int "Number of measurements per channel during calibration"
+	default 5
+
+
 config LIGHT_SENSOR
     bool "Enable light sensor"
 	default y if BOARD_THINGY91_NRF9160NS

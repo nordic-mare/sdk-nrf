@@ -11,160 +11,82 @@
 #include <lwm2m_resource_ids.h>
 #include <math.h>
 
+#include "accelerometer.h"
+
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_accel, CONFIG_APP_LOG_LEVEL);
 
-#define SENSOR_UNIT_NAME		"m/s2"
-#define FLIP_ACCELERATION_THRESHOLD	5.0
-#define CALIBRATION_ITERATIONS		CONFIG_ACCEL_CALIBRATION_ITERATIONS
-#define MEASUREMENT_ITERATIONS		CONFIG_ACCEL_ITERATIONS
-#define ACCEL_INVERTED			CONFIG_ACCEL_INVERTED
+#define SENSOR_UNIT_NAME			"m/s2"
 
-#if defined(CONFIG_FLIP_POLL)
-#define FLIP_POLL_INTERVAL		K_MSEC(CONFIG_FLIP_POLL_INTERVAL)
-#else
-#define FLIP_POLL_INTERVAL		K_NO_WAIT
-#endif
+#define LWM2M_RES_DATA_FLAG_RW	0
 
-#ifdef CONFIG_ACCEL_USE_SIM
-#define FLIP_INPUT			CONFIG_FLIP_INPUT
-#else
-#define FLIP_INPUT			-1
-#endif
-
-/**@brief Orientation states. */
-enum orientation_state {
-	ORIENTATION_NOT_KNOWN,   /**< Initial state. */
-	ORIENTATION_NORMAL,      /**< Has normal orientation. */
-	ORIENTATION_UPSIDE_DOWN, /**< System is upside down. */
-	ORIENTATION_ON_SIDE      /**< System is placed on its side. */
-};
-
-
-/**@brief Struct containing current orientation and 3 axis acceleration data. */
-struct accelerometer_sensor_data {
-	struct sensor_value x; /**< x-axis acceleration [m/s^2]. */
-	struct sensor_value y; /**< y-axis acceleration [m/s^2]. */
-	struct sensor_value z; /**< z-axis acceleration [m/s^2]. */
-	enum orientation_state orientation; /**< Current orientation. */
-};
-
-static const struct device *accel_dev;
-static double accel_offset[3];
-static uint32_t timestamp;
-static struct sensor_value x_val, y_val, z_val;
-
-static struct accelerometer_sensor_data read_accelerometer() {
-	struct accelerometer_sensor_data sensor_data;
-	int err;
-	err = sensor_sample_fetch(accel_dev);
-	if (err) {
-		LOG_ERR("Sensor sample fetch failed: %d", err);
-	}
-	err = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_X, &(sensor_data.x));
-	if (err) {
-		LOG_ERR("Accelerometer failed getting x value: %d", err);
-	}
-	err = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_Y, &(sensor_data.y));
-	if (err) {
-		LOG_ERR("Accelerometer failed getting y value: %d", err);
-	}
-	err = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_Z, &(sensor_data.z));
-	if (err) {
-		LOG_ERR("Accelerometer failed getting z value: %d", err);
-	}
-	double x_temp, y_temp, z_temp;
-	double x_int, y_int, z_int;
-	x_temp = sensor_value_to_double(&sensor_data.x) - accel_offset[0];
-	y_temp = sensor_value_to_double(&sensor_data.y) - accel_offset[1];
-	z_temp = sensor_value_to_double(&sensor_data.z) - accel_offset[2];
-	sensor_data.x.val2 = (int32_t) (modf(x_temp, &x_int) * 1000000);
-	sensor_data.x.val1 = (int32_t) x_int;
-	sensor_data.y.val2 = (int32_t) (modf(y_temp, &y_int) * 1000000);
-	sensor_data.y.val1 = (int32_t) y_int;
-	sensor_data.z.val2 = (int32_t) (modf(z_temp, &z_int) * 1000000);
-	sensor_data.z.val1 = (int32_t) z_int;
-	
-	return sensor_data;
-}
+static float32_value_t x_val;
+static float32_value_t y_val;
+static float32_value_t z_val;
 
 static void *accel_x_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	x_val = read_accelerometer().x;
+	int ret;
+	struct accelerometer_sensor_data accel_data;
+
+	ret = accelerometer_read(&accel_data);
+	if (ret) {
+		LOG_ERR("Error %d: read accelerometer failed", ret);
+		return NULL;
+	}
+
+	x_val.val1 = accel_data.x.val1;
+	x_val.val2 = accel_data.x.val2;
+
+	*data_len = sizeof(x_val);
+
 	return &x_val;
 }
 
 static void *accel_y_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	y_val = read_accelerometer().y;
+	int ret;
+	struct accelerometer_sensor_data accel_data;
+
+	ret = accelerometer_read(&accel_data);
+	if (ret) {
+		LOG_ERR("Error %d: read accelerometer failed", ret);
+		return NULL;
+	}
+
+	y_val.val1 = accel_data.y.val1;
+	y_val.val2 = accel_data.y.val2;
+
+	*data_len = sizeof(y_val);
+
 	return &y_val;
 }
 
 static void *accel_z_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	z_val = read_accelerometer().z;
-	return &z_val;
-}
+	int ret;
+	struct accelerometer_sensor_data accel_data;
 
-static int accel_calibrate(void) {
-	int err;
-	struct sensor_value accel_data[3];
-	double aggr_data[3] = {0};
-	
-	k_sleep(K_SECONDS(2));
-
-	for (uint8_t i = 0; i < CALIBRATION_ITERATIONS; i++) 
-	{
-		LOG_INF("CALIBRATING %i of %i", i, CALIBRATION_ITERATIONS);
-		err = sensor_sample_fetch(accel_dev);
-		if (err) {
-			LOG_ERR("Sensor sample fetch failed while calibrating accelerometer: %d", err);
-			return err;
-		}
-		err = sensor_channel_get(accel_dev,
-				SENSOR_CHAN_ACCEL_X, &(accel_data[0]));
-		err += sensor_channel_get(accel_dev,
-				SENSOR_CHAN_ACCEL_Y, &(accel_data[1]));
-		err += sensor_channel_get(accel_dev,
-				SENSOR_CHAN_ACCEL_Z, &(accel_data[2]));
-
-		if (err) {
-			LOG_ERR("Sensor channel get failed while calibrating accelerometer: %d", err);
-			return err;
-		}
-
-		aggr_data[0] += sensor_value_to_double(&(accel_data[0]));
-		aggr_data[1] += sensor_value_to_double(&(accel_data[1]));
-		aggr_data[2] += (sensor_value_to_double(&(accel_data[2]))
-			+ ((double)SENSOR_G) / 1000000.0);
+	ret = accelerometer_read(&accel_data);
+	if (ret) {
+		LOG_ERR("Error %d: read accelerometer failed", ret);
+		return NULL;
 	}
-	accel_offset[0] = aggr_data[0] / (double)CALIBRATION_ITERATIONS;
-	accel_offset[1] = aggr_data[1] / (double)CALIBRATION_ITERATIONS;
-	accel_offset[2] = aggr_data[2] / (double)CALIBRATION_ITERATIONS;
-	return 0;
+
+	z_val.val1 = accel_data.z.val1;
+	z_val.val2 = accel_data.z.val2;
+
+	*data_len = sizeof(z_val);
+
+	return &z_val;
 }
 
 int lwm2m_init_accel(void)
 {
-	int ret;
-
-	accel_dev = device_get_binding(CONFIG_ACCEL_DEV_NAME);
-	if (accel_dev == NULL) {
-		LOG_ERR("Could not get %s device", CONFIG_ACCEL_DEV_NAME);
-		return -ENOENT;
-	}
-
-	if (IS_ENABLED(CONFIG_ACCEL_CALIBRATE)) {
-		ret = accel_calibrate();
-		if (ret) {
-			LOG_ERR("Could not calibrate accelerometer device: %d",
-				ret);
-			return ret;
-		}
-	}
+	accelerometer_init();
 
 	/* create accel object */
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0));
@@ -177,8 +99,12 @@ int lwm2m_init_accel(void)
 				  accel_y_read_cb);
 	lwm2m_engine_register_read_callback(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Z_VALUE_RID), 
 				  accel_z_read_cb);
-	lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, TIMESTAMP_RID),
-				  &timestamp, sizeof(timestamp), 0);
+	lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, X_VALUE_RID),
+				  &x_val, sizeof(x_val), LWM2M_RES_DATA_FLAG_RW);
+	lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Y_VALUE_RID),
+				  &y_val, sizeof(y_val), LWM2M_RES_DATA_FLAG_RW);
+	lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Z_VALUE_RID),
+				  &z_val, sizeof(z_val), LWM2M_RES_DATA_FLAG_RW);
 
 	return 0;
 }

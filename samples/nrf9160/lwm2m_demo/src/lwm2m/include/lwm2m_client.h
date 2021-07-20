@@ -37,7 +37,7 @@ int lwm2m_init_buzzer(void);
 int lwm2m_init_button(void);
 #endif
 
-#if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER)
+#if defined(CONFIG_LWM2M_APP_ACCELEROMETER)
 #if CONFIG_FLIP_INPUT > 0
 int handle_accel_events(struct ui_evt *evt);
 #endif
