@@ -52,7 +52,7 @@ config GPS_USE_EXTERNAL
 	bool "User provided GPS device"
 	help
 		Provide a GPS device that location data will be fetched from and
-		sent to nRF Cloud
+		sent to the LWM2M server.
 
 endchoice
 
@@ -75,6 +75,7 @@ config GPS_DEV_NAME
 	help
 		GPS device from which location data will be fetched and sent
 		to nRF Cloud.
+endif
 
 config GPS_SEARCH_INTERVAL_TIME
 	int "GPS search interval [s]"
@@ -88,7 +89,6 @@ config GPS_SEARCH_TIMEOUT_TIME
 	help
 		Length of time the GPS can spend looking for a fix in seconds. 
 		In areas with poor connection, this should be increased.
-endif
 
 choice
 	prompt "Accelerometer device"
@@ -159,7 +159,7 @@ config ACCEL_DEV_NAME
 	default "ADXL362"
 	help
 		Device from which accelerometer data will be fetched and used
-		for orientation detection and sent to nRF Cloud.
+		for orientation detection and sent to the LWM2M server.
 
 endif
 
