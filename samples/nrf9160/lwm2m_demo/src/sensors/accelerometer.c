@@ -6,11 +6,11 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(accelerometer, CONFIG_APP_LOG_LEVEL);
 
-#if defined(CONFIG_BOARD_THINGY91_NRF9160NS)
+#if defined(CONFIG_ACCEL_USE_EXTERNAL)
 #define ACCEL_NODE          DT_PATH(soc, peripheral_40000000, spi_b000, adxl362_0)
 #define ACCEL_DEV_LABEL     DT_LABEL(ACCEL_NODE)
-#elif defined(CONFIG_BOARD_NRF9160DK_NRF9160NS)
-#define ACCEL_DEV_LABEL     CONFIG_SENSOR_SIM_DEV_NAME
+#elif defined(CONFIG_ACCEL_USE_SIM)
+#define ACCEL_DEV_LABEL     "SENSOR_SIM"
 #endif
 
 #define CALIBRATION_ITERATIONS      CONFIG_ACCEL_CALIBRATION_ITERATIONS
@@ -36,21 +36,18 @@ int accelerometer_read(struct accelerometer_sensor_data *data)
         LOG_ERR("Error %d: get x channel failed", ret);
         return ret;
     }
-    LOG_DBG("x: val1=%d, val2=%d", data->x.val1, data->x.val2);
     ret = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_Y,
                             &(data->y));
     if(ret) {
         LOG_ERR("Error %d: get y channel failed", ret);
         return ret;
     }
-    LOG_DBG("y: val1=%d, val2=%d", data->y.val1, data->y.val2);
     ret = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_Z,
                             &(data->z));
     if(ret) {
         LOG_ERR("Error %d: get z channel failed", ret);
         return ret;
     }
-    LOG_DBG("z: val1=%d, val2=%d", data->z.val1, data->z.val2);
 
     /* Adjust for sensor bias */
     x_temp = sensor_value_to_double(&(data->x)) - accel_offset[0];

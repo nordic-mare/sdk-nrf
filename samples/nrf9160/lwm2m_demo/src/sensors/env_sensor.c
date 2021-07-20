@@ -4,8 +4,12 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(env_sensor, CONFIG_APP_LOG_LEVEL);
 
+#if defined(CONFIG_ENV_SENSOR_USE_EXTERNAL)
 #define ENV_SENSOR_NODE			DT_PATH(soc, peripheral_40000000, i2c_a000, bme680_76)
 #define ENV_SENSOR_DEV_LABEL	DT_LABEL(ENV_SENSOR_NODE)
+#elif defined(CONFIG_ENV_SENSOR_USE_SIM)
+#define ENV_SENSOR_DEV_LABEL	"SENSOR_SIM"
+#endif
 
 static const struct device *env_sensor_dev;
 
@@ -78,6 +82,7 @@ int env_sensor_read_humidity(struct sensor_value *humid_val)
 
 int env_sensor_read_gas_resistance(struct sensor_value *gas_res_val)
 {
+#if defined(CONFIG_ENV_SENSOR_USE_EXTERNAL)
 	int ret;
 
 	ret = read_sensor(gas_res_val, SENSOR_CHAN_GAS_RES);
@@ -85,6 +90,11 @@ int env_sensor_read_gas_resistance(struct sensor_value *gas_res_val)
 		LOG_ERR("Error %d: read gas resistance sensor failed", ret);
 		return ret;
 	}
+#elif defined(CONFIG_ENV_SENSOR_USE_SIM)
+	/* TODO: Simulate gas resistance with rng */
+	gas_res_val->val1 = (int32_t)CONFIG_ENV_SENSOR_GAS_RES_SIM_VAL;
+	gas_res_val->val2 = 0;
+#endif
 
 	LOG_INF("%s: read %d.%d Ohm", env_sensor_dev->name, 
 			gas_res_val->val1, gas_res_val->val2);

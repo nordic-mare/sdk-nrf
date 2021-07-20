@@ -19,7 +19,7 @@ int lwm2m_app_init_device(char *serial_num);
 int lwm2m_init_light_control(void);
 #endif
 
-#if defined(CONFIG_LWM2M_IPSO_TEMP_SENSOR)
+#if defined(CONFIG_LWM2M_APP_ENVIRONMENT_SENSOR)
 int lwm2m_init_env_sensor(void);
 #endif
 
@@ -36,9 +36,6 @@ int lwm2m_init_button(void);
 #endif
 
 #if defined(CONFIG_LWM2M_APP_ACCELEROMETER)
-#if CONFIG_FLIP_INPUT > 0
-int handle_accel_events(struct ui_evt *evt);
-#endif
 int lwm2m_init_accel(void);
 #endif
 

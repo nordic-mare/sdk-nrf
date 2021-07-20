@@ -79,7 +79,6 @@ int ui_led_pwm_set_intensity(uint8_t new_intensity)
 
 int ui_led_pwm_init(void)
 {
-	LOG_DBG("PWM label: " LED_PWM_DEV_LABEL);
 	led_pwm_dev = device_get_binding(LED_PWM_DEV_LABEL);
 	if (!led_pwm_dev) {
 		LOG_DBG("Error %d: could not bind to LED PWM device", -ENODEV);

@@ -18,7 +18,7 @@ LOG_MODULE_REGISTER(app_lwm2m_accel, CONFIG_APP_LOG_LEVEL);
 
 #define SENSOR_UNIT_NAME			"m/s2"
 
-#define LWM2M_RES_DATA_FLAG_RW	0
+#define LWM2M_RES_DATA_FLAG_RW		0
 
 static float32_value_t x_val;
 static float32_value_t y_val;

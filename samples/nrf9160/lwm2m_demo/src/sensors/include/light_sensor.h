@@ -4,12 +4,6 @@
 #include <zephyr.h>
 #include <drivers/sensor.h>
 
-#define LIGHT_SENSOR_NUM_CHANNELS    4
-
-/* Macros to scale light and colour measurements to uint8_t */
-#define SCALE_LIGHT_MEAS(raw_value)     MIN((raw_value * 255U / CONFIG_LIGHT_SENSOR_MEASUREMENT_MAX_VALUE), UINT8_MAX)
-#define SCALE_COLOUR_MEAS(raw_value)    MIN((raw_value * 255U / CONFIG_COLOUR_SENSOR_MEASUREMENT_MAX_VALUE), UINT8_MAX)
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,23 +11,25 @@ extern "C" {
 /**
  * @brief Read the R, G, B, and IR channels of the light sensor. 
  * 
- * @param[out] value Array of sensor_value structs. Must contain exactly 4 elements.
- * @param[in] size The size of the array.
+ * @param[out] light_value 4-byte representation of light values. 
+ * Each byte represents a different colour channel.
+ * MSB=R->G->B->IR=LSB.
  * @return int 0 if successful, negative error code if not. Returns -EBUSY if sample fetch failed; user
  * should wait some hundred milliseconds before trying again.
  */
-int light_sensor_read(struct sensor_value value[], size_t size);
+int light_sensor_read(uint32_t *light_value);
 
 /**
  * @brief Read the R, G, B, and IR channels of the light sensor while the
  * sense LED is on. Used to measure the colour of a surface.
  * 
- * @param[out] value Array of sensor_value structs. Must contain exactly 4 elements.
- * @param[in] size The size of the array.
+ * @param[out] light_value 4-byte representation of colour values. 
+ * Each byte represents a different colour channel.
+ * MSB=R->G->B->IR=LSB.
  * @return int 0 if successful, negative error code if not. Returns -EBUSY if sample fetch failed; user
  * should wait some hundred milliseconds before trying again.
  */
-int colour_sensor_read(struct sensor_value value[], size_t size);
+int colour_sensor_read(uint32_t *colour_value);
 
 /**
  * @brief Initialize the light sensor and apply the trigger settings set
