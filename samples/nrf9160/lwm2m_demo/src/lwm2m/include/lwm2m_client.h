@@ -14,8 +14,6 @@
 extern "C" {
 #endif
 int lwm2m_app_init_device(char *serial_num);
-int lwm2m_app_init_location(void);
-int lwm2m_app_start_gps(void);
 
 #if defined(CONFIG_LWM2M_APP_LIGHT_CONTROL)
 int lwm2m_init_light_control(void);

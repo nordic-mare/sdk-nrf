@@ -29,6 +29,7 @@ LOG_MODULE_REGISTER(app_lwm2m_client, CONFIG_APP_LOG_LEVEL);
 
 #include "lwm2m_client.h"
 #include "sensor_module.h"
+#include "gps_module.h"
 
 
 #if !defined(CONFIG_LTE_LINK_CONTROL)
@@ -142,7 +143,7 @@ static int lwm2m_setup(void)
 	lwm2m_init_light_sensor();
 #endif
 #if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
-	lwm2m_app_init_location();
+	initialise_gps();
 #endif
 	return 0;
 }
@@ -332,7 +333,7 @@ static void rd_client_event(struct lwm2m_ctx *client,
 		LOG_DBG("Registration complete");
 #if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
 		// Ensure that GPS search is only started after bootstrap process is complete.
-		lwm2m_app_start_gps();
+		start_gps_search();
 #endif
 		break;
 

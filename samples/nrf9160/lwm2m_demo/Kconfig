@@ -38,61 +38,6 @@ config APP_MCUBOOT_FLASH_BUF_SZ
 	help
 	  Buffer size must be aligned to the minimal flash write block size.
 
-choice
-	prompt "GPS device"
-	default GPS_USE_EXTERNAL
-	help
-		Select from which device GPS data will be fetched.
-
-config GPS_USE_SIM
-	bool "Use GPS simulator"
-	select GPS_SIM
-	select GPS_SIM_TRIGGER
-	help
-		Use simulated GPS data.
-
-config GPS_USE_EXTERNAL
-	bool "User provided GPS device"
-	help
-		Provide a GPS device that location data will be fetched from and
-		sent to the LWM2M server.
-
-endchoice
-
-if GPS_USE_SIM
-
-config GPS_DEV_NAME
-	string
-	default GPS_SIM_DEV_NAME
-
-config GPS_TRIGGER
-	bool
-	default GPS_SIM_TRIGGER
-
-endif
-
-if GPS_USE_EXTERNAL
-config GPS_DEV_NAME
-	string "GPS device name"
-	default "NRF9160_GPS"
-	help
-		GPS device from which location data will be fetched and sent
-		to nRF Cloud.
-endif
-
-config GPS_SEARCH_INTERVAL_TIME
-	int "GPS search interval [s]"
-	default 300
-	help
-		Length of time between GPS searches in seconds.
-
-config GPS_SEARCH_TIMEOUT_TIME
-	int "GPS search timeout [s]"
-	default 270
-	help
-		Length of time the GPS can spend looking for a fix in seconds. 
-		In areas with poor connection, this should be increased.
-
 module = APP
 module-dep = LOG
 module-str = Log level for sample
