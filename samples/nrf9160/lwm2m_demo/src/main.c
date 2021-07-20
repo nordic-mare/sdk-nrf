@@ -142,7 +142,7 @@ static int lwm2m_setup(void)
 	lwm2m_init_light_sensor();
 #endif
 #if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
-	//lwm2m_app_init_location();
+	lwm2m_app_init_location();
 #endif
 	return 0;
 }
@@ -332,7 +332,7 @@ static void rd_client_event(struct lwm2m_ctx *client,
 		LOG_DBG("Registration complete");
 #if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
 		// Ensure that GPS search is only started after bootstrap process is complete.
-		//lwm2m_app_start_gps();
+		lwm2m_app_start_gps();
 #endif
 		break;
 
