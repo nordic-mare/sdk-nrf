@@ -17,6 +17,13 @@ config LWM2M_APP_PUSH_BUTTON
         Create button LWM2M object(s). The nRF9160 DK
         will have two object instances, one for each push button.
 
+config LWM2M_APP_ONOFF_SWITCH
+    bool "Enable LWM2M on/off switch support"
+    depends on LWM2M_IPSO_ONOFF_SWITCH
+    depends on UI_INPUT
+    help
+        Create two on/off switch LWM2M objects.  
+
 config LWM2M_APP_BUZZER
     bool "Enable LWM2M buzzer support"
     depends on LWM2M_IPSO_APP_BUZZER

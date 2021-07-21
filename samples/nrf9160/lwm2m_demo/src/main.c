@@ -135,6 +135,9 @@ static int lwm2m_setup(void)
 #if defined(CONFIG_LWM2M_APP_PUSH_BUTTON)
 	lwm2m_init_push_button();
 #endif
+#if defined(CONFIG_LWM2M_APP_ONOFF_SWITCH)
+lwm2m_init_onoff_switch();
+#endif
 #if defined(CONFIG_LWM2M_APP_ACCELEROMETER)
 	lwm2m_init_accel();
 #endif

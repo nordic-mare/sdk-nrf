@@ -19,6 +19,9 @@ target_sources_ifdef(CONFIG_LWM2M_APP_BUZZER
 target_sources_ifdef(CONFIG_LWM2M_APP_PUSH_BUTTON
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_push_button.c)
 
+target_sources_ifdef(CONFIG_LWM2M_APP_ONOFF_SWITCH
+	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_onoff_switch.c)
+
 target_sources_ifdef(CONFIG_LWM2M_APP_LIGHT_SENSOR
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_light_sensor.c)
 

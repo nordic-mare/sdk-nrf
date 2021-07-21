@@ -37,6 +37,10 @@ int lwm2m_init_buzzer(void);
 int lwm2m_init_push_button(void);
 #endif
 
+#if defined(CONFIG_LWM2M_APP_ONOFF_SWITCH)
+int lwm2m_init_onoff_switch(void);
+#endif
+
 #if defined(CONFIG_LWM2M_APP_ACCELEROMETER)
 int lwm2m_init_accel(void);
 #endif

@@ -61,6 +61,10 @@ static bool event_handler(const struct event_header *eh)
 	if (is_ui_input_event(eh)) {
 		struct ui_input_event *event = cast_ui_input_event(eh);
 
+		if (event->type != Button) {
+			return false;
+		}
+
 		switch (event->device_number) {
 		case 1:
 			lwm2m_engine_set_bool(
@@ -93,7 +97,6 @@ static bool event_handler(const struct event_header *eh)
 			break;
 
 		default:
-			LOG_DBG("\"Button\" %d changed state to %d.", event->device_number, event->state);
 			return false;
 		}
 
