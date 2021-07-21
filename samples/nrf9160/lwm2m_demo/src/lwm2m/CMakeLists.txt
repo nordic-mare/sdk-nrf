@@ -17,7 +17,7 @@ target_sources_ifdef(CONFIG_LWM2M_APP_BUZZER
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_buzzer.c)
 
 target_sources_ifdef(CONFIG_LWM2M_APP_PUSH_BUTTON
-	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_button.c)
+	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_push_button.c)
 
 target_sources_ifdef(CONFIG_LWM2M_APP_LIGHT_SENSOR
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_light_sensor.c)

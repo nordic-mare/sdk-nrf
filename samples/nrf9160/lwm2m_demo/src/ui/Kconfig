@@ -40,8 +40,8 @@ config UI_BUZZER
 		If enabled, a buzzer will be controllable with PWM. 
 
 
-config UI_BUTTON
-	bool "Enable buttons"
+config UI_INPUT
+	bool "Enable switches and buttons"
 
 
 config UI_SENSE_LED

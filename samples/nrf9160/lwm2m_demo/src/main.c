@@ -133,7 +133,7 @@ static int lwm2m_setup(void)
 	lwm2m_init_buzzer();
 #endif
 #if defined(CONFIG_LWM2M_APP_PUSH_BUTTON)
-	lwm2m_init_button();
+	lwm2m_init_push_button();
 #endif
 #if defined(CONFIG_LWM2M_APP_ACCELEROMETER)
 	lwm2m_init_accel();

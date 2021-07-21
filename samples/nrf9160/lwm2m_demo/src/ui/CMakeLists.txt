@@ -6,8 +6,8 @@
 
 zephyr_include_directories(include)
 
-target_sources_ifdef(CONFIG_UI_BUTTON
-	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_button.c)
+target_sources_ifdef(CONFIG_UI_INPUT
+	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_input.c)
 
 target_sources_ifdef(CONFIG_UI_SENSE_LED
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_sense_led.c)

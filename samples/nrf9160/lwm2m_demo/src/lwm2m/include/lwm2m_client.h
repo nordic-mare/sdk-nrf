@@ -34,7 +34,7 @@ int lwm2m_init_buzzer(void);
 #endif
 
 #if defined(CONFIG_LWM2M_APP_PUSH_BUTTON)
-int lwm2m_init_button(void);
+int lwm2m_init_push_button(void);
 #endif
 
 #if defined(CONFIG_LWM2M_APP_ACCELEROMETER)
