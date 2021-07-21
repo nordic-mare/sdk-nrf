@@ -1,0 +1,59 @@
+config LIGHT_SENSOR
+    bool
+	help
+		Enable the light sensor device. 
+
+if LIGHT_SENSOR
+choice 
+	prompt "Select light sensor device"
+	default LIGHT_SENSOR_USE_EXTERNAL
+
+config LIGHT_SENSOR_USE_EXTERNAL
+	bool "Use the BH1749 light sensor"
+	depends on BH1749
+	select UI_SENSE_LED
+
+config LIGHT_SENSOR_USE_SIM
+	bool "Simulate light sensor"
+endchoice # Light sensor device
+
+config LIGHT_SENSOR_LIGHT_MEASUREMENT_MAX_VALUE
+    int "Max expected light sensor output value"
+	default 500
+	help
+		Maximum value expected from the light sensor.
+		Used to scale each color measurement to an 8-bit, unsigned
+		integer. 
+		Reasonable values will depend on the sensors environment.
+		Max of a series of raw measurements during particular use conditions
+		can give a good estimate (for that condition).
+
+config LIGHT_SENSOR_COLOUR_MEASUREMENT_MAX_VALUE
+	int "Max expected colour sensor output value"
+	default 500
+	help
+		Maximum value expected from the colour sensor. 
+		Used to scale each color measurement to an 8-bit, unsigned
+		integer. 
+		Reasonable values will depend on the sensors environment.
+		Max of a series of raw measurements during particular use conditions
+		can give a good estimate (for that condition).
+
+if LIGHT_SENSOR_USE_SIM
+config LIGHT_SENSOR_LIGHT_SIM_VAL
+	int "Simulated light value for all channels"
+	default 50
+	help
+		Simulated light value. Wil be scaled to 
+		uint8_t, so this value should be smaller than
+		LIGHT_SENSOR_LIGHT_MEASUREMENT_MAX_VALUE. 
+
+config LIGHT_SENSOR_COLOUR_SIM_VAL
+	int "Simulated colour value for all channels"
+	default 250
+	help
+		Simulated colour value. Wil be scaled to 
+		uint8_t, so this value should be smaller than
+		LIGHT_SENSOR_COLOUR_MEASUREMENT_MAX_VALUE. 
+endif # LIGHT_SENSOR_USE_SIM
+endif # LIGHT_SENSOR

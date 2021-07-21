@@ -13,7 +13,9 @@ LOG_MODULE_REGISTER(accelerometer, CONFIG_APP_LOG_LEVEL);
 #define ACCEL_DEV_LABEL     "SENSOR_SIM"
 #endif
 
+#if defined(CONFIG_ACCEL_CALIBRATE_ON_STARTUP)
 #define CALIBRATION_ITERATIONS      CONFIG_ACCEL_CALIBRATION_ITERATIONS
+#endif
 
 static const struct device *accel_dev;
 
@@ -60,7 +62,8 @@ int accelerometer_read(struct accelerometer_sensor_data *data)
     return 0;
 }
 
-int accelerometer_calibrate(void)
+#if defined(CONFIG_ACCEL_CALIBRATE_ON_STARTUP)
+static int accelerometer_calibrate(void)
 {
     int ret;
     struct accelerometer_sensor_data accel_data;
@@ -88,24 +91,25 @@ int accelerometer_calibrate(void)
 
     return 0;
 }
+#endif /* if defined(CONFIG_ACCEL_CALIBRATE_ON_STARTUP) */
 
 int accelerometer_init(void)
 {
-    int ret;
-
 	accel_dev = device_get_binding(ACCEL_DEV_LABEL);
 	if (!accel_dev) {
 		LOG_ERR("Error %d: could not get accelerometer device", -ENODEV);
 		return -ENODEV;
 	}
 
-	if (IS_ENABLED(CONFIG_ACCEL_CALIBRATE)) {
-		ret = accelerometer_calibrate();
-		if (ret) {
-			LOG_ERR("Error %d: calibrate accelerometer failed", ret);
-			return ret;
-		}
+#if defined(CONFIG_ACCEL_CALIBRATE_ON_STARTUP)
+    int ret;
+    
+	ret = accelerometer_calibrate();
+	if (ret) {
+		LOG_ERR("Error %d: calibrate accelerometer failed", ret);
+		return ret;
 	}
+#endif
 
     return 0;
 }

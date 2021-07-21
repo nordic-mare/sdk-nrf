@@ -27,14 +27,22 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define GAS_RES_UNIT 	"Ohm"
 	
 static bool read_sensor;
+#if defined(CONFIG_LWM2M_APP_TEMP_SENSOR)
 static float32_value_t temp_float;
+#endif
+#if defined(CONFIG_LWM2M_APP_PRESS_SENSOR)
 static float32_value_t press_float;
+#endif
+#if defined(CONFIG_LWM2M_APP_HUMID_SENSOR)
 static float32_value_t humid_float;
-
+#endif
+#if defined(CONFIG_LWM2M_APP_GAS_RES_SENSOR)
 /* Default gas res value used if using sensor simulator, 
    as it does not have support for generic sensors. */
 static float32_value_t gas_res_float = {30000, 0};
+#endif
 
+#if defined(CONFIG_LWM2M_APP_TEMP_SENSOR)
 static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id, 
 					uint16_t res_inst_id, size_t *data_len)
 {
@@ -60,7 +68,9 @@ static void *temp_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 
 	return &temp_float;
 }
+#endif /* if defined(CONFIG_LWM2M_APP_TEMP_SENSOR) */
 
+#if defined(CONFIG_LWM2M_APP_PRESS_SENSOR)
 static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
@@ -86,7 +96,9 @@ static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 
 	return &press_float;
 }
+#endif /* if defined(CONFIG_LWM2M_APP_PRESS_SENSOR) */
 
+#if defined(CONFIG_LWM2M_APP_HUMID_SENSOR)
 static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
@@ -112,7 +124,9 @@ static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 
 	return &humid_float;
 }
+#endif /* if defined(CONFIG_LWM2M_APP_HUMID_SENSOR) */
 
+#if defined(CONFIG_LWM2M_APP_GAS_RES_SENSOR)
 static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
@@ -138,12 +152,14 @@ static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint1
 
 	return &gas_res_float;
 }
+#endif /* if defined(CONFIG_LWM2M_APP_GAS_RES_SENSOR) */
 
 int lwm2m_init_env_sensor(void)
 {
 	read_sensor = true;
 	env_sensor_init();
 
+#if defined(CONFIG_LWM2M_APP_TEMP_SENSOR)
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0));
 	lwm2m_engine_register_read_callback(
 			LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID), temp_read_cb);
@@ -153,7 +169,9 @@ int lwm2m_init_env_sensor(void)
 	lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_UNITS_RID), 
 			TEMP_UNIT, sizeof(TEMP_UNIT), LWM2M_RES_DATA_FLAG_RO);
+#endif
 
+#if defined(CONFIG_LWM2M_APP_PRESS_SENSOR)
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0));
 	lwm2m_engine_register_read_callback(
 			LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID), pressure_read_cb);
@@ -163,7 +181,9 @@ int lwm2m_init_env_sensor(void)
 	lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_UNITS_RID), 
 			PRESS_UNIT, sizeof(PRESS_UNIT), LWM2M_RES_DATA_FLAG_RO);
-	
+#endif
+
+#if defined(CONFIG_LWM2M_APP_HUMID_SENSOR)
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0));
 	lwm2m_engine_register_read_callback(
 			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID), humidity_read_cb);
@@ -173,7 +193,9 @@ int lwm2m_init_env_sensor(void)
 	lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_UNITS_RID), 
 			HUMID_UNIT, sizeof(HUMID_UNIT), LWM2M_RES_DATA_FLAG_RO);
+#endif
 
+#if defined(CONFIG_LWM2M_APP_GAS_RES_SENSOR)
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0));
 	lwm2m_engine_register_read_callback(
 			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID), gas_resistance_read_cb);
@@ -189,6 +211,8 @@ int lwm2m_init_env_sensor(void)
 	lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_TYPE_RID),
 			GENERIC_SENSOR_TYPE, sizeof(GENERIC_SENSOR_TYPE), LWM2M_RES_DATA_FLAG_RO);
+#endif
+
 	return 0;
 }
 

@@ -6,6 +6,7 @@ config SENSOR_MODULE
 	bool "Enable sensor module"
 	default n
 
+if SENSOR_MODULE
 config SENSOR_MODULE_TEMP_ENABLE
 	bool "Enable value tracking of temperature"
 	default n
@@ -270,6 +271,7 @@ config SENSOR_MODULE_COLOUR_DELTA_IR
 		Required difference in infrared colour to register a new measurement.
 		Set this to 0 to always register the latest measurement.
 endmenu # Colour minimum change
+endif # SENSOR_MODULE
 
 endmenu # Sensor Module
 

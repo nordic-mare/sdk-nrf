@@ -55,7 +55,7 @@ static bool event_handler(const struct event_header *eh)
 		case 2:
 			lwm2m_engine_set_bool(
 				LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWITCH2_OBJ_INST_ID, DIGITAL_INPUT_STATE_RID), 
-				event->device_number);
+				event->state);
 			break;
 
 		default:
