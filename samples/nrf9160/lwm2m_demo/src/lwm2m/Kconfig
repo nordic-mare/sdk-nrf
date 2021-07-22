@@ -1,46 +1,61 @@
-menu "LWM2M app"
-
 config LWM2M_APP_ACCELEROMETER
-    bool "Enable LWM2M accelerometer support"
-    depends on LWM2M_IPSO_ACCELEROMETER
-    depends on ACCELEROMETER
+    bool 
+    select LWM2M_IPSO_ACCELEROMETER
+    select ACCELEROMETER
     help
         Create LWM2M accelerometer object.
         The nRF9160 DK will only display simulated (constant)
         sensor values.
 
 config LWM2M_APP_PUSH_BUTTON
-    bool "Enable LWM2M button support"
-    depends on LWM2M_IPSO_PUSH_BUTTON
-    depends on UI_BUTTON
+    bool 
+    select LWM2M_IPSO_PUSH_BUTTON
+    select UI_INPUT
     help
         Create button LWM2M object(s). The nRF9160 DK
         will have two object instances, one for each push button.
 
+config LWM2M_APP_ONOFF_SWITCH
+    bool 
+    select LWM2M_IPSO_ONOFF_SWITCH
+    select UI_INPUT
+    help
+        Create two on/off switch LWM2M objects.  
+
 config LWM2M_APP_BUZZER
-    bool "Enable LWM2M buzzer support"
+    bool 
     depends on LWM2M_IPSO_APP_BUZZER
     depends on UI_BUZZER
     help
         Create a buzzer LWM2M object. Should not be enabled
         on the nRF9160 DK, as it has no buzzer.
 
-config LWM2M_APP_ENVIRONMENT_SENSOR
-    bool "Enable LWM2M environment sensor support"
+config LWM2M_APP_TEMP_SENSOR
+    bool
     depends on LWM2M_IPSO_TEMP_SENSOR
-    depends on LWM2M_IPSO_PRESSURE_SENSOR
-    depends on LWM2M_IPSO_HUMIDITY_SENSOR
-    depends on LWM2M_IPSO_GENERIC_SENSOR
-    depends on ENVIRONMENT_SENSOR
     help
-        Create LWM2M objects for a temperature sensor,
-        pressure sensor, humidity sensor and 
-        gas resistance sensor.
-        The nRF9160 DK will only display simulated (constant)
-        sensor values.
+        Create temperature sensor LwM2M object.
+
+config LWM2M_APP_PRESS_SENSOR
+    bool
+    depends on LWM2M_IPSO_PRESSURE_SENSOR
+    help
+        Create air pressure sensor LwM2M object.
+
+config LWM2M_APP_HUMID_SENSOR
+    bool
+    depends on LWM2M_IPSO_HUMIDITY_SENSOR
+    help
+        Create air humidity sensor LwM2M object.
+
+config LWM2M_APP_GAS_RES_SENSOR
+    bool
+    depends on LWM2M_IPSO_GENERIC_SENSOR
+    help
+        Create gas resistance sensor LwM2M object.
 
 config LWM2M_APP_LIGHT_CONTROL
-    bool "Enable LWM2M light control support"
+    bool 
     depends on LWM2M_IPSO_LIGHT_CONTROL
     depends on UI_LED
     help
@@ -49,7 +64,7 @@ config LWM2M_APP_LIGHT_CONTROL
         if UI_LED_USE_GPIO is chosen.
 
 config LWM2M_APP_LIGHT_SENSOR
-    bool "Enable LWM2M light sensor support"
+    bool 
     depends on LWM2M_IPSO_APP_COLOUR_SENSOR
     depends on LIGHT_SENSOR
     help
@@ -57,5 +72,3 @@ config LWM2M_APP_LIGHT_SENSOR
         It uses the IPSO Colour object. 
         The nRF9160 DK will only display simulated (constant)
         sensor values.
-        
-endmenu # LWM2M app

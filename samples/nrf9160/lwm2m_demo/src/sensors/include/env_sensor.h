@@ -14,7 +14,7 @@ extern "C" {
  * @param[out] temp_val Pointer to sensor_value struct where the temperature value is stored. 
  * @return int 0 if successful, negative error code if not.
  */
-int env_sensor_read_temp(struct sensor_value *temp_val);
+int env_sensor_read_temperature(struct sensor_value *temp_val);
 
 /**
  * @brief Read the current air pressure. Unit: [kPa].

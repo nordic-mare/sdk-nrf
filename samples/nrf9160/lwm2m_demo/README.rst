@@ -92,6 +92,16 @@ The following files are available:
 * ``prj.conf`` - Standard default configuration file
 * ``overlay-queue`` - Enables LwM2M Queue Mode support
 * ``overlay-bootstrap.conf`` - Enables LwM2M bootstrap support
+* ``overlay-thingy91.conf`` - Thingy:91 specific configuration options.
+* ``overlay-nrf9160dk.conf`` - nRF9160 DK specific configuration options.
+
+Run
+west build -d <build folder> -b <build target> -t menuconfig -- -DOVERLAY_CONFIG=<overlay files>
+to open menuconfig and configure the application.
+
+Example:
+west build -d build_thingy91_nrf9160ns -b thingy91_nrf9160ns -t menuconfig -- -DOVERLAY_CONFIG=overlay-thingy91.conf overlay-bootstrap.conf
+opens menuconfig and configures the application to run on the Thingy:91 with LwM2M bootstrap support.
 
 Building and Running
 ********************

@@ -8,10 +8,10 @@
 #include <net/lwm2m.h>
 #include <lwm2m_resource_ids.h>
 
-#include "ui_button.h"
-#include "button_event.h"
+#include "ui_input.h"
+#include "ui_input_event.h"
 
-#define MODULE app_lwm2m_button
+#define MODULE app_lwm2m_push_button
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
@@ -26,9 +26,9 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 static uint64_t btn1_counter = 0;
 static uint64_t btn2_counter = 0;
 
-int lwm2m_init_button(void)
+int lwm2m_init_push_button(void)
 {
-	ui_button_init();
+	ui_input_init();
 
 	/* create button1 object */
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON1_OBJ_INST_ID));
@@ -58,18 +58,22 @@ int lwm2m_init_button(void)
 
 static bool event_handler(const struct event_header *eh)
 {
-	if (is_button_event(eh)) {
-		struct button_event *event = cast_button_event(eh);
+	if (is_ui_input_event(eh)) {
+		struct ui_input_event *event = cast_ui_input_event(eh);
 
-		switch (event->button_number) {
+		if (event->type != Button) {
+			return false;
+		}
+
+		switch (event->device_number) {
 		case 1:
 			lwm2m_engine_set_bool(
 				LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON1_OBJ_INST_ID, DIGITAL_INPUT_STATE_RID), 
-				event->button_state);
+				event->state);
 			
 			/* Won't be needed with new Zephyr update, as the counter 
 			   object is automatically updated in the ipso_push_button file. */
-			if (event->button_state) {
+			if (event->state) {
 				btn1_counter++;
 				lwm2m_engine_set_u64(
 				LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON1_OBJ_INST_ID, DIGITAL_INPUT_COUNTER_RID), 
@@ -80,11 +84,11 @@ static bool event_handler(const struct event_header *eh)
 		case 2:
 			lwm2m_engine_set_bool(
 				LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON2_OBJ_INST_ID, DIGITAL_INPUT_STATE_RID), 
-				event->button_state);
+				event->device_number);
 			
 			/* Won't be needed with new Zephyr update, as the counter 
 			   object is automatically updated in the ipso_push_button file. */
-			if (event->button_state) {
+			if (event->state) {
 				btn2_counter++;
 				lwm2m_engine_set_u64(
 				LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON2_OBJ_INST_ID, DIGITAL_INPUT_COUNTER_RID), 
@@ -96,7 +100,7 @@ static bool event_handler(const struct event_header *eh)
 			return false;
 		}
 
-		LOG_DBG("Button %d changed state to %d.", event->button_number, event->button_state);
+		LOG_DBG("Button %d changed state to %d.", event->device_number, event->state);
 		return true;
 	}
 
@@ -104,4 +108,4 @@ static bool event_handler(const struct event_header *eh)
 }
 
 EVENT_LISTENER(MODULE, event_handler);
-EVENT_SUBSCRIBE(MODULE, button_event);
+EVENT_SUBSCRIBE(MODULE, ui_input_event);

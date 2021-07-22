@@ -5,47 +5,29 @@
 #
 
 menu "User Interface"
+visible if FALSE # Hide menu
 
 config UI_LED
-	bool "Enable LEDs"
-
-if UI_LED
-choice
-	prompt "LED device"
-	default UI_LED_USE_GPIO
+	bool
 	help
-	  Select which device is used for controlling
-	  the LEDs.
-
-config UI_LED_USE_PWM
-	bool "Use PWM to control LEDs"
-	select PWM 
-	select PWM_0
-	help
-		If enabled, LEDs will be controlled with PWM.
-
-config UI_LED_USE_GPIO
-	bool "Use GPIO to control LEDs"
-	help
-		If enabled, LEDs will be controlled with GPIO. 
-endchoice # LED device
-endif # UI_LED
-
+		Enable LEDs. 
 
 config UI_BUZZER
-	bool "Enable buzzer"
+	bool
 	select PWM
 	select PWM_1
 	help
 		If enabled, a buzzer will be controllable with PWM. 
 
 
-config UI_BUTTON
-	bool "Enable buttons"
+config UI_INPUT
+	bool
+	help
+		Enable switches and buttons. 
 
 
 config UI_SENSE_LED
-	bool "Enable sense LEDs"
+	bool 
 	help
 		Enables the sense LEDs available on the Thingy:91.
 

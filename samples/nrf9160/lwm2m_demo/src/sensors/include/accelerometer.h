@@ -26,8 +26,6 @@ struct accelerometer_sensor_data {
 
 int accelerometer_read(struct accelerometer_sensor_data *data);
 
-int accelerometer_calibrate(void);
-
 int accelerometer_init(void);
 
 #ifdef __cplusplus

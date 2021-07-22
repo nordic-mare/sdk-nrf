@@ -1,5 +1,6 @@
 #include <zephyr.h>
 #include <drivers/sensor.h>
+#include <stdlib.h>
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(env_sensor, CONFIG_APP_LOG_LEVEL);
@@ -9,9 +10,13 @@ LOG_MODULE_REGISTER(env_sensor, CONFIG_APP_LOG_LEVEL);
 #define ENV_SENSOR_DEV_LABEL	DT_LABEL(ENV_SENSOR_NODE)
 #elif defined(CONFIG_ENV_SENSOR_USE_SIM)
 #define ENV_SENSOR_DEV_LABEL	"SENSOR_SIM"
+#define GAS_RES_SIM_BASE 		CONFIG_ENV_SENSOR_GAS_RES_SIM_BASE
+#define GAS_RES_SIM_MAX_DIFF		CONFIG_ENV_SENSOR_GAS_RES_SIM_MAX_DIFF
 #endif
 
 static const struct device *env_sensor_dev;
+
+bool initialised = false;
 
 static int read_sensor(struct sensor_value *value, enum sensor_channel channel)
 {
@@ -32,7 +37,7 @@ static int read_sensor(struct sensor_value *value, enum sensor_channel channel)
 	return 0;
 }
 
-int env_sensor_read_temp(struct sensor_value *temp_val)
+int env_sensor_read_temperature(struct sensor_value *temp_val)
 {
 	int ret;
 
@@ -91,12 +96,12 @@ int env_sensor_read_gas_resistance(struct sensor_value *gas_res_val)
 		return ret;
 	}
 #elif defined(CONFIG_ENV_SENSOR_USE_SIM)
-	/* TODO: Simulate gas resistance with rng */
-	gas_res_val->val1 = (int32_t)CONFIG_ENV_SENSOR_GAS_RES_SIM_VAL;
+	int32_t sim_val = MAX(0, GAS_RES_SIM_BASE + (rand() % GAS_RES_SIM_MAX_DIFF)*(1 - 2*(rand() % 2)));
+	gas_res_val->val1 = sim_val;
 	gas_res_val->val2 = 0;
 #endif
 
-	LOG_INF("%s: read %d.%d Ohm", env_sensor_dev->name, 
+	LOG_INF("%s: read %d.%d Ω", env_sensor_dev->name, 
 			gas_res_val->val1, gas_res_val->val2);
 
 	return 0;
@@ -104,10 +109,14 @@ int env_sensor_read_gas_resistance(struct sensor_value *gas_res_val)
 
 int env_sensor_init(void)
 {
-	env_sensor_dev = device_get_binding(ENV_SENSOR_DEV_LABEL);
-	if (!env_sensor_dev) {
-		LOG_ERR("Error %d: could not bind to Environment Sensor device", -ENODEV);
-		return -ENODEV;
+	if (!initialised) {
+		env_sensor_dev = device_get_binding(ENV_SENSOR_DEV_LABEL);
+		if (!env_sensor_dev) {
+			LOG_ERR("Error %d: could not bind to Environment Sensor device", -ENODEV);
+			return -ENODEV;
+		}
+
+		initialised = true;
 	}
 
 	return 0;

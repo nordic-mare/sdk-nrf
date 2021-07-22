@@ -1,0 +1,15 @@
+config LWM2M_IPSO_APP_BUZZER
+    bool 
+    help
+        This IPSO object is used to actuate an audible alarm such as a buzzer,
+	    beeper, or vibration alarm.
+
+if LWM2M_IPSO_APP_BUZZER
+config LWM2M_IPSO_APP_BUZZER_INSTANCE_COUNT
+    int 
+	default 1
+
+	help
+        Total count of IPSO Buzzer instances
+        available to the LWM2M client.
+endif # LWM2M_IPSO_APP_BUZZER

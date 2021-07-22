@@ -8,9 +8,124 @@ menu "Application sample"
 
 rsource "src/ui/Kconfig"
 rsource "src/modules/Kconfig"
-rsource "src/sensors/Kconfig"
-rsource "src/ipso/Kconfig"
 rsource "src/lwm2m/Kconfig"
+
+
+menu "Push buttons and on/off switches"
+config APP_PUSH_BUTTON
+	bool "Enable button(s)"
+	select UI_INPUT
+	select LWM2M_IPSO_PUSH_BUTTON
+	select LWM2M_APP_PUSH_BUTTON
+
+
+config APP_ONOFF_SWITCH
+	bool "Enable switches"
+	depends on BOARD_NRF9160DK_NRF9160NS
+	select UI_INPUT
+	select LWM2M_IPSO_ONOFF_SWITCH
+	select LWM2M_APP_ONOFF_SWITCH
+endmenu # Buttons and switches
+
+
+menu "LEDs"
+config APP_LIGHT_CONTROL
+	bool "Enable LED(s)"
+	select UI_LED
+	select LWM2M_IPSO_LIGHT_CONTROL
+	select LWM2M_APP_LIGHT_CONTROL
+
+if APP_LIGHT_CONTROL
+	rsource "src/ui/Kconfig.ui_led"
+endif # APP_LIGHT_CONTROL
+endmenu # LEDs
+
+
+menu "Buzzer"
+config APP_BUZZER
+	bool "Enable buzzer"
+	depends on BOARD_THINGY91_NRF9160NS
+	select UI_BUZZER
+	select LWM2M_IPSO_APP_BUZZER
+	select LWM2M_APP_BUZZER
+
+if APP_BUZZER
+	rsource "src/ipso/Kconfig.buzzer"
+endif # APP_BUZZER
+endmenu # Buzzer
+
+
+menu "Light sensor"
+config APP_LIGHT_SENSOR
+	bool "Enable light sensor"
+	select LIGHT_SENSOR
+	select LWM2M_IPSO_APP_COLOUR_SENSOR
+	select LWM2M_APP_LIGHT_SENSOR
+
+if APP_LIGHT_SENSOR
+	rsource "src/sensors/Kconfig.light_sensor"
+	rsource "src/ipso/Kconfig.colour_sensor"
+endif # APP_LIGHT_SENSOR
+endmenu # Light sensor
+
+
+menu "Environment sensor"
+config APP_ENV_SENSOR
+	bool "Enable environment sensors"
+	select ENVIRONMENT_SENSOR
+	help
+		Enables options for enabling temperature,
+		pressure, humidity and gas resistance sensors.
+
+if APP_ENV_SENSOR
+rsource "src/sensors/Kconfig.env_sensor"
+
+config APP_TEMP_SENSOR
+	bool "Enable temperature sensor"
+	select LWM2M_IPSO_TEMP_SENSOR
+	select LWM2M_APP_TEMP_SENSOR
+
+config APP_PRESS_SENSOR
+	bool "Enable air pressure sensor"
+	select LWM2M_IPSO_PRESSURE_SENSOR
+	select LWM2M_APP_PRESS_SENSOR
+
+config APP_HUMID_SENSOR
+	bool "Enable humidity sensor"
+	select LWM2M_IPSO_HUMIDITY_SENSOR
+	select LWM2M_APP_HUMID_SENSOR
+
+config APP_GAS_RES_SENSOR
+	bool "Enable gas resistance sensor"
+	select LWM2M_IPSO_GENERIC_SENSOR
+	select LWM2M_APP_GAS_RES_SENSOR
+endif # APP_ENV_SENSOR
+endmenu # Environment sensor
+
+
+menu "Accelerometer"
+config APP_ACCELEROMETER
+	bool "Enable accelerometer"
+	select ACCELEROMETER
+	select LWM2M_IPSO_ACCELEROMETER
+	select LWM2M_APP_ACCELEROMETER
+
+if APP_ACCELEROMETER
+	rsource "src/sensors/Kconfig.accelerometer"
+endif # APP_ACCELEROMETER
+endmenu # Accelerometer
+
+menu "GPS"
+config APP_GPS
+	bool "Enable GPS"
+	select GPS
+	select LWM2M_LOCATION_OBJ_SUPPORT
+
+if APP_GPS
+	rsource "src/sensors/Kconfig.gps"
+endif # APP_GPS
+endmenu # GPS
+
 
 config APP_LWM2M_SERVER
 	string "LwM2M server name or IP address"
