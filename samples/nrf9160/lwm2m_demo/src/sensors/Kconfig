@@ -126,6 +126,7 @@ endif # LIGHT_SENSOR
 
 config GPS
 	bool "Enable GPS"
+	select LWM2M_LOCATION_OBJ_SUPPORT
 	default y
 
 choice
