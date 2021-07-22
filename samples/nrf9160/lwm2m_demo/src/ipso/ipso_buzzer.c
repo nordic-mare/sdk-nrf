@@ -9,6 +9,17 @@
  * http://www.openmobilealliance.org/tech/profiles/lwm2m/3338.xml
  */
 
+/* This file exists due to an error in zephyrs handling of receiving floats over lwm2m.
+ * The lwm2m standard does not specify what size a float has to be, and allows it to
+ * wary across implementations. Coiote has decided that all floats are 64 bit whereas
+ * zephyr has made 32 and 64 bit floats distinct types and expects that all floats that
+ * it recieves will adhere to this distinction. This causes an error when a float that is
+ * set as 32 bit in zephyr is written to in Coiote and sent to the client. The level
+ * resource for the buzzer object is an example of such a float in zephyrs implementation
+ * of lwm2m. This file thus exists to change the type of the level resource to a 64 bit
+ * float. When a fix for this problem is created and integrated, this file can be removed.
+ */
+
 #define LOG_MODULE_NAME app_ipso_buzzer
 #define LOG_LEVEL CONFIG_LWM2M_LOG_LEVEL
 
@@ -33,10 +44,6 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 #endif /* defined(CONFIG_LWM2M_IPSO_BUZZER_VERSION_1_1) */
 
 #define MAX_INSTANCE_COUNT		CONFIG_LWM2M_IPSO_APP_BUZZER_INSTANCE_COUNT
-/*
- * Calculate resource instances as follows:
- * start with BUZZER_MAX_ID
- */
 #define RESOURCE_INSTANCE_COUNT        (BUZZER_MAX_ID)
 
 /* resource state */
@@ -108,7 +115,7 @@ static int start_buzzer(struct ipso_buzzer_data *buzzer)
 	uint32_t temp = 0U;
 	char path[MAX_RESOURCE_LEN];
 
-	/* make sure buzzer is currently not active */
+	/* Make sure buzzer is currently inactive */
 	if (buzzer->active) {
 		return -EINVAL;
 	}
@@ -119,7 +126,7 @@ static int start_buzzer(struct ipso_buzzer_data *buzzer)
 		return -EINVAL;
 	}
 
-	/* TODO: check delay_duration > 0 */
+	/* TODO: Check delay_duration > 0 */
 
 	buzzer->trigger_offset = k_uptime_get();
 	snprintk(path, MAX_RESOURCE_LEN, "%d/%u/%d", IPSO_OBJECT_BUZZER_ID,
@@ -136,7 +143,7 @@ static int stop_buzzer(struct ipso_buzzer_data *buzzer, bool cancel)
 {
 	char path[MAX_RESOURCE_LEN];
 
-	/* make sure buzzer is currently active */
+	/* Make sure buzzer is currently active */
 	if (!buzzer->active) {
 		return -EINVAL;
 	}
