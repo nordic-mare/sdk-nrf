@@ -41,19 +41,31 @@ config LIGHT_SENSOR_COLOUR_MEASUREMENT_MAX_VALUE
 
 if LIGHT_SENSOR_USE_SIM
 config LIGHT_SENSOR_LIGHT_SIM_VAL
-	int "Simulated light value for all channels"
-	default 50
-	help
-		Simulated light value. Wil be scaled to 
-		uint8_t, so this value should be smaller than
-		LIGHT_SENSOR_LIGHT_MEASUREMENT_MAX_VALUE. 
-
-config LIGHT_SENSOR_COLOUR_SIM_VAL
-	int "Simulated colour value for all channels"
+	int "Base value of simulated light values"
 	default 250
 	help
-		Simulated colour value. Wil be scaled to 
-		uint8_t, so this value should be smaller than
-		LIGHT_SENSOR_COLOUR_MEASUREMENT_MAX_VALUE. 
+		Baseline of simulated light value. 
+		Note: Baseline value + max variance value < max expected value.
+
+config LIGHT_SENSOR_COLOUR_SIM_VAL
+	int "Base value of simulated colour values"
+	default 250
+	help
+		Baseline of simulated colour value.
+		Note: Baseline value + max variance value < max expected value.
+
+config LIGHT_SENSOR_LIGHT_SIM_MAX_DIFF
+	int "Max difference from light base value of simulated light value"
+	default 250
+	help
+		Maximum difference from the base value
+		when simulating light data. 
+
+config LIGHT_SENSOR_COLOUR_SIM_MAX_DIFF
+	int "Max difference from colour base value of simulated colour value"
+	default 250
+	help
+		Maximum difference from the base value
+		when simulating colour data. 
 endif # LIGHT_SENSOR_USE_SIM
 endif # LIGHT_SENSOR
