@@ -29,6 +29,7 @@ LOG_MODULE_REGISTER(app_lwm2m_client, CONFIG_APP_LOG_LEVEL);
 
 #include "lwm2m_client.h"
 #include "sensor_module.h"
+#include "gps_module.h"
 
 
 #if !defined(CONFIG_LTE_LINK_CONTROL)
@@ -154,7 +155,7 @@ lwm2m_init_onoff_switch();
 	lwm2m_init_light_sensor();
 #endif
 #if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
-	//lwm2m_app_init_location();
+	initialise_gps();
 #endif
 	return 0;
 }
@@ -344,7 +345,7 @@ static void rd_client_event(struct lwm2m_ctx *client,
 		LOG_DBG("Registration complete");
 #if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
 		// Ensure that GPS search is only started after bootstrap process is complete.
-		//lwm2m_app_start_gps();
+		start_gps_search();
 #endif
 		break;
 
@@ -441,16 +442,6 @@ void main(void)
 		LOG_ERR("Unable to init modem (%d)", ret);
 		return;
 	}
-	// ret = lte_lc_psm_req(true);
-	// if (ret) {
-	// 	LOG_ERR("Error requesting Power Saving Mode: %d", ret);
-	// 	return;
-	// }
-	// ret = lte_lc_edrx_req(true);
-	// if (ret) {
-	// 	LOG_ERR("Error requesting Extended Discontinuous Reception (eDRX): %d", ret);
-	// 	return;
-	// }
 
 	/* query IMEI */
 	query_modem("AT+CGSN", imei_buf, sizeof(imei_buf));
