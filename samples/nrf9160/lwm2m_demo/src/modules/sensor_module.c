@@ -5,9 +5,12 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "sensor_event.h"
+#include "accelerometer.h"
+#include "accel_event.h"
+
 #include "env_sensor.h"
 #include "light_sensor.h"
+#include "sensor_event.h"
 
 #define MODULE sensor_module
 
@@ -19,8 +22,22 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define COLOUR_OBJ_INSTANCE_ID  1
 #define RBG_STR_LEN				11	// '0xRRGGBBIR\0'
 
-#if defined(CONFIG_SENSOR_MODULE_TEMP)
+#if defined(CONFIG_SENSOR_MODULE_ACCEL)
+#define ACCEL_STARTUP_TIME		K_SECONDS(CONFIG_SENSOR_MODULE_ACCEL_STARTUP_DELAY)
+#define ACCEL_DELAY				CONFIG_SENSOR_MODULE_ACCEL_DELAY
+#define ACCEL_DELTA_X			((float32_value_t){ \
+								.val1 = CONFIG_SENSOR_MODULE_ACCEL_X_DELTA_INT, \
+								.val2 = CONFIG_SENSOR_MODULE_ACCEL_X_DELTA_DEC})
+#define ACCEL_DELTA_Y			((float32_value_t){ \
+								.val1 = CONFIG_SENSOR_MODULE_ACCEL_Y_DELTA_INT, \
+								.val2 = CONFIG_SENSOR_MODULE_ACCEL_Y_DELTA_DEC})
+#define ACCEL_DELTA_Z			((float32_value_t){ \
+								.val1 = CONFIG_SENSOR_MODULE_ACCEL_Z_DELTA_INT, \
+								.val2 = CONFIG_SENSOR_MODULE_ACCEL_Z_DELTA_DEC})
+static struct k_work_delayable accel_work;
+#endif
 
+#if defined(CONFIG_SENSOR_MODULE_TEMP)
 #define TEMP_STARTUP_TIME		K_SECONDS(CONFIG_SENSOR_MODULE_TEMP_STARTUP_DELAY)
 #define TEMP_DELAY          	CONFIG_SENSOR_MODULE_TEMP_DELAY
 #define TEMP_DELTA				((float32_value_t){ \
@@ -79,23 +96,30 @@ static struct k_work_delayable colour_work;
 #endif
 
 #if defined(CONFIG_SENSOR_MODULE_TEMP) || defined(CONFIG_SENSOR_MODULE_PRESS) || \
-    defined(CONFIG_SENSOR_MODULE_HUMID) || defined(CONFIG_SENSOR_MODULE_GAS_RES)
+    defined(CONFIG_SENSOR_MODULE_HUMID) || defined(CONFIG_SENSOR_MODULE_GAS_RES) || \
+	defined(CONFIG_SENSOR_MODULE_ACCEL)
+static double float32_to_double(float32_value_t *val)
+{
+	return (double)val->val1 + (double)val->val2 / 1000000;
+}
+
+static void float32_from_double(float32_value_t *val, double inp)
+{
+	val->val1 = (int32_t) inp;
+	val->val2 = (int32_t)(inp * 1000000) % 1000000;
+}
+
 static bool float32_sufficient_change(float32_value_t new_val, float32_value_t old_val, 
 						float32_value_t req_change)
 {
-	int64_t int_change;
-	float32_value_t change;
+	double change = fabs(float32_to_double(&new_val) - float32_to_double(&old_val));
+	float32_value_t change_dbg;
 
-	int_change = (int64_t)(new_val.val1 - old_val.val1)*1000000 + 
-				 (int64_t)(new_val.val2 - old_val.val2);
+	float32_from_double(&change_dbg, change);
 
-	change.val1 = fabs(int_change / 1000000);
-	change.val2 = fabs(int_change % 1000000);
+	LOG_DBG("Change: %d.%06d", change_dbg.val1, change_dbg.val2);
 
-	if (change.val1 > req_change.val1) {
-		return true;
-	}
-	else if (change.val1 == req_change.val1 && change.val2 >= req_change.val2) {
+	if (change > float32_to_double(&req_change)) {
 		return true;
 	}
 	return false;
@@ -107,6 +131,48 @@ static float32_value_t sensor_value_to_float32(struct sensor_value val)
 }
 #endif /* if defined(CONFIG_SENSOR_MODULE_TEMP) || defined(CONFIG_SENSOR_MODULE_PRESS) || \
     		 defined(CONFIG_SENSOR_MODULE_HUMID) || defined(CONFIG_SENSOR_MODULE_GAS_RES) */
+
+#if defined(CONFIG_SENSOR_MODULE_ACCEL)
+static void accel_work_cb(struct k_work *work)
+{
+	float32_value_t *old_x_val;
+	float32_value_t *old_y_val;
+	float32_value_t *old_z_val;
+	uint16_t dummy_data_len;
+	uint8_t dummy_data_flags;
+	struct accelerometer_sensor_data new_data;
+	bool sufficient_x, sufficient_y, sufficient_z; 
+
+	LOG_DBG("ACCEL WORK CB");
+
+	/* Get latest registered accelerometer values */
+	lwm2m_engine_get_res_data(
+		LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, X_VALUE_RID),
+		(void **)(&old_x_val), &dummy_data_len, &dummy_data_flags);
+	lwm2m_engine_get_res_data(
+		LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Y_VALUE_RID),
+		(void **)(&old_y_val), &dummy_data_len, &dummy_data_flags);
+	lwm2m_engine_get_res_data(
+		LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Z_VALUE_RID),
+		(void **)(&old_z_val), &dummy_data_len, &dummy_data_flags);
+
+	accelerometer_read(&new_data);
+
+	sufficient_x = float32_sufficient_change(sensor_value_to_float32(new_data.x), *old_x_val, ACCEL_DELTA_X);
+	sufficient_y = float32_sufficient_change(sensor_value_to_float32(new_data.y), *old_y_val, ACCEL_DELTA_Y);
+	sufficient_z = float32_sufficient_change(sensor_value_to_float32(new_data.z), *old_z_val, ACCEL_DELTA_Z);
+
+	if (sufficient_x || sufficient_y || sufficient_z) {
+		struct accel_event *event = new_accel_event();
+
+		event->data = new_data;
+
+		EVENT_SUBMIT(event);
+	}
+
+	k_work_schedule(&accel_work, K_SECONDS(ACCEL_DELAY));
+}
+#endif /* if defined(CONFIG_SENSOR_MODULE_ACCEL) */
 
 #if defined(CONFIG_SENSOR_MODULE_TEMP)
 static void temp_work_cb(struct k_work *work) 
@@ -329,6 +395,11 @@ static void colour_work_cb(struct k_work *work)
 
 int sensor_module_init(void)
 {
+#if defined(CONFIG_SENSOR_MODULE_ACCEL)
+	k_work_init_delayable(&accel_work, accel_work_cb);
+	k_work_schedule(&accel_work, ACCEL_STARTUP_TIME);
+#endif
+
 #if defined(CONFIG_SENSOR_MODULE_TEMP)
 	k_work_init_delayable(&temp_work, temp_work_cb);
 	k_work_schedule(&temp_work, TEMP_STARTUP_TIME);

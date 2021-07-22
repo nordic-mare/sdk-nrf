@@ -11,8 +11,10 @@
 
 #include "app_gps_event.h"
 
+#define MODULE	lwm2m_app_loc
+
 #include <logging/log.h>
-LOG_MODULE_REGISTER(lwm2m_app_loc, CONFIG_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
 #define LATITUDE_RID 0
 #define LONGITUDE_RID 1
@@ -34,25 +36,26 @@ static float32_value_t double_to_lwm2m_float(double val) {
 	return out;
 }
 
-static void handle_pvt_fix(struct gps_pvt pvt)
-{
-	float32_value_t latitude = double_to_lwm2m_float(pvt.latitude);
-	float32_value_t longitude = double_to_lwm2m_float(pvt.longitude);
-	float32_value_t altitude = float_to_lwm2m_float(pvt.altitude);
-	float32_value_t speed = float_to_lwm2m_float(pvt.speed);
-	float32_value_t radius = float_to_lwm2m_float(pvt.accuracy);
-
-	lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, LATITUDE_RID), &latitude);
-	lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, LONGITUDE_RID), &longitude);
-	lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, ALTITUDE_RID), &altitude);
-	lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, RADIUS_RID), &radius);
-	lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, SPEED_RID), &speed);
-}
-
 static bool event_handler(const struct event_header *eh) {
-	struct app_gps_event *event = cast_app_gps_event(eh);
-	handle_pvt_fix(event->pvt);
-	return true;
+	if (is_app_gps_event(eh)) {
+		struct app_gps_event *event = cast_app_gps_event(eh);
+
+		float32_value_t latitude = double_to_lwm2m_float(event->pvt.latitude);
+		float32_value_t longitude = double_to_lwm2m_float(event->pvt.longitude);
+		float32_value_t altitude = float_to_lwm2m_float(event->pvt.altitude);
+		float32_value_t speed = float_to_lwm2m_float(event->pvt.speed);
+		float32_value_t radius = float_to_lwm2m_float(event->pvt.accuracy);
+
+		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, LATITUDE_RID), &latitude);
+		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, LONGITUDE_RID), &longitude);
+		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, ALTITUDE_RID), &altitude);
+		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, RADIUS_RID), &radius);
+		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, SPEED_RID), &speed);
+
+		return true;
+	}
+	
+	return false;
 }
 
 EVENT_LISTENER(MODULE, event_handler);

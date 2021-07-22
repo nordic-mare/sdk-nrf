@@ -2,6 +2,7 @@ config GPS
 	bool
 	help
         Enable GPS
+
 if GPS
 choice
 	prompt "GPS device"
@@ -22,11 +23,9 @@ config GPS_USE_EXTERNAL
 	help
 		Provide a GPS device that location data will be fetched from and
 		sent to the LWM2M server.
-
-endchoice
+endchoice # GPS device
 
 if GPS_USE_SIM
-
 config GPS_DEV_NAME
 	string
 	default GPS_SIM_DEV_NAME
@@ -34,8 +33,7 @@ config GPS_DEV_NAME
 config GPS_TRIGGER
 	bool
 	default GPS_SIM_TRIGGER
-
-endif
+endif # GPS_USE_SIM
 
 if GPS_USE_EXTERNAL
 config GPS_DEV_NAME
@@ -44,7 +42,7 @@ config GPS_DEV_NAME
 	help
 		GPS device from which location data will be fetched and sent
 		to nRF Cloud.
-endif
+endif # GPS_USE_EXTERNAL
 
 config GPS_SEARCH_INTERVAL_TIME
 	int "GPS search interval [s]"
@@ -60,5 +58,4 @@ config GPS_SEARCH_TIMEOUT_TIME
 	help
 		Length of time the GPS can spend looking for a fix in seconds. 
 		In areas with poor connection, this should be increased.
-
 endif #GPS
