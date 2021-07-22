@@ -1,5 +1,6 @@
 #include <zephyr.h>
 #include <drivers/sensor.h>
+#include <stdlib.h>
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(env_sensor, CONFIG_APP_LOG_LEVEL);
@@ -9,6 +10,8 @@ LOG_MODULE_REGISTER(env_sensor, CONFIG_APP_LOG_LEVEL);
 #define ENV_SENSOR_DEV_LABEL	DT_LABEL(ENV_SENSOR_NODE)
 #elif defined(CONFIG_ENV_SENSOR_USE_SIM)
 #define ENV_SENSOR_DEV_LABEL	"SENSOR_SIM"
+#define GAS_RES_SIM_BASE 		CONFIG_ENV_SENSOR_GAS_RES_SIM_BASE
+#define GAS_RES_SIM_MAX_VAR		CONFIG_ENV_SENSOR_GAS_RES_SIM_MAX_VAR
 #endif
 
 static const struct device *env_sensor_dev;
@@ -93,8 +96,8 @@ int env_sensor_read_gas_resistance(struct sensor_value *gas_res_val)
 		return ret;
 	}
 #elif defined(CONFIG_ENV_SENSOR_USE_SIM)
-	/* TODO: Simulate gas resistance with rng */
-	gas_res_val->val1 = (int32_t)CONFIG_ENV_SENSOR_GAS_RES_SIM_VAL;
+	int32_t sim_val = GAS_RES_SIM_BASE + (rand() % GAS_RES_SIM_MAX_VAR)*(1 - 2*(rand() % 2));
+	gas_res_val->val1 = sim_val;
 	gas_res_val->val2 = 0;
 #endif
 

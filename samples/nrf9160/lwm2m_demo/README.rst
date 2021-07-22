@@ -101,7 +101,7 @@ to open menuconfig and configure the application.
 
 Example:
 west build -d build_thingy91_nrf9160ns -b thingy91_nrf9160ns -t menuconfig -- -DOVERLAY_CONFIG=overlay-thingy91.conf overlay-bootstrap.conf
-configures the application to run on the Thingy:91 with LwM2M bootstrap support.
+opens menuconfig and configures the application to run on the Thingy:91 with LwM2M bootstrap support.
 
 Building and Running
 ********************
