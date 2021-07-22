@@ -73,7 +73,6 @@ menu "Environment sensor"
 config APP_ENV_SENSOR
 	bool "Enable environment sensors"
 	select ENVIRONMENT_SENSOR
-	select LWM2M_APP_ENVIRONMENT_SENSOR
 	help
 		Enables options for enabling temperature,
 		pressure, humidity and gas resistance sensors.

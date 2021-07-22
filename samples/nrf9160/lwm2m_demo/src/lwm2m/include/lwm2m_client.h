@@ -21,8 +21,20 @@ int lwm2m_app_start_gps(void);
 int lwm2m_init_light_control(void);
 #endif
 
-#if defined(CONFIG_LWM2M_APP_ENVIRONMENT_SENSOR)
-int lwm2m_init_env_sensor(void);
+#if defined(CONFIG_LWM2M_APP_TEMP_SENSOR)
+int lwm2m_init_temp_sensor(void);
+#endif
+
+#if defined(CONFIG_LWM2M_APP_PRESS_SENSOR)
+int lwm2m_init_press_sensor(void);
+#endif
+
+#if defined(CONFIG_LWM2M_APP_HUMID_SENSOR)
+int lwm2m_init_humid_sensor(void);
+#endif
+
+#if defined(CONFIG_LWM2M_APP_GAS_RES_SENSOR)
+int lwm2m_init_gas_res_sensor(void);
 #endif
 
 #if defined(CONFIG_LWM2M_APP_LIGHT_SENSOR)

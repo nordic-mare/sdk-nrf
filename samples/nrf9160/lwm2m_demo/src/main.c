@@ -126,8 +126,17 @@ static int lwm2m_setup(void)
 #if defined(CONFIG_LWM2M_APP_LIGHT_CONTROL)
 	lwm2m_init_light_control();
 #endif
-#if defined(CONFIG_LWM2M_APP_ENVIRONMENT_SENSOR)
-	lwm2m_init_env_sensor();
+#if defined(CONFIG_LWM2M_APP_TEMP_SENSOR)
+	lwm2m_init_temp_sensor();
+#endif
+#if defined(CONFIG_LWM2M_APP_PRESS_SENSOR)
+	lwm2m_init_press_sensor();
+#endif
+#if defined(CONFIG_LWM2M_APP_HUMID_SENSOR)
+	lwm2m_init_humid_sensor();
+#endif
+#if defined(CONFIG_LWM2M_APP_GAS_RES_SENSOR)
+	lwm2m_init_gas_res_sensor();
 #endif
 #if defined(CONFIG_LWM2M_APP_BUZZER)
 	lwm2m_init_buzzer();

@@ -30,18 +30,6 @@ config LWM2M_APP_BUZZER
         Create a buzzer LWM2M object. Should not be enabled
         on the nRF9160 DK, as it has no buzzer.
 
-
-config LWM2M_APP_ENVIRONMENT_SENSOR
-    bool 
-    depends on ENVIRONMENT_SENSOR
-    help
-        Create LWM2M objects for a temperature sensor,
-        pressure sensor, humidity sensor and 
-        gas resistance sensor.
-        The nRF9160 DK will only display simulated (constant)
-        sensor values.
-
-if LWM2M_APP_ENVIRONMENT_SENSOR
 config LWM2M_APP_TEMP_SENSOR
     bool
     depends on LWM2M_IPSO_TEMP_SENSOR
@@ -65,8 +53,6 @@ config LWM2M_APP_GAS_RES_SENSOR
     depends on LWM2M_IPSO_GENERIC_SENSOR
     help
         Create gas resistance sensor LwM2M object.
-endif # LWM2M_APP_ENVIRONMENT_SENSOR
-
 
 config LWM2M_APP_LIGHT_CONTROL
     bool 
