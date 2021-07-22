@@ -11,8 +11,22 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Initialise GPS driver.
+ *  
+ * @return int 0 if successful, negative error code if not.
+ */
 int initialise_gps(void);
 
+/**
+ * @brief Start GPS search.
+ *  
+ * @return int 0 if successful, negative error code if not.
+ */
 int start_gps_search(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

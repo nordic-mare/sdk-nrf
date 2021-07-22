@@ -12,6 +12,12 @@
 
 #define MODULE gps_module
 
+#if defined(CONFIG_GPS_USE_EXTERNAL)
+#define GPS_DEV_LABEL     "NRF9160_GPS"
+#elif defined(CONFIG_GPS_USE_SIM)
+#define GPS_DEV_LABEL     "SENSOR_SIM"
+#endif
+
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
@@ -23,7 +29,11 @@ static struct gps_config gps_cfg = {
 	.interval = CONFIG_GPS_SEARCH_INTERVAL_TIME,
 	.timeout = CONFIG_GPS_SEARCH_TIMEOUT_TIME,
 	.accuracy = GPS_ACCURACY_NORMAL,
+#if defined(CONFIG_GPS_PRIORITY_ON_FIRST_FIX)
 	.priority = true
+#else
+	.priority = false
+#endif
 };
 
 /**@brief Callback for GPS events */
@@ -79,18 +89,18 @@ int initialise_gps(void)
 {
 	int err;
 
-	gps_dev = device_get_binding(CONFIG_GPS_DEV_NAME);
+	gps_dev = device_get_binding(GPS_DEV_LABEL);
 	if (gps_dev == NULL) {
 		LOG_ERR("Could not get %s device",
-			log_strdup(CONFIG_GPS_DEV_NAME));
+			log_strdup(GPS_DEV_LABEL));
 		return -EINVAL;
 	}
 
-	LOG_DBG("GPS device found: %s", log_strdup(CONFIG_GPS_DEV_NAME));
+	LOG_DBG("GPS device found: %s", log_strdup(GPS_DEV_LABEL));
 
 	err = gps_init(gps_dev, gps_event_handler);
 	if (err) {
-		LOG_ERR("Could not set trigger, error code: %d", err);
+		LOG_ERR("Could not initialise GPS, error code: %d", err);
 		return err;
 	}
 

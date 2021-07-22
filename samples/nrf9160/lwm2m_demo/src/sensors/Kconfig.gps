@@ -17,11 +17,10 @@ config GPS_USE_SIM
 		Use simulated GPS data.
 
 config GPS_USE_EXTERNAL
-	bool "User provided GPS device"
+	bool "Use NRF9160 GPS driver"
 	select NRF9160_GPS
 	help
-		Provide a GPS device that location data will be fetched from and
-		sent to the LWM2M server.
+		Use NRF9160 GPS driver.
 
 endchoice
 
@@ -37,28 +36,26 @@ config GPS_TRIGGER
 
 endif
 
-if GPS_USE_EXTERNAL
-config GPS_DEV_NAME
-	string "GPS device name"
-	default "NRF9160_GPS"
-	help
-		GPS device from which location data will be fetched and sent
-		to nRF Cloud.
-endif
-
 config GPS_SEARCH_INTERVAL_TIME
 	int "GPS search interval [s]"
 	default 300
-	depends on GPS
 	help
 		Length of time between GPS searches in seconds.
 
 config GPS_SEARCH_TIMEOUT_TIME
 	int "GPS search timeout [s]"
-	default 270
-	depends on GPS
+	default 150
 	help
 		Length of time the GPS can spend looking for a fix in seconds. 
 		In areas with poor connection, this should be increased.
+
+config GPS_PRIORITY_ON_FIRST_FIX
+	bool "Give GPS priority when looking for first fix"
+	default n
+	help
+		Gives the GPS priority while it is performing its first search.
+		Enabling this will make it significantly easier for the GPS module
+		to find a position, but will also affect performance for the rest of the app.
+		Subsequent fixes are much quicker and therefore no priority is needed.
 
 endif #GPS
