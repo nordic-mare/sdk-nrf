@@ -103,21 +103,10 @@ static double float32_to_double(float32_value_t *val)
 	return (double)val->val1 + (double)val->val2 / 1000000;
 }
 
-static void float32_from_double(float32_value_t *val, double inp)
-{
-	val->val1 = (int32_t) inp;
-	val->val2 = (int32_t)(inp * 1000000) % 1000000;
-}
-
 static bool float32_sufficient_change(float32_value_t new_val, float32_value_t old_val, 
 						float32_value_t req_change)
 {
 	double change = fabs(float32_to_double(&new_val) - float32_to_double(&old_val));
-	float32_value_t change_dbg;
-
-	float32_from_double(&change_dbg, change);
-
-	LOG_DBG("Change: %d.%06d", change_dbg.val1, change_dbg.val2);
 
 	if (change > float32_to_double(&req_change)) {
 		return true;
