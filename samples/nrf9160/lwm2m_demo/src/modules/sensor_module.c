@@ -1,6 +1,6 @@
 #include <zephyr.h>
 #include <drivers/sensor.h>
-#include <lwm2m_engine.h>
+#include <net/lwm2m.h>
 #include <lwm2m_resource_ids.h>
 #include <math.h>
 #include <stdlib.h>
@@ -14,102 +14,83 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
-#ifdef CONFIG_SENSOR_MODULE_TEMP_ENABLE
-#define TEMP_STARTUP_TIME	K_SECONDS(CONFIG_SENSOR_MODULE_TEMP_STARTUP_DELAY)
-#else
-#define TEMP_STARTUP_TIME	K_FOREVER
-#endif
-#define TEMP_DELAY          CONFIG_SENSOR_MODULE_TEMP_DELAY
-#define TEMP_DELTA			((float32_value_t){ \
-							.val1 = CONFIG_SENSOR_MODULE_TEMP_DELTA_INT, \
-							.val2 = CONFIG_SENSOR_MODULE_TEMP_DELTA_DEC})
+#define IPSO_OBJECT_COLOUR_ID 	3335
+#define LIGHT_OBJ_INSTANCE_ID 	0
+#define COLOUR_OBJ_INSTANCE_ID  1
+#define RBG_STR_LEN				11	// '0xRRGGBBIR\0'
 
-#ifdef CONFIG_SENSOR_MODULE_PRESS_ENABLE
-#define PRESS_STARTUP_TIME	K_SECONDS(CONFIG_SENSOR_MODULE_PRESS_STARTUP_DELAY)
-#else
-#define PRESS_STARTUP_TIME	K_FOREVER
-#endif
-#define PRESS_DELAY			CONFIG_SENSOR_MODULE_PRESS_DELAY
-#define PRESS_DELTA			((float32_value_t){ \
-							.val1 = CONFIG_SENSOR_MODULE_PRESS_DELTA_INT,\
-							.val2 = CONFIG_SENSOR_MODULE_PRESS_DELTA_DEC})
+#if defined(CONFIG_SENSOR_MODULE_TEMP)
 
-#ifdef CONFIG_SENSOR_MODULE_HUMID_ENABLE
-#define HUMID_STARTUP_TIME	K_SECONDS(CONFIG_SENSOR_MODULE_HUMID_STARTUP_DELAY)
-#else
-#define HUMID_STARTUP_TIME	K_FOREVER
+#define TEMP_STARTUP_TIME		K_SECONDS(CONFIG_SENSOR_MODULE_TEMP_STARTUP_DELAY)
+#define TEMP_DELAY          	CONFIG_SENSOR_MODULE_TEMP_DELAY
+#define TEMP_DELTA				((float32_value_t){ \
+								.val1 = CONFIG_SENSOR_MODULE_TEMP_DELTA_INT, \
+								.val2 = CONFIG_SENSOR_MODULE_TEMP_DELTA_DEC})
+static struct k_work_delayable temp_work;
 #endif
-#define HUMID_DELAY			CONFIG_SENSOR_MODULE_HUMID_DELAY
-#define HUMID_DELTA			((float32_value_t){ \
-							.val1 = CONFIG_SENSOR_MODULE_HUMID_DELTA_INT, \
-							.val2 = CONFIG_SENSOR_MODULE_HUMID_DELTA_DEC})
 
-#ifdef CONFIG_SENSOR_MODULE_GAS_RES_ENABLE
+#if defined(CONFIG_SENSOR_MODULE_PRESS)
+#define PRESS_STARTUP_TIME		K_SECONDS(CONFIG_SENSOR_MODULE_PRESS_STARTUP_DELAY)
+#define PRESS_DELAY				CONFIG_SENSOR_MODULE_PRESS_DELAY
+#define PRESS_DELTA				((float32_value_t){ \
+								.val1 = CONFIG_SENSOR_MODULE_PRESS_DELTA_INT,\
+								.val2 = CONFIG_SENSOR_MODULE_PRESS_DELTA_DEC})
+static struct k_work_delayable press_work;
+#endif
+
+#if defined(CONFIG_SENSOR_MODULE_HUMID)
+#define HUMID_STARTUP_TIME		K_SECONDS(CONFIG_SENSOR_MODULE_HUMID_STARTUP_DELAY)
+#define HUMID_DELAY				CONFIG_SENSOR_MODULE_HUMID_DELAY
+#define HUMID_DELTA				((float32_value_t){ \
+								.val1 = CONFIG_SENSOR_MODULE_HUMID_DELTA_INT, \
+								.val2 = CONFIG_SENSOR_MODULE_HUMID_DELTA_DEC})
+static struct k_work_delayable humid_work;
+#endif
+
+#if defined(CONFIG_SENSOR_MODULE_GAS_RES)
 #define GAS_RES_STARTUP_TIME	K_SECONDS(CONFIG_SENSOR_MODULE_GAS_RES_STARTUP_DELAY)
-#else
-#define GAS_RES_STARTUP_TIME	K_FOREVER
+#define GAS_RES_DELAY			CONFIG_SENSOR_MODULE_GAS_RES_DELAY
+#define GAS_RES_DELTA			((float32_value_t){ \
+								.val1 = CONFIG_SENSOR_MODULE_GAS_RES_DELTA, \
+								.val2 = 0})
+static struct k_work_delayable gas_res_work;
 #endif
-#define GAS_RES_DELAY		CONFIG_SENSOR_MODULE_GAS_RES_DELAY
-#define GAS_RES_DELTA		((float32_value_t){ \
-							.val1 = CONFIG_SENSOR_MODULE_GAS_RES_DELTA, \
-							.val2 = 0})
 
-#ifdef CONFIG_SENSOR_MODULE_LIGHT_ENABLE
-#define LIGHT_STARTUP_TIME	K_SECONDS(CONFIG_SENSOR_MODULE_LIGHT_STARTUP_DELAY)
-#else
-#define LIGHT_STARTUP_TIME	K_FOREVER
-#endif
-#define LIGHT_DELAY			CONFIG_SENSOR_MODULE_LIGHT_DELAY
+#if defined(CONFIG_SENSOR_MODULE_LIGHT)
+#define LIGHT_STARTUP_TIME		K_SECONDS(CONFIG_SENSOR_MODULE_LIGHT_STARTUP_DELAY)
+#define LIGHT_DELAY				CONFIG_SENSOR_MODULE_LIGHT_DELAY
+#define LIGHT_FETCH_DELAY_MS	(LIGHT_DELAY * MSEC_PER_SEC / 2)
 #define LIGHT_DELTA			((uint32_t)((CONFIG_SENSOR_MODULE_LIGHT_DELTA_R << 24) | \
 										(CONFIG_SENSOR_MODULE_LIGHT_DELTA_G << 16) | \
 										(CONFIG_SENSOR_MODULE_LIGHT_DELTA_B << 8)  | \
 										(CONFIG_SENSOR_MODULE_LIGHT_DELTA_IR)))
-
-#ifdef CONFIG_SENSOR_MODULE_COLOUR_ENABLE
-#define COLOUR_STARTUP_TIME	K_SECONDS(CONFIG_SENSOR_MODULE_COLOUR_STARTUP_DELAY)
-#else
-#define COLOUR_STARTUP_TIME	K_FOREVER
+static struct k_work_delayable light_work;
 #endif
-#define COLOUR_DELAY		CONFIG_SENSOR_MODULE_COLOUR_DELAY
+
+#if defined(CONFIG_SENSOR_MODULE_COLOUR)
+#define COLOUR_STARTUP_TIME		K_SECONDS(CONFIG_SENSOR_MODULE_COLOUR_STARTUP_DELAY)
+#define COLOUR_DELAY			CONFIG_SENSOR_MODULE_COLOUR_DELAY
+#define COLOUR_FETCH_DELAY_MS	(COLOUR_DELAY * MSEC_PER_SEC / 2)
 #define COLOUR_DELTA		((uint32_t)((CONFIG_SENSOR_MODULE_COLOUR_DELTA_R << 24) | \
 										(CONFIG_SENSOR_MODULE_COLOUR_DELTA_G << 16) | \
 										(CONFIG_SENSOR_MODULE_COLOUR_DELTA_B << 8)  | \
 										(CONFIG_SENSOR_MODULE_COLOUR_DELTA_IR)))
-
-
-
-#define IPSO_OBJECT_COLOUR_ID 	3335
-#define LIGHT_OBJ_INSTANCE_ID 	0
-#define COLOUR_OBJ_INSTANCE_ID  1
-
-#define RBG_STR_LEN				11	// '0xRRGGBBIR\0'
-
-#define LIGHT_SENSOR_FETCH_DELAY_MS		(LIGHT_DELAY * MSEC_PER_SEC / 2)
-#define COLOUR_SENSOR_FETCH_DELAY_MS	(COLOUR_DELAY * MSEC_PER_SEC / 2)
-
-static struct k_work_delayable temp_work;
-static struct k_work_delayable press_work;
-static struct k_work_delayable humid_work;
-static struct k_work_delayable gas_res_work;
-static struct k_work_delayable light_work;
 static struct k_work_delayable colour_work;
+#endif
 
+#if defined(CONFIG_SENSOR_MODULE_TEMP) || defined(CONFIG_SENSOR_MODULE_PRESS) || \
+    defined(CONFIG_SENSOR_MODULE_HUMID) || defined(CONFIG_SENSOR_MODULE_GAS_RES)
 static bool float32_sufficient_change(float32_value_t new_val, float32_value_t old_val, 
 						float32_value_t req_change)
 {
 	int64_t int_change;
 	float32_value_t change;
 
-	LOG_DBG("new: val1=%d, val2=%d", new_val.val1, new_val.val2);
-	LOG_DBG("old: val1=%d, val2=%d", old_val.val1, old_val.val2);
-
 	int_change = (int64_t)(new_val.val1 - old_val.val1)*1000000 + 
 				 (int64_t)(new_val.val2 - old_val.val2);
 
 	change.val1 = fabs(int_change / 1000000);
 	change.val2 = fabs(int_change % 1000000);
-
-	LOG_DBG("Change: val1=%d, val2=%d", change.val1, change.val2);
 
 	if (change.val1 > req_change.val1) {
 		return true;
@@ -124,7 +105,10 @@ static float32_value_t sensor_value_to_float32(struct sensor_value val)
 {
 	return (float32_value_t){.val1 = val.val1, .val2 = val.val2};
 }
+#endif /* if defined(CONFIG_SENSOR_MODULE_TEMP) || defined(CONFIG_SENSOR_MODULE_PRESS) || \
+    		 defined(CONFIG_SENSOR_MODULE_HUMID) || defined(CONFIG_SENSOR_MODULE_GAS_RES) */
 
+#if defined(CONFIG_SENSOR_MODULE_TEMP)
 static void temp_work_cb(struct k_work *work) 
 {
 	float32_value_t *old_temp_val;
@@ -139,7 +123,7 @@ static void temp_work_cb(struct k_work *work)
 		LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID),
 		(void **)(&old_temp_val), &dummy_data_len, &dummy_data_flags);
 
-	env_sensor_read_temp(&new_temp_val);
+	env_sensor_read_temperature(&new_temp_val);
 
 	if (float32_sufficient_change(sensor_value_to_float32(new_temp_val), *old_temp_val, TEMP_DELTA)) {
 		struct sensor_event *event = new_sensor_event();
@@ -152,7 +136,9 @@ static void temp_work_cb(struct k_work *work)
 
 	k_work_schedule(&temp_work, K_SECONDS(TEMP_DELAY));
 }
+#endif /* if defined(CONFIG_SENSOR_MODULE_TEMP) */
 
+#if defined(CONFIG_SENSOR_MODULE_PRESS)
 static void press_work_cb(struct k_work *work)
 {
 	float32_value_t *old_press_val;
@@ -180,7 +166,9 @@ static void press_work_cb(struct k_work *work)
 
 	k_work_schedule(&press_work, K_SECONDS(PRESS_DELAY));
 }
+#endif /* if defined(CONFIG_SENSOR_MODULE_PRESS) */
 
+#if defined(CONFIG_SENSOR_MODULE_HUMID)
 static void humid_work_cb(struct k_work *work)
 {
 	float32_value_t *old_humid_val;
@@ -208,7 +196,9 @@ static void humid_work_cb(struct k_work *work)
 
 	k_work_schedule(&humid_work, K_SECONDS(HUMID_DELAY));
 }
+#endif /* if defined(CONFIG_SENSOR_MODULE_HUMID) */
 
+#if defined(CONFIG_SENSOR_MODULE_GAS_RES)
 static void gas_res_work_cb(struct k_work *work)
 {
 	float32_value_t *old_gas_res_val;
@@ -236,16 +226,15 @@ static void gas_res_work_cb(struct k_work *work)
 
 	k_work_schedule(&gas_res_work, K_SECONDS(GAS_RES_DELAY));
 }
+#endif /* if defined(CONFIG_SENSOR_MODULE_GAS_RES) */
 
+#if defined(CONFIG_SENSOR_MODULE_LIGHT) || defined(CONFIG_SENSOR_MODULE_COLOUR)
 static bool rgbir_sufficient_change(uint32_t new_light_val, uint32_t old_light_val, uint32_t req_change)
 {
 	uint8_t *new_val_ptr = (uint8_t *)(&new_light_val);
 	uint8_t *old_val_ptr = (uint8_t *)(&old_light_val);
 	int16_t new_byte, old_byte;
 	uint32_t change = 0;
-
-	LOG_DBG("Old light val: 0x%08X", old_light_val);
-	LOG_DBG("New light val: 0x%08X", new_light_val);
 
 	/* Get change per colour channel; each byte represents a unique colour channel */
 	for (int i = 0; i < 4; i++) {
@@ -254,8 +243,6 @@ static bool rgbir_sufficient_change(uint32_t new_light_val, uint32_t old_light_v
 
 		change |= (uint32_t)(fabs(new_byte - old_byte)) << 8*i;
 	}
-
-	LOG_DBG("Change: 0x%08X", change);
 
 	/* Check if any of the colour channels has changed sufficiently */
 	for (int i = 0; i < 4; i++) {
@@ -266,7 +253,9 @@ static bool rgbir_sufficient_change(uint32_t new_light_val, uint32_t old_light_v
 
 	return false;
 }
+#endif /* if defined(CONFIG_SENSOR_MODULE_LIGHT) || defined(CONFIG_SENSOR_MODULE_COLOUR) */
 
+#if defined(CONFIG_SENSOR_MODULE_LIGHT)
 static void light_work_cb(struct k_work *work)
 {
 	char *old_light_val_str;
@@ -285,7 +274,7 @@ static void light_work_cb(struct k_work *work)
 
 	/* Read sensor, try again later if busy */
 	if (light_sensor_read(&new_light_val) == -EBUSY) {
-		k_work_schedule(&light_work, K_MSEC(LIGHT_SENSOR_FETCH_DELAY_MS));
+		k_work_schedule(&light_work, K_MSEC(LIGHT_FETCH_DELAY_MS));
 		return;
 	}
 
@@ -300,7 +289,9 @@ static void light_work_cb(struct k_work *work)
 
 	k_work_schedule(&light_work, K_SECONDS(LIGHT_DELAY));
 }
+#endif /* if defined(CONFIG_SENSOR_MODULE_LIGHT) */
 
+#if defined(CONFIG_SENSOR_MODULE_COLOUR)
 static void colour_work_cb(struct k_work *work)
 {
 	char *old_colour_val_str;
@@ -319,7 +310,7 @@ static void colour_work_cb(struct k_work *work)
 
 	/* Read sensor, try again later if busy */
 	if (colour_sensor_read(&new_colour_val) == -EBUSY) {
-		k_work_schedule(&colour_work, K_MSEC(COLOUR_SENSOR_FETCH_DELAY_MS));
+		k_work_schedule(&colour_work, K_MSEC(COLOUR_FETCH_DELAY_MS));
 		return;
 	}
 
@@ -334,26 +325,39 @@ static void colour_work_cb(struct k_work *work)
 
 	k_work_schedule(&colour_work, K_SECONDS(COLOUR_DELAY));
 }
+#endif /* if defined(CONFIG_SENSOR_MODULE_COLOUR) */
 
 int sensor_module_init(void)
 {
+#if defined(CONFIG_SENSOR_MODULE_TEMP)
 	k_work_init_delayable(&temp_work, temp_work_cb);
 	k_work_schedule(&temp_work, TEMP_STARTUP_TIME);
+#endif
 
+#if defined(CONFIG_SENSOR_MODULE_PRESS)
 	k_work_init_delayable(&press_work, press_work_cb);
 	k_work_schedule(&press_work, PRESS_STARTUP_TIME);
+#endif
 	
+#if defined(CONFIG_SENSOR_MODULE_HUMID)
 	k_work_init_delayable(&humid_work, humid_work_cb);
 	k_work_schedule(&humid_work, HUMID_STARTUP_TIME);
-	
+#endif
+
+#if defined(CONFIG_SENSOR_MODULE_GAS_RES)
 	k_work_init_delayable(&gas_res_work, gas_res_work_cb);
 	k_work_schedule(&gas_res_work, GAS_RES_STARTUP_TIME);
-	
+#endif
+
+#if defined(CONFIG_SENSOR_MODULE_LIGHT)
 	k_work_init_delayable(&light_work, light_work_cb);
 	k_work_schedule(&light_work, LIGHT_STARTUP_TIME);
-	
+#endif
+
+#if defined(CONFIG_SENSOR_MODULE_COLOUR)
 	k_work_init_delayable(&colour_work, colour_work_cb);
 	k_work_schedule(&colour_work, COLOUR_STARTUP_TIME);
+#endif
 
 	return 0;
 } 
