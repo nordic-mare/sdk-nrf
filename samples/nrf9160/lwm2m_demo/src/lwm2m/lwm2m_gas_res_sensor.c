@@ -12,10 +12,13 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
 #define LWM2M_RES_DATA_FLAG_RW	0
 
+#define MIN_RANGE_VALUE			0
+#define MAX_RANGE_VALUE			100
+
 #define GENERIC_SENSOR_APP_TYPE "A measure for Air Quality Index"
 #define GENERIC_SENSOR_TYPE 	"Gas resistance sensor"
 
-#define GAS_RES_UNIT 		"Ω"
+#define GAS_RES_UNIT 			"Ω"
 
 static bool read_sensor;
 static float32_value_t gas_res_float;
@@ -48,6 +51,13 @@ static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 
 int lwm2m_init_gas_res_sensor(void)
 {
+	float32_value_t min_range_val = {
+		.val1 = MIN_RANGE_VALUE, 
+		.val2 = 0};
+	float32_value_t max_range_val = {
+		.val1 = MAX_RANGE_VALUE, 
+		.val2 = 0};
+
 	read_sensor = true;
 	env_sensor_init();
 
@@ -66,6 +76,12 @@ int lwm2m_init_gas_res_sensor(void)
 	lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_TYPE_RID),
 			GENERIC_SENSOR_TYPE, sizeof(GENERIC_SENSOR_TYPE), LWM2M_RES_DATA_FLAG_RO);
+	lwm2m_engine_set_float32(
+			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, MIN_RANGE_VALUE_RID),
+			&min_range_val);
+	lwm2m_engine_set_float32(
+			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, MAX_RANGE_VALUE_RID),
+			&max_range_val);
 
     return 0;
 }
