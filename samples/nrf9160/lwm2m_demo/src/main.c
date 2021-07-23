@@ -146,7 +146,7 @@ static int lwm2m_setup(void)
 	lwm2m_init_push_button();
 #endif
 #if defined(CONFIG_LWM2M_APP_ONOFF_SWITCH)
-lwm2m_init_onoff_switch();
+	lwm2m_init_onoff_switch();
 #endif
 #if defined(CONFIG_LWM2M_APP_ACCELEROMETER)
 	lwm2m_init_accel();
@@ -181,7 +181,7 @@ static int find_server_security_instance(void)
 
 		ret = lwm2m_engine_get_bool(pathstr, &bootstrap);
 		if (ret < 0) {
-			LOG_ERR("Failed to check bootstrap, err %d", ret);
+			LOG_ERR("Error %d: failed to check bootstrap", ret);
 			continue;
 		}
 
@@ -204,7 +204,7 @@ static int get_security_mode(int instance)
 
 	ret = lwm2m_engine_get_u8(pathstr, &security_mode);
 	if (ret < 0) {
-		LOG_ERR("Failed to obtain security mode, err %d", ret);
+		LOG_ERR("Error %d: failed to obtain security mode", ret);
 		return -1;
 	}
 
@@ -230,7 +230,7 @@ static void provision_psk(int instance)
 	ret = lwm2m_engine_get_res_data(pathstr, (void **)&identity,
 					&identity_len, &flags);
 	if (ret < 0) {
-		LOG_ERR("Failed to obtain client identity.");
+		LOG_ERR("Error %d: failed to obtain client identity", ret);
 		return;
 	}
 
@@ -240,14 +240,14 @@ static void provision_psk(int instance)
 	ret = lwm2m_engine_get_res_data(pathstr, (void **)&psk,
 					&psk_len, &flags);
 	if (ret < 0) {
-		LOG_ERR("Failed to obtain PSK.");
+		LOG_ERR("Error %d: failed to obtain PSK", ret);
 		return;
 	}
 
 	/* Convert PSK to a format accepted by the modem. */
 	psk_len = bin2hex(psk, psk_len, psk_hex, sizeof(psk_hex));
 	if (psk_len == 0) {
-		LOG_ERR("PSK is too large to convert.");
+		LOG_ERR("Error %d: PSK is too large to convert", -EOVERFLOW);
 		return;
 	}
 
@@ -258,9 +258,8 @@ static void provision_psk(int instance)
 				   MODEM_KEY_MGMT_CRED_TYPE_PSK,
 				   psk_hex, psk_len);
 	if (ret < 0) {
-		LOG_ERR("Error setting cred tag %d type %d: Error %d",
-			client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_PSK,
-			ret);
+		LOG_ERR("Error %d: setting cred tag %d type %d failed",
+			ret, client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_PSK);
 		goto exit;
 	}
 
@@ -268,9 +267,8 @@ static void provision_psk(int instance)
 				   MODEM_KEY_MGMT_CRED_TYPE_IDENTITY,
 				   identity, identity_len);
 	if (ret < 0) {
-		LOG_ERR("Error setting cred tag %d type %d: Error %d",
-			client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_IDENTITY,
-			ret);
+		LOG_ERR("Error %d: setting cred tag %d type %d failed",
+			ret, client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_IDENTITY);
 	}
 
 exit:
@@ -286,7 +284,7 @@ static void provision_credentials(void)
 
 	security_instance = find_server_security_instance();
 	if (security_instance == -1) {
-		LOG_ERR("No security instance found");
+		LOG_ERR("Error %d: no security instance found", -ENODEV);
 		return;
 	}
 
@@ -309,7 +307,7 @@ static void provision_credentials(void)
 		break;
 
 	default:
-		LOG_ERR("Unsupported security mode");
+		LOG_ERR("Error %d: unsupported security mode", -ENOTSUP);
 		break;
 	}
 }
@@ -418,13 +416,13 @@ void main(void)
 
 	ret = event_manager_init();
 	if (ret) {
-		LOG_ERR("Unable to init event manager (%d", ret);
+		LOG_ERR("Error %d: unable to init event manager", ret);
 		return;	
 	}
 
 	ret = fota_settings_init();
 	if (ret < 0) {
-		LOG_ERR("Unable to init settings (%d)", ret);
+		LOG_ERR("Error %d: unable to init settings", ret);
 		return;
 	}
 
@@ -439,7 +437,7 @@ void main(void)
 	LOG_INF("Initializing modem.");
 	ret = lte_lc_init();
 	if (ret < 0) {
-		LOG_ERR("Unable to init modem (%d)", ret);
+		LOG_ERR("Error %d: unable to init modem", ret);
 		return;
 	}
 
@@ -454,13 +452,13 @@ void main(void)
 
 	ret = lwm2m_setup();
 	if (ret < 0) {
-		LOG_ERR("Cannot setup LWM2M fields (%d)", ret);
+		LOG_ERR("Error %d: failed to setup LWM2M fields", ret);
 		return;
 	}
 
 	ret = lwm2m_init_image();
 	if (ret < 0) {
-		LOG_ERR("Failed to setup image properties (%d)", ret);
+		LOG_ERR("Error %d: failed to setup image properties", ret);
 		return;
 	}
 
@@ -469,18 +467,16 @@ void main(void)
 				   MODEM_KEY_MGMT_CRED_TYPE_PSK,
 				   client_psk, strlen(client_psk));
 	if (ret < 0) {
-		LOG_ERR("Error setting cred tag %d type %d: Error %d",
-			client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_PSK,
-			ret);
+		LOG_ERR("Error %d: setting cred tag %d type %d failed",
+			ret, client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_PSK);
 	}
 
 	ret = modem_key_mgmt_write(client.tls_tag,
 				   MODEM_KEY_MGMT_CRED_TYPE_IDENTITY,
 				   endpoint_name, strlen(endpoint_name));
 	if (ret < 0) {
-		LOG_ERR("Error setting cred tag %d type %d: Error %d",
-			client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_IDENTITY,
-			ret);
+		LOG_ERR("Error %d: setting cred tag %d type %d failed",
+			ret, client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_IDENTITY);
 	}
 #endif
 
@@ -489,7 +485,7 @@ void main(void)
 #if defined(CONFIG_LWM2M_CLIENT_UTILS_CONN_MON_OBJ_SUPPORT)
 	ret = lwm2m_update_connmon();
 	if (ret < 0) {
-		LOG_ERR("Error registering rsrp handler (%d)", ret);
+		LOG_ERR("Error %d: registering rsrp handler failed", ret);
 	}
 #endif
 
@@ -515,7 +511,7 @@ void main(void)
 		/* Try to reconnect to the network. */
 		ret = lte_lc_offline();
 		if (ret < 0) {
-			LOG_ERR("Failed to put LTE link in offline state. (%d)",
+			LOG_ERR("Error %d: failed to put LTE link in offline state",
 				ret);
 		}
 
