@@ -24,7 +24,7 @@
 #define LOG_LEVEL CONFIG_LWM2M_LOG_LEVEL
 
 #include <logging/log.h>
-LOG_MODULE_REGISTER(LOG_MODULE_NAME, 4);
+LOG_MODULE_REGISTER(LOG_MODULE_NAME, CONFIG_LWM2M_LOG_LEVEL);
 
 #include <stdint.h>
 #include <init.h>

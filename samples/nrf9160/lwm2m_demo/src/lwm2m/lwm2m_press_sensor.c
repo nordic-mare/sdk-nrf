@@ -12,6 +12,8 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
 #define LWM2M_RES_DATA_FLAG_RW	0
 
+#define NOTIFICATION_REQUEST_DELAY_MS	500
+
 #define MIN_RANGE_VALUE			0
 #define MAX_RANGE_VALUE			100
 
@@ -24,7 +26,13 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define PRESS_UNIT 				"kPa"
 
 static float32_value_t press_float;
-static bool read_sensor;
+static int64_t last_sensor_read_timestamp;
+
+static bool is_regular_request(void)
+{
+	int64_t dt = k_uptime_get() - last_sensor_read_timestamp;
+	return dt > NOTIFICATION_REQUEST_DELAY_MS;
+}
 
 #if defined(CONFIG_LWM2M_IPSO_PRESSURE_SENSOR_VERSION_1_1)
 static int32_t timestamp;
@@ -45,7 +53,7 @@ static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 					uint16_t res_inst_id, size_t *data_len)
 {
 	/* Only read sensor if a regular request from server, i.e. not a notify request */
-	if (read_sensor) {
+	if (is_regular_request()) {
 		int ret;
 		struct sensor_value press_val;
 
@@ -55,15 +63,14 @@ static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 			return NULL;
 		}
 
+		last_sensor_read_timestamp = k_uptime_get();
+
 #if defined(CONFIG_LWM2M_IPSO_PRESSURE_SENSOR_VERSION_1_1)
 		set_timestamp();
 #endif
 
 		press_float.val1 = press_val.val1;
 		press_float.val2 = press_val.val2;
-	}
-	else {
-		read_sensor = true;
 	}
 
 	*data_len = sizeof(press_float);
@@ -80,7 +87,8 @@ int lwm2m_init_press_sensor(void)
 		.val1 = MAX_RANGE_VALUE, 
 		.val2 = 0};
 
-	read_sensor = true;
+	last_sensor_read_timestamp = k_uptime_get();
+
 	env_sensor_init();
 
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0));
@@ -124,11 +132,7 @@ static bool event_handler(const struct event_header *eh)
         if (event->type == PressureSensor) {
             float32_value_t received_value;
 
-            /* This prevents re-reading the sensor when a callback is called because of
-            a notification event.
-            Ensures that the value received by the server is the same as the value in the
-            event received below. */
-            read_sensor = false;
+            last_sensor_read_timestamp = k_uptime_get();
 
             LOG_DBG("Pressure sensor event received: val1 = %06d, val2 = %06d", 
 					event->sensor_value.val1, event->sensor_value.val2);

@@ -12,6 +12,8 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
 #define LWM2M_RES_DATA_FLAG_RW	0
 
+#define NOTIFICATION_REQUEST_DELAY_MS	500
+
 #define MIN_RANGE_VALUE			0
 #define MAX_RANGE_VALUE			100
 
@@ -24,7 +26,13 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define TEMP_UNIT 				"°C"
 
 static float32_value_t temp_float;
-static bool read_sensor;
+static int64_t last_sensor_read_timestamp;
+
+static bool is_regular_request(void)
+{
+	int64_t dt = k_uptime_get() - last_sensor_read_timestamp;
+	return dt > NOTIFICATION_REQUEST_DELAY_MS;
+}
 
 #if defined(CONFIG_LWM2M_IPSO_TEMP_SENSOR_VERSION_1_1)
 static int32_t timestamp;
@@ -45,7 +53,7 @@ static void *temperature_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 					uint16_t res_inst_id, size_t *data_len)
 {
 	/* Only read sensor if a regular request from server, i.e. not a notify request */
-	if (read_sensor) {
+	if (is_regular_request()) {
 		int ret;
 		struct sensor_value temp_val;
 
@@ -55,15 +63,14 @@ static void *temperature_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 			return NULL;
 		}
 
+		last_sensor_read_timestamp = k_uptime_get();
+
 #if defined(CONFIG_LWM2M_IPSO_TEMP_SENSOR_VERSION_1_1)
 		set_timestamp();
 #endif
 
 		temp_float.val1 = temp_val.val1;
 		temp_float.val2 = temp_val.val2;
-	}
-	else {
-		read_sensor = true;
 	}
 
 	*data_len = sizeof(temp_float);
@@ -80,7 +87,8 @@ int lwm2m_init_temp_sensor(void)
 		.val1 = MAX_RANGE_VALUE, 
 		.val2 = 0};
 
-	read_sensor = true;
+	last_sensor_read_timestamp = k_uptime_get();
+
 	env_sensor_init();
 
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0));
@@ -124,11 +132,7 @@ static bool event_handler(const struct event_header *eh)
         if (event->type == TemperatureSensor) {
             float32_value_t received_value;
 
-            /* This prevents re-reading the sensor when a callback is called because of
-            a notification event.
-            Ensures that the value received by the server is the same as the value in the
-            event received below. */
-            read_sensor = false;
+            last_sensor_read_timestamp = k_uptime_get();
 
             LOG_DBG("Temperature sensor event received: val1 = %06d, val2 = %06d", 
 					event->sensor_value.val1, event->sensor_value.val2);

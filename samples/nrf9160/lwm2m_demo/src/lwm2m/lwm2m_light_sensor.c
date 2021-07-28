@@ -26,6 +26,7 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define MAX_LWM2M_PATH_LEN		20
 #define RGBIR_STR_LENGTH      	11  // '0xRRGGBBIR\0'
 
+#define NOTIFICATION_REQUEST_DELAY_MS	500
 #define SENSOR_FETCH_DELAY_MS	200
 
 #if defined(CONFIG_LIGHT_SENSOR_USE_EXTERNAL)
@@ -42,7 +43,13 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
 static char light_value_str[RGBIR_STR_LENGTH] = "-";
 static char colour_value_str[RGBIR_STR_LENGTH] = "-";
-static bool read_sensor;
+static int64_t last_sensor_read_timestamp[2];
+
+static bool is_regular_request(uint16_t obj_inst_id)
+{
+	int64_t dt = k_uptime_get() - last_sensor_read_timestamp[obj_inst_id];
+	return dt > NOTIFICATION_REQUEST_DELAY_MS;
+}
 
 #if defined(CONFIG_LWM2M_IPSO_APP_COLOUR_SENSOR_VERSION_1_1)
 static int32_t timestamp_light_sensor;
@@ -68,7 +75,7 @@ static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_
 			  size_t *data_len) 
 {
 	/* Only read sensor if a regular request from server, i.e. not a notify request */
-	if (read_sensor) {
+	if (is_regular_request(obj_inst_id)) {
 		int ret;
 		uint32_t light_value;
 		
@@ -87,6 +94,8 @@ static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_
 			return NULL;
 		}
 
+		last_sensor_read_timestamp[obj_inst_id] = k_uptime_get();
+
 #if defined(CONFIG_LWM2M_IPSO_APP_COLOUR_SENSOR_VERSION_1_1)
 		set_timestamp(LIGHT_OBJ_INSTANCE_ID);
 #endif
@@ -95,9 +104,6 @@ static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_
 
 		snprintf(light_value_str, RGBIR_STR_LENGTH,    
 					"0x%08X", light_value);
-	} 
-	else {
-		read_sensor = true;
 	}
 
 	*data_len = sizeof(light_value_str);
@@ -109,7 +115,7 @@ static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16
 			  size_t *data_len)
 {
 	/* Only read sensor if a regular request from server, i.e. not a notify request */
-	if (read_sensor) {
+	if (is_regular_request(obj_inst_id)) {
 		int ret;
 		uint32_t colour_value ;
 
@@ -128,6 +134,8 @@ static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16
 			return NULL;
 		}
 
+		last_sensor_read_timestamp[obj_inst_id] = k_uptime_get();
+
 #if defined(CONFIG_LWM2M_IPSO_APP_COLOUR_SENSOR_VERSION_1_1)
 		set_timestamp(COLOUR_OBJ_INSTANCE_ID);
 #endif
@@ -136,9 +144,6 @@ static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16
 
 		snprintf(colour_value_str, RGBIR_STR_LENGTH,
 					"0x%08X", colour_value);
-	} 
-	else {
-		read_sensor = true;
 	}
 
 	*data_len = sizeof(colour_value_str);
@@ -148,7 +153,9 @@ static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16
 
 int lwm2m_init_light_sensor(void) 
 {
-	read_sensor = true;
+	last_sensor_read_timestamp[LIGHT_OBJ_INSTANCE_ID] = k_uptime_get();
+	last_sensor_read_timestamp[COLOUR_OBJ_INSTANCE_ID] = k_uptime_get();
+
 	light_sensor_init();
 
 	/* Ambient light sensor */
@@ -211,12 +218,6 @@ static bool event_handler(const struct event_header *eh)
 	if (is_sensor_event(eh)) {
 		struct sensor_event *event = cast_sensor_event(eh);
 		char temp_value_str[RGBIR_STR_LENGTH];
-		
-		/* This prevents re-reading the sensor when a callback is called because of
-		   a notification event.
-		   Ensures that the value received by the server is the same as the value in the
-		   event received below. */
-		read_sensor = false;
 
 		switch (event->type)
 		{
@@ -224,6 +225,8 @@ static bool event_handler(const struct event_header *eh)
 			snprintf(temp_value_str, RGBIR_STR_LENGTH,    
 				"0x%08X", event->unsigned_value);
 			LOG_DBG("Light sensor event received! Val: 0x%08X", event->unsigned_value);
+
+			last_sensor_read_timestamp[LIGHT_OBJ_INSTANCE_ID] = k_uptime_get();
 
 #if defined(CONFIG_LWM2M_IPSO_APP_COLOUR_SENSOR_VERSION_1_1)
 			set_timestamp(LIGHT_OBJ_INSTANCE_ID);
@@ -237,7 +240,9 @@ static bool event_handler(const struct event_header *eh)
 		case ColourSensor:
 			snprintf(temp_value_str, RGBIR_STR_LENGTH,
 				"0x%08X", event->unsigned_value);
-			LOG_DBG("Light sensor event received! Val: 0x%08X", event->unsigned_value);
+			LOG_DBG("Colour sensor event received! Val: 0x%08X", event->unsigned_value);
+
+			last_sensor_read_timestamp[COLOUR_OBJ_INSTANCE_ID] = k_uptime_get();
 
 #if defined(CONFIG_LWM2M_IPSO_APP_COLOUR_SENSOR_VERSION_1_1)
 			set_timestamp(COLOUR_OBJ_INSTANCE_ID);
@@ -249,7 +254,6 @@ static bool event_handler(const struct event_header *eh)
 			break;
 
 		default:
-			read_sensor = true;
 			return false;
 		}
 

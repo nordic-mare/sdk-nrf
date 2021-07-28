@@ -29,10 +29,37 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
 #define LWM2M_RES_DATA_FLAG_RW	0
 
+#define NOTIFICATION_REQUEST_DELAY_MS	500
+
 static float32_value_t x_val;
 static float32_value_t y_val;
 static float32_value_t z_val;
-uint8_t read_condition;
+static int64_t last_accel_read_timestamp[3];
+
+static bool is_regular_request(uint16_t res_inst_id)
+{
+	int64_t dt = 0;
+	
+	switch (res_inst_id)
+	{
+	case X_VALUE_RID:
+		dt = k_uptime_get() - last_accel_read_timestamp[0];
+		break;
+
+	case Y_VALUE_RID:
+		dt = k_uptime_get() - last_accel_read_timestamp[1];
+		break;
+
+	case Z_VALUE_RID:
+		dt = k_uptime_get() - last_accel_read_timestamp[2];
+		break;
+	
+	default:
+		break;
+	}
+	
+	return dt > NOTIFICATION_REQUEST_DELAY_MS;
+}
 
 #if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)
 int32_t timestamp;
@@ -52,7 +79,7 @@ static void set_timestamp(void)
 static void *accel_x_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	if (read_condition == 0) {
+	if (is_regular_request(res_inst_id)) {
 		int ret;
 		struct accelerometer_sensor_data accel_data;
 
@@ -62,15 +89,14 @@ static void *accel_x_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 			return NULL;
 		}
 
+		last_accel_read_timestamp[0] = k_uptime_get();
+
 #if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)
 		set_timestamp();
 #endif
 
 		x_val.val1 = accel_data.x.val1;
 		x_val.val2 = accel_data.x.val2;
-	}
-	else {
-		read_condition = MAX(0, read_condition - 1);
 	}
 
 	*data_len = sizeof(x_val);
@@ -81,7 +107,7 @@ static void *accel_x_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 static void *accel_y_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	if (read_condition == 0) {
+	if (is_regular_request(res_inst_id)) {
 		int ret;
 		struct accelerometer_sensor_data accel_data;
 
@@ -91,15 +117,14 @@ static void *accel_y_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 			return NULL;
 		}
 
+		last_accel_read_timestamp[1] = k_uptime_get();
+
 #if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)
 		set_timestamp();
 #endif
 
 		y_val.val1 = accel_data.y.val1;
 		y_val.val2 = accel_data.y.val2;
-	}
-	else {
-		read_condition = MAX(0, read_condition - 1);
 	}
 
 	*data_len = sizeof(y_val);
@@ -110,7 +135,7 @@ static void *accel_y_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 static void *accel_z_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	if (read_condition == 0) {
+	if (is_regular_request(res_inst_id)) {
 		int ret;
 		struct accelerometer_sensor_data accel_data;
 
@@ -120,15 +145,14 @@ static void *accel_z_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 			return NULL;
 		}
 
+		last_accel_read_timestamp[2] = k_uptime_get();
+
 #if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)
 		set_timestamp();
 #endif
 
 		z_val.val1 = accel_data.z.val1;
 		z_val.val2 = accel_data.z.val2;
-	}
-	else {
-		read_condition = MAX(0, read_condition - 1);
 	}
 
 	*data_len = sizeof(z_val);
@@ -138,7 +162,10 @@ static void *accel_z_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 
 int lwm2m_init_accel(void)
 {
-	read_condition = 0;
+	last_accel_read_timestamp[0] = k_uptime_get();
+	last_accel_read_timestamp[1] = k_uptime_get();
+	last_accel_read_timestamp[2] = k_uptime_get();
+
 	accelerometer_init();
 
 	/* create accel object */
@@ -183,11 +210,9 @@ static bool event_handler(const struct event_header *eh)
 		struct accel_event *event = cast_accel_event(eh);
 		float32_value_t received_value;
 
-		/* This prevents re-reading the sensor when a callback is called because of
-            a notification event.
-            Ensures that the value received by the server is the same as the value in the
-            event received below. */
-        read_condition = 3;
+		last_accel_read_timestamp[0] = k_uptime_get();
+		last_accel_read_timestamp[1] = k_uptime_get();
+		last_accel_read_timestamp[2] = k_uptime_get();
 
 #if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)
 		set_timestamp();
