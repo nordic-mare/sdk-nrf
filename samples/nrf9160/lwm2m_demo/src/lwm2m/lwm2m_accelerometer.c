@@ -19,14 +19,35 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
-#define SENSOR_UNIT_NAME			"m/s2"
+#if defined(CONFIG_ACCEL_USE_EXTERNAL)
+#define ACCEL_APP_TYPE			"ADXL362 Accelerometer"
+#elif defined(CONFIG_ACCEL_USE_SIM)
+#define ACCEL_APP_TYPE			"Simulated Accelerometer"
+#endif
 
-#define LWM2M_RES_DATA_FLAG_RW		0
+#define SENSOR_UNIT_NAME		"m/s2"
+
+#define LWM2M_RES_DATA_FLAG_RW	0
 
 static float32_value_t x_val;
 static float32_value_t y_val;
 static float32_value_t z_val;
 uint8_t read_condition;
+
+#if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)
+int32_t timestamp;
+static uint8_t meas_qual_ind;
+
+static void set_timestamp(void)
+{
+	int32_t ts;
+
+	lwm2m_engine_get_s32("3/0/13", &ts);
+	lwm2m_engine_set_s32(
+			LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, TIMESTAMP_RID),
+			ts);	
+}
+#endif
 
 static void *accel_x_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
@@ -40,6 +61,10 @@ static void *accel_x_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 			LOG_ERR("Error %d: read accelerometer failed", ret);
 			return NULL;
 		}
+
+#if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)
+		set_timestamp();
+#endif
 
 		x_val.val1 = accel_data.x.val1;
 		x_val.val2 = accel_data.x.val2;
@@ -66,6 +91,10 @@ static void *accel_y_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 			return NULL;
 		}
 
+#if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)
+		set_timestamp();
+#endif
+
 		y_val.val1 = accel_data.y.val1;
 		y_val.val2 = accel_data.y.val2;
 	}
@@ -90,6 +119,10 @@ static void *accel_z_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 			LOG_ERR("Error %d: read accelerometer failed", ret);
 			return NULL;
 		}
+
+#if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)
+		set_timestamp();
+#endif
 
 		z_val.val1 = accel_data.z.val1;
 		z_val.val2 = accel_data.z.val2;
@@ -126,6 +159,20 @@ int lwm2m_init_accel(void)
 	lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Z_VALUE_RID),
 				  &z_val, sizeof(z_val), LWM2M_RES_DATA_FLAG_RW);
 
+#if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)
+	meas_qual_ind = 0;
+
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, APPLICATION_TYPE_RID), 
+			ACCEL_APP_TYPE, sizeof(ACCEL_APP_TYPE), LWM2M_RES_DATA_FLAG_RO);
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, TIMESTAMP_RID), 
+			&timestamp, sizeof(timestamp), LWM2M_RES_DATA_FLAG_RW);
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, MEASUREMENT_QUALITY_INDICATOR_RID), 
+			&meas_qual_ind, sizeof(meas_qual_ind), LWM2M_RES_DATA_FLAG_RW);
+#endif
+
 	return 0;
 }
 
@@ -141,6 +188,10 @@ static bool event_handler(const struct event_header *eh)
             Ensures that the value received by the server is the same as the value in the
             event received below. */
         read_condition = 3;
+
+#if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)
+		set_timestamp();
+#endif
 
 		LOG_DBG("Accelerometer sensor event received: x = %d.%06d, y = %d.%06d, z = %d.%06d", 
 					event->data.x.val1, event->data.x.val2, 

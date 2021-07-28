@@ -10,7 +10,7 @@ rsource "src/ui/Kconfig"
 rsource "src/modules/Kconfig"
 rsource "src/lwm2m/Kconfig"
 
-
+menu "LwM2M objects"
 menu "Push buttons and on/off switches"
 config APP_PUSH_BUTTON
 	bool "Enable button(s)"
@@ -125,12 +125,18 @@ if APP_GPS
 	rsource "src/sensors/Kconfig.gps"
 endif # APP_GPS
 endmenu # GPS
-
+endmenu # LwM2M objects
 
 config APP_LWM2M_SERVER
 	string "LwM2M server name or IP address"
 	help
 	  Choose the LwM2M server you wish to connect to.
+
+config APP_PSK
+	string "Pre Shared Key"
+	help
+		Pre Shared Key must be identical to the PSK registered with the
+		device on the LwM2M server. Use the hexadeciaml representation.
 
 config APP_HOLD_TIME_RSRP
 	int "Minimum time [s] between RSRP notification messages"
@@ -157,9 +163,9 @@ module = APP
 module-dep = LOG
 module-str = Log level for sample
 source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
+endmenu # Application sample
 
-endmenu
 
 menu "Zephyr Kernel"
 source "Kconfig.zephyr"
-endmenu
+endmenu # Zephyr Kernel

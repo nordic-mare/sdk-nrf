@@ -3,6 +3,27 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
+/*
+TODO:
+	Fix min/max measured object resources
+		Use lwm2m_engine_set... for this.
+			Creates problems if value tracking enabled, as it will trigger
+			a notify which in turn triggers the read_cb, which triggers a
+			new read_cb and so on.
+			Possible to differentiate between notify read_cb and regular
+			read_cb?
+			Solution: Use timestamp to check if resource has just been set.
+	Write documentation
+		Test procedures
+		Connect to server (Coiote and Leshan)
+	Test sensor module with gps
+	Find different name for sensor module?
+	Find reasonable min/max range values
+	Fix device Current Time -> Show correct timestamp
+	Implement callbacks for device resources (low priority)
+*/
+
+
 
 #include <zephyr.h>
 #include <ctype.h>
@@ -30,7 +51,6 @@ LOG_MODULE_REGISTER(app_lwm2m_client, CONFIG_APP_LOG_LEVEL);
 #include "lwm2m_client.h"
 #include "sensor_module.h"
 #include "gps_module.h"
-
 
 #if !defined(CONFIG_LTE_LINK_CONTROL)
 #error "Missing CONFIG_LTE_LINK_CONTROL"
