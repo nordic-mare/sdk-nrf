@@ -26,7 +26,7 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define MAX_LWM2M_PATH_LEN		20
 #define RGBIR_STR_LENGTH      	11  // '0xRRGGBBIR\0'
 
-#define NOTIFICATION_REQUEST_DELAY_MS	500
+#define NOTIFICATION_REQUEST_DELAY_MS	1500
 #define SENSOR_FETCH_DELAY_MS	200
 
 #if defined(CONFIG_LIGHT_SENSOR_USE_EXTERNAL)
@@ -43,11 +43,11 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
 static char light_value_str[RGBIR_STR_LENGTH] = "-";
 static char colour_value_str[RGBIR_STR_LENGTH] = "-";
-static int64_t last_sensor_read_timestamp[2];
+static int64_t sensor_read_timestamp[2];
 
 static bool is_regular_request(uint16_t obj_inst_id)
 {
-	int64_t dt = k_uptime_get() - last_sensor_read_timestamp[obj_inst_id];
+	int64_t dt = k_uptime_get() - sensor_read_timestamp[obj_inst_id];
 	return dt > NOTIFICATION_REQUEST_DELAY_MS;
 }
 
@@ -94,7 +94,7 @@ static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_
 			return NULL;
 		}
 
-		last_sensor_read_timestamp[obj_inst_id] = k_uptime_get();
+		sensor_read_timestamp[obj_inst_id] = k_uptime_get();
 
 #if defined(CONFIG_LWM2M_IPSO_APP_COLOUR_SENSOR_VERSION_1_1)
 		set_timestamp(LIGHT_OBJ_INSTANCE_ID);
@@ -134,7 +134,7 @@ static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16
 			return NULL;
 		}
 
-		last_sensor_read_timestamp[obj_inst_id] = k_uptime_get();
+		sensor_read_timestamp[obj_inst_id] = k_uptime_get();
 
 #if defined(CONFIG_LWM2M_IPSO_APP_COLOUR_SENSOR_VERSION_1_1)
 		set_timestamp(COLOUR_OBJ_INSTANCE_ID);
@@ -153,8 +153,8 @@ static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16
 
 int lwm2m_init_light_sensor(void) 
 {
-	last_sensor_read_timestamp[LIGHT_OBJ_INSTANCE_ID] = k_uptime_get();
-	last_sensor_read_timestamp[COLOUR_OBJ_INSTANCE_ID] = k_uptime_get();
+	sensor_read_timestamp[LIGHT_OBJ_INSTANCE_ID] = k_uptime_get();
+	sensor_read_timestamp[COLOUR_OBJ_INSTANCE_ID] = k_uptime_get();
 
 	light_sensor_init();
 
@@ -173,17 +173,6 @@ int lwm2m_init_light_sensor(void)
 			LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, LIGHT_OBJ_INSTANCE_ID, SENSOR_UNITS_RID), 
 			LIGHT_UNIT, sizeof(LIGHT_UNIT), LWM2M_RES_DATA_FLAG_RO);
 
-#if defined(CONFIG_LWM2M_IPSO_APP_COLOUR_SENSOR_VERSION_1_1)
-	meas_qual_ind_light_sensor = 0;
-
-	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, LIGHT_OBJ_INSTANCE_ID, TIMESTAMP_RID), 
-			&timestamp_light_sensor, sizeof(timestamp_light_sensor), LWM2M_RES_DATA_FLAG_RW);
-	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, LIGHT_OBJ_INSTANCE_ID, MEASUREMENT_QUALITY_INDICATOR_RID), 
-			&meas_qual_ind_light_sensor, sizeof(meas_qual_ind_light_sensor), LWM2M_RES_DATA_FLAG_RW);
-#endif
-
 	/* Surface colour sensor */
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, COLOUR_OBJ_INSTANCE_ID));
 	lwm2m_engine_register_read_callback(
@@ -200,8 +189,17 @@ int lwm2m_init_light_sensor(void)
 			LIGHT_UNIT, sizeof(LIGHT_UNIT), LWM2M_RES_DATA_FLAG_RO);
 
 #if defined(CONFIG_LWM2M_IPSO_APP_COLOUR_SENSOR_VERSION_1_1)
-	meas_qual_ind_colour_sensor = 0;
+	/* Ambient light sensor */
+	meas_qual_ind_light_sensor = 0;
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, LIGHT_OBJ_INSTANCE_ID, TIMESTAMP_RID), 
+			&timestamp_light_sensor, sizeof(timestamp_light_sensor), LWM2M_RES_DATA_FLAG_RW);
+	lwm2m_engine_set_res_data(
+			LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, LIGHT_OBJ_INSTANCE_ID, MEASUREMENT_QUALITY_INDICATOR_RID), 
+			&meas_qual_ind_light_sensor, sizeof(meas_qual_ind_light_sensor), LWM2M_RES_DATA_FLAG_RW);
 
+	/* Surface colour sensor */
+	meas_qual_ind_colour_sensor = 0;
 	lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, COLOUR_OBJ_INSTANCE_ID, TIMESTAMP_RID), 
 			&timestamp_colour_sensor, sizeof(timestamp_colour_sensor), LWM2M_RES_DATA_FLAG_RW);
@@ -226,7 +224,7 @@ static bool event_handler(const struct event_header *eh)
 				"0x%08X", event->unsigned_value);
 			LOG_DBG("Light sensor event received! Val: 0x%08X", event->unsigned_value);
 
-			last_sensor_read_timestamp[LIGHT_OBJ_INSTANCE_ID] = k_uptime_get();
+			sensor_read_timestamp[LIGHT_OBJ_INSTANCE_ID] = k_uptime_get();
 
 #if defined(CONFIG_LWM2M_IPSO_APP_COLOUR_SENSOR_VERSION_1_1)
 			set_timestamp(LIGHT_OBJ_INSTANCE_ID);
@@ -242,7 +240,7 @@ static bool event_handler(const struct event_header *eh)
 				"0x%08X", event->unsigned_value);
 			LOG_DBG("Colour sensor event received! Val: 0x%08X", event->unsigned_value);
 
-			last_sensor_read_timestamp[COLOUR_OBJ_INSTANCE_ID] = k_uptime_get();
+			sensor_read_timestamp[COLOUR_OBJ_INSTANCE_ID] = k_uptime_get();
 
 #if defined(CONFIG_LWM2M_IPSO_APP_COLOUR_SENSOR_VERSION_1_1)
 			set_timestamp(COLOUR_OBJ_INSTANCE_ID);
