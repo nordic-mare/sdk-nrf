@@ -29,12 +29,12 @@ config SENSOR_MODULE_ACCEL_STARTUP_DELAY
 		Time in seconds before the first accelerometer read 
 		is executed.
 
-config SENSOR_MODULE_ACCEL_DELAY
-	int "Delay between accelerometer readings"
+config SENSOR_MODULE_ACCEL_PERIOD
+	int "Accelerometer read period"
 	default 120
 	help
 		Time in seconds before a new accelerometer work is submitted to the
-		system work queue. Actual delay between accelerometer
+		system work queue. Actual time between accelerometer
 		reads will vary on the execution time of the other works 
 		in the queue at the time the accelerometer work is submitted.
 
@@ -117,12 +117,12 @@ config SENSOR_MODULE_TEMP_STARTUP_DELAY
 		Time in seconds before the first temperature read 
 		is executed. 
 
-config SENSOR_MODULE_TEMP_DELAY
-	int "Delay between temperature readings"
+config SENSOR_MODULE_TEMP_PERIOD
+	int "Temperature read period"
 	default 120
 	help
 		Time in seconds before a new temperature work is submitted to the
-		system work queue. Actual delay between temperature sensor
+		system work queue. Actual time between temperature sensor
 		reads will vary on the execution time of the other works 
 		in the queue at the time the temperature work is submitted.
 
@@ -165,12 +165,12 @@ config SENSOR_MODULE_PRESS_STARTUP_DELAY
 		Time in seconds before the first pressure read 
 		is executed. 
 
-config SENSOR_MODULE_PRESS_DELAY
-	int "Delay between pressure readings"
+config SENSOR_MODULE_PRESS_PERIOD
+	int "Pressure read period"
 	default 120
 	help
 		Time in seconds before a new pressure work is submitted to the
-		system work queue. Actual delay between pressure sensor
+		system work queue. Actual time between pressure sensor
 		reads will vary on the execution time of the other works 
 		in the queue at the time the pressure work is added.
 	
@@ -213,12 +213,12 @@ config SENSOR_MODULE_HUMID_STARTUP_DELAY
 		Time in seconds before the first humidity read 
 		is executed. 
 
-config SENSOR_MODULE_HUMID_DELAY
-	int "Delay between humidity readings"
+config SENSOR_MODULE_HUMID_PERIOD
+	int "Humidity read period"
 	default 120
 	help
 		Time in seconds before a new humidity work is submitted to the
-		system work queue. Actual delay between humidity sensor
+		system work queue. Actual time between humidity sensor
 		reads will vary on the execution time of the other works 
 		in the queue at the time the humidity work is added.
 
@@ -261,12 +261,12 @@ config SENSOR_MODULE_GAS_RES_STARTUP_DELAY
 		Time in seconds before the first gas resistance
 		read is executed. 
 
-config SENSOR_MODULE_GAS_RES_DELAY
-	int "Delay between gas resistance readings"
+config SENSOR_MODULE_GAS_RES_PERIOD
+	int "Gas resistance read period"
 	default 120
 	help
 		Time in seconds before a new gas resistance work is submitted to the
-		system work queue. Actual delay between gas resistance sensor
+		system work queue. Actual time between gas resistance sensor
 		reads will vary on the execution time of the other works 
 		in the queue at the time the gas resistance work is added.
 
@@ -300,12 +300,12 @@ config SENSOR_MODULE_LIGHT_STARTUP_DELAY
 		Time in seconds before the first light read 
 		is executed. 
 
-config SENSOR_MODULE_LIGHT_DELAY
-	int "Delay between light sensor readings"
+config SENSOR_MODULE_LIGHT_PERIOD
+	int "Light sensor read period"
 	default 120
 	help
 		Time in seconds before a new light work is submitted to the
-		system work queue. Actual delay between light sensor
+		system work queue. Actual time between light sensor
 		reads will vary on the execution time of the other works 
 		in the queue at the time the light work is added.
 
@@ -363,12 +363,12 @@ config SENSOR_MODULE_COLOUR_STARTUP_DELAY
 		Time in seconds before the first colour read 
 		is executed. 
 
-config SENSOR_MODULE_COLOUR_DELAY
-	int "Delay between colour sensor readings"
+config SENSOR_MODULE_COLOUR_PERIOD
+	int "Colour sensor read period"
 	default 120
 	help
 		Time in seconds before a new colour work is submitted to the
-		system work queue. Actual delay between colour sensor
+		system work queue. Actual time between colour sensor
 		reads will vary on the execution time of the other works 
 		in the queue at the time the colour work is added.
 

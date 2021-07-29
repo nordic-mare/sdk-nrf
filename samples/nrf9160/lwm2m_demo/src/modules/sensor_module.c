@@ -23,8 +23,8 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define RBG_STR_LEN				11	// '0xRRGGBBIR\0'
 
 #if defined(CONFIG_SENSOR_MODULE_ACCEL)
-#define ACCEL_STARTUP_TIME		K_SECONDS(CONFIG_SENSOR_MODULE_ACCEL_STARTUP_DELAY)
-#define ACCEL_DELAY				CONFIG_SENSOR_MODULE_ACCEL_DELAY
+#define ACCEL_STARTUP_DELAY		K_SECONDS(CONFIG_SENSOR_MODULE_ACCEL_STARTUP_DELAY)
+#define ACCEL_PERIOD			CONFIG_SENSOR_MODULE_ACCEL_PERIOD
 #define ACCEL_DELTA_X			((float32_value_t){ \
 								.val1 = CONFIG_SENSOR_MODULE_ACCEL_X_DELTA_INT, \
 								.val2 = CONFIG_SENSOR_MODULE_ACCEL_X_DELTA_DEC})
@@ -38,8 +38,8 @@ static struct k_work_delayable accel_work;
 #endif
 
 #if defined(CONFIG_SENSOR_MODULE_TEMP)
-#define TEMP_STARTUP_TIME		K_SECONDS(CONFIG_SENSOR_MODULE_TEMP_STARTUP_DELAY)
-#define TEMP_DELAY          	CONFIG_SENSOR_MODULE_TEMP_DELAY
+#define TEMP_STARTUP_DELAY		K_SECONDS(CONFIG_SENSOR_MODULE_TEMP_STARTUP_DELAY)
+#define TEMP_PERIOD          	CONFIG_SENSOR_MODULE_TEMP_PERIOD
 #define TEMP_DELTA				((float32_value_t){ \
 								.val1 = CONFIG_SENSOR_MODULE_TEMP_DELTA_INT, \
 								.val2 = CONFIG_SENSOR_MODULE_TEMP_DELTA_DEC})
@@ -47,8 +47,8 @@ static struct k_work_delayable temp_work;
 #endif
 
 #if defined(CONFIG_SENSOR_MODULE_PRESS)
-#define PRESS_STARTUP_TIME		K_SECONDS(CONFIG_SENSOR_MODULE_PRESS_STARTUP_DELAY)
-#define PRESS_DELAY				CONFIG_SENSOR_MODULE_PRESS_DELAY
+#define PRESS_STARTUP_DELAY		K_SECONDS(CONFIG_SENSOR_MODULE_PRESS_STARTUP_DELAY)
+#define PRESS_PERIOD			CONFIG_SENSOR_MODULE_PRESS_PERIOD
 #define PRESS_DELTA				((float32_value_t){ \
 								.val1 = CONFIG_SENSOR_MODULE_PRESS_DELTA_INT,\
 								.val2 = CONFIG_SENSOR_MODULE_PRESS_DELTA_DEC})
@@ -56,8 +56,8 @@ static struct k_work_delayable press_work;
 #endif
 
 #if defined(CONFIG_SENSOR_MODULE_HUMID)
-#define HUMID_STARTUP_TIME		K_SECONDS(CONFIG_SENSOR_MODULE_HUMID_STARTUP_DELAY)
-#define HUMID_DELAY				CONFIG_SENSOR_MODULE_HUMID_DELAY
+#define HUMID_STARTUP_DELAY		K_SECONDS(CONFIG_SENSOR_MODULE_HUMID_STARTUP_DELAY)
+#define HUMID_PERIOD			CONFIG_SENSOR_MODULE_HUMID_PERIOD
 #define HUMID_DELTA				((float32_value_t){ \
 								.val1 = CONFIG_SENSOR_MODULE_HUMID_DELTA_INT, \
 								.val2 = CONFIG_SENSOR_MODULE_HUMID_DELTA_DEC})
@@ -65,8 +65,8 @@ static struct k_work_delayable humid_work;
 #endif
 
 #if defined(CONFIG_SENSOR_MODULE_GAS_RES)
-#define GAS_RES_STARTUP_TIME	K_SECONDS(CONFIG_SENSOR_MODULE_GAS_RES_STARTUP_DELAY)
-#define GAS_RES_DELAY			CONFIG_SENSOR_MODULE_GAS_RES_DELAY
+#define GAS_RES_STARTUP_DELAY	K_SECONDS(CONFIG_SENSOR_MODULE_GAS_RES_STARTUP_DELAY)
+#define GAS_RES_PERIOD			CONFIG_SENSOR_MODULE_GAS_RES_PERIOD
 #define GAS_RES_DELTA			((float32_value_t){ \
 								.val1 = CONFIG_SENSOR_MODULE_GAS_RES_DELTA, \
 								.val2 = 0})
@@ -74,10 +74,10 @@ static struct k_work_delayable gas_res_work;
 #endif
 
 #if defined(CONFIG_SENSOR_MODULE_LIGHT)
-#define LIGHT_STARTUP_TIME		K_SECONDS(CONFIG_SENSOR_MODULE_LIGHT_STARTUP_DELAY)
-#define LIGHT_DELAY				CONFIG_SENSOR_MODULE_LIGHT_DELAY
+#define LIGHT_STARTUP_DELAY		K_SECONDS(CONFIG_SENSOR_MODULE_LIGHT_STARTUP_DELAY)
+#define LIGHT_PERIOD			CONFIG_SENSOR_MODULE_LIGHT_PERIOD
 #define LIGHT_FETCH_DELAY_MS	(LIGHT_DELAY * MSEC_PER_SEC / 2)
-#define LIGHT_DELTA			((uint32_t)((CONFIG_SENSOR_MODULE_LIGHT_DELTA_R << 24) | \
+#define LIGHT_DELTA				((uint32_t)((CONFIG_SENSOR_MODULE_LIGHT_DELTA_R << 24) | \
 										(CONFIG_SENSOR_MODULE_LIGHT_DELTA_G << 16) | \
 										(CONFIG_SENSOR_MODULE_LIGHT_DELTA_B << 8)  | \
 										(CONFIG_SENSOR_MODULE_LIGHT_DELTA_IR)))
@@ -85,10 +85,10 @@ static struct k_work_delayable light_work;
 #endif
 
 #if defined(CONFIG_SENSOR_MODULE_COLOUR)
-#define COLOUR_STARTUP_TIME		K_SECONDS(CONFIG_SENSOR_MODULE_COLOUR_STARTUP_DELAY)
-#define COLOUR_DELAY			CONFIG_SENSOR_MODULE_COLOUR_DELAY
+#define COLOUR_STARTUP_DELAY	K_SECONDS(CONFIG_SENSOR_MODULE_COLOUR_STARTUP_DELAY)
+#define COLOUR_PERIOD			CONFIG_SENSOR_MODULE_COLOUR_PERIOD
 #define COLOUR_FETCH_DELAY_MS	(COLOUR_DELAY * MSEC_PER_SEC / 2)
-#define COLOUR_DELTA		((uint32_t)((CONFIG_SENSOR_MODULE_COLOUR_DELTA_R << 24) | \
+#define COLOUR_DELTA			((uint32_t)((CONFIG_SENSOR_MODULE_COLOUR_DELTA_R << 24) | \
 										(CONFIG_SENSOR_MODULE_COLOUR_DELTA_G << 16) | \
 										(CONFIG_SENSOR_MODULE_COLOUR_DELTA_B << 8)  | \
 										(CONFIG_SENSOR_MODULE_COLOUR_DELTA_IR)))
@@ -159,7 +159,7 @@ static void accel_work_cb(struct k_work *work)
 		EVENT_SUBMIT(event);
 	}
 
-	k_work_schedule(&accel_work, K_SECONDS(ACCEL_DELAY));
+	k_work_schedule(&accel_work, K_SECONDS(ACCEL_PERIOD));
 }
 #endif /* if defined(CONFIG_SENSOR_MODULE_ACCEL) */
 
@@ -189,7 +189,7 @@ static void temp_work_cb(struct k_work *work)
 		EVENT_SUBMIT(event);
 	}
 
-	k_work_schedule(&temp_work, K_SECONDS(TEMP_DELAY));
+	k_work_schedule(&temp_work, K_SECONDS(TEMP_PERIOD));
 }
 #endif /* if defined(CONFIG_SENSOR_MODULE_TEMP) */
 
@@ -219,7 +219,7 @@ static void press_work_cb(struct k_work *work)
 		EVENT_SUBMIT(event);
 	}
 
-	k_work_schedule(&press_work, K_SECONDS(PRESS_DELAY));
+	k_work_schedule(&press_work, K_SECONDS(PRESS_PERIOD));
 }
 #endif /* if defined(CONFIG_SENSOR_MODULE_PRESS) */
 
@@ -249,7 +249,7 @@ static void humid_work_cb(struct k_work *work)
 		EVENT_SUBMIT(event);
 	}
 
-	k_work_schedule(&humid_work, K_SECONDS(HUMID_DELAY));
+	k_work_schedule(&humid_work, K_SECONDS(HUMID_PERIOD));
 }
 #endif /* if defined(CONFIG_SENSOR_MODULE_HUMID) */
 
@@ -279,7 +279,7 @@ static void gas_res_work_cb(struct k_work *work)
 		EVENT_SUBMIT(event);
 	}
 
-	k_work_schedule(&gas_res_work, K_SECONDS(GAS_RES_DELAY));
+	k_work_schedule(&gas_res_work, K_SECONDS(GAS_RES_PERIOD));
 }
 #endif /* if defined(CONFIG_SENSOR_MODULE_GAS_RES) */
 
@@ -342,7 +342,7 @@ static void light_work_cb(struct k_work *work)
 		EVENT_SUBMIT(event);
 	}
 
-	k_work_schedule(&light_work, K_SECONDS(LIGHT_DELAY));
+	k_work_schedule(&light_work, K_SECONDS(LIGHT_PERIOD));
 }
 #endif /* if defined(CONFIG_SENSOR_MODULE_LIGHT) */
 
@@ -378,7 +378,7 @@ static void colour_work_cb(struct k_work *work)
 		EVENT_SUBMIT(event);
 	}
 
-	k_work_schedule(&colour_work, K_SECONDS(COLOUR_DELAY));
+	k_work_schedule(&colour_work, K_SECONDS(COLOUR_PERIOD));
 }
 #endif /* if defined(CONFIG_SENSOR_MODULE_COLOUR) */
 
@@ -386,37 +386,37 @@ int sensor_module_init(void)
 {
 #if defined(CONFIG_SENSOR_MODULE_ACCEL)
 	k_work_init_delayable(&accel_work, accel_work_cb);
-	k_work_schedule(&accel_work, ACCEL_STARTUP_TIME);
+	k_work_schedule(&accel_work, ACCEL_STARTUP_DELAY);
 #endif
 
 #if defined(CONFIG_SENSOR_MODULE_TEMP)
 	k_work_init_delayable(&temp_work, temp_work_cb);
-	k_work_schedule(&temp_work, TEMP_STARTUP_TIME);
+	k_work_schedule(&temp_work, TEMP_STARTUP_DELAY);
 #endif
 
 #if defined(CONFIG_SENSOR_MODULE_PRESS)
 	k_work_init_delayable(&press_work, press_work_cb);
-	k_work_schedule(&press_work, PRESS_STARTUP_TIME);
+	k_work_schedule(&press_work, PRESS_STARTUP_DELAY);
 #endif
 	
 #if defined(CONFIG_SENSOR_MODULE_HUMID)
 	k_work_init_delayable(&humid_work, humid_work_cb);
-	k_work_schedule(&humid_work, HUMID_STARTUP_TIME);
+	k_work_schedule(&humid_work, HUMID_STARTUP_DELAY);
 #endif
 
 #if defined(CONFIG_SENSOR_MODULE_GAS_RES)
 	k_work_init_delayable(&gas_res_work, gas_res_work_cb);
-	k_work_schedule(&gas_res_work, GAS_RES_STARTUP_TIME);
+	k_work_schedule(&gas_res_work, GAS_RES_STARTUP_DELAY);
 #endif
 
 #if defined(CONFIG_SENSOR_MODULE_LIGHT)
 	k_work_init_delayable(&light_work, light_work_cb);
-	k_work_schedule(&light_work, LIGHT_STARTUP_TIME);
+	k_work_schedule(&light_work, LIGHT_STARTUP_DELAY);
 #endif
 
 #if defined(CONFIG_SENSOR_MODULE_COLOUR)
 	k_work_init_delayable(&colour_work, colour_work_cb);
-	k_work_schedule(&colour_work, COLOUR_STARTUP_TIME);
+	k_work_schedule(&colour_work, COLOUR_STARTUP_DELAY);
 #endif
 
 	return 0;
