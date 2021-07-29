@@ -5,22 +5,29 @@
  */
 /*
 TODO:
-	Fix min/max measured object resources
-		Use lwm2m_engine_set... for this.
-			Creates problems if value tracking enabled, as it will trigger
-			a notify which in turn triggers the read_cb, which triggers a
-			new read_cb and so on.
-			Possible to differentiate between notify read_cb and regular
-			read_cb?
-			Solution: Use timestamp to check if resource has just been set.
+	Fix socket error when tracking many resources and sensor module enabled
+	for many sensors
+		To reproduce: 
+			Enable all sensors (including accelerometer) except light/colour in 
+			sensor module.
+			Enable value tracking for sensor value, and max/min measured for
+			the same sensors and the accelerometer.
+			When the work_cbs are called (sensor module), the error occurs.
+			Restarts RD Client and all is fine (error MAY occur even after this,
+			but rarely).
+		Error: "net_lwm2m_engine: Poll reported a socket error, 08"
+		Error: "net_lwm2m_rd_client: RD Client socket error: 5"
+		Ask Veijjo for help?
 	Write documentation
 		Test procedures
 		Connect to server (Coiote and Leshan)
 	Test sensor module with gps
 	Find different name for sensor module?
-	Find reasonable min/max range values
+	Increase client lifetime to stop unnecessary disconnects
+		"lwm2m_engine_set_u32(LWM2M_PATH(1, 2, 1), 120U);"" works, but it must
+		be set once, after bootstrap is finished. How?
 	Fix device Current Time -> Show correct timestamp
-	Implement callbacks for device resources (low priority)
+	Implement missing callbacks for Device object resources
 */
 
 

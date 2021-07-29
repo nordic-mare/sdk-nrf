@@ -5,9 +5,7 @@
  */
 
 #include <zephyr.h>
-#include <drivers/sensor.h>
 #include <net/lwm2m.h>
-#include <net/lwm2m_path.h>
 #include <lwm2m_resource_ids.h>
 #include <math.h>
 
@@ -25,11 +23,22 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define ACCEL_APP_TYPE			"Simulated Accelerometer"
 #endif
 
-#define SENSOR_UNIT_NAME		"m/s2"
+#define SENSOR_UNIT_NAME		"m/s^2"
 
 #define LWM2M_RES_DATA_FLAG_RW	0
 
 #define NOTIFICATION_REQUEST_DELAY_MS	1500
+
+#if defined(CONFIG_ADXL362_ACCEL_RANGE_8G)
+#define ACCEL_RANGE_G			8
+#elif defined(CONFIG_ADXL362_ACCEL_RANGE_4G)
+#define ACCEL_RANGE_G			4
+#else
+#define ACCEL_RANGE_G			2
+#endif
+
+#define MIN_RANGE_VALUE		(-ACCEL_RANGE_G*SENSOR_G/1000000.0)
+#define MAX_RANGE_VALUE		(ACCEL_RANGE_G*SENSOR_G/1000000.0)
 
 static float32_value_t *x_val;
 static float32_value_t *y_val;
@@ -177,6 +186,12 @@ static void *accel_z_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 
 int lwm2m_init_accel(void)
 {
+	float32_value_t min_range_val = {
+		.val1 = (int)MIN_RANGE_VALUE, 
+		.val2 = (MIN_RANGE_VALUE - (int)MIN_RANGE_VALUE)*100000};
+	float32_value_t max_range_val = {
+		.val1 = (int)MAX_RANGE_VALUE, 
+		.val2 = (MAX_RANGE_VALUE - (int)MAX_RANGE_VALUE)*100000};
 	uint16_t dummy_data_len;
 	uint8_t dummy_data_flags;
 
@@ -209,6 +224,12 @@ int lwm2m_init_accel(void)
 	lwm2m_engine_get_res_data(
 			LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Z_VALUE_RID),
 			(void **)&z_val, &dummy_data_len, &dummy_data_flags);
+	lwm2m_engine_set_float32(
+			LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, MIN_RANGE_VALUE_RID),
+			&min_range_val);
+	lwm2m_engine_set_float32(
+			LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, MAX_RANGE_VALUE_RID),
+			&max_range_val);
 
 #if defined(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)
 	meas_qual_ind = 0;

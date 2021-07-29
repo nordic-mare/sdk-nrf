@@ -122,6 +122,13 @@ config APP_GPS
 	select LWM2M_LOCATION_OBJ_SUPPORT
 
 if APP_GPS
+config APP_GPS_HOLD_TIME
+	int "Minimum time [s] between location data notification messages"
+	default 60
+	help
+	  The minimum time in seconds that notifications can be sent to
+	  observers of the Location data.
+	  
 	rsource "src/sensors/Kconfig.gps"
 endif # APP_GPS
 endmenu # GPS
@@ -144,13 +151,6 @@ config APP_HOLD_TIME_RSRP
 	help
 	  The minimum time in seconds that notifications can be sent to
 	  observers of the Connectivity Monitoring data.
-
-config APP_HOLD_TIME_GPS
-	int "Minimum time [s] between location data notification messages"
-	default 60
-	help
-	  The minimum time in seconds that notifications can be sent to
-	  observers of the Location data.
 
 config APP_MCUBOOT_FLASH_BUF_SZ
 	int "Size of buffer used for flash write operations during MCUboot updates"
