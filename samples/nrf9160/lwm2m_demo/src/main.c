@@ -19,18 +19,17 @@ TODO:
 		Error: "net_lwm2m_rd_client: RD Client socket error: 5"
 		Ask Veijjo for help?
 	Write documentation
-		Test procedures
-		Connect to server (Coiote and Leshan)
+		ctrl+f "TODO" in README.rst to see whats missing
 	Test sensor module with gps
-	Find different name for sensor module?
 	Increase client lifetime to stop unnecessary disconnects
-		"lwm2m_engine_set_u32(LWM2M_PATH(1, 2, 1), 120U);"" works, but it must
-		be set once, after bootstrap is finished. How?
+		Lifetime is now set in rd_client_event() in main, but anything other
+		than 60 seconds causes problems. > 60 seconds -> resending message and
+		timeout. < 60 seconds trouble when starting up.
 	Fix device Current Time -> Show correct timestamp
+		It works! It uses the Date-Time ncs library
+		Does NTP server use coap/udp?
 	Implement missing callbacks for Device object resources
 */
-
-
 
 #include <zephyr.h>
 #include <ctype.h>
@@ -42,6 +41,7 @@ TODO:
 #include <modem/nrf_modem_lib.h>
 #include <settings/settings.h>
 #include <event_manager.h>
+#include <date_time.h>
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_client, CONFIG_APP_LOG_LEVEL);
@@ -56,6 +56,7 @@ LOG_MODULE_REGISTER(app_lwm2m_client, CONFIG_APP_LOG_LEVEL);
 #endif
 
 #include "lwm2m_client.h"
+#include "lwm2m_defines.h"
 #include "sensor_module.h"
 #include "gps_module.h"
 
@@ -339,6 +340,41 @@ static void provision_credentials(void)
 	}
 }
 
+static void date_time_event_handler(const struct date_time_evt *evt)
+{
+	switch (evt->type)
+	{
+	case DATE_TIME_OBTAINED_MODEM:
+	{
+		LOG_INF("Obtained date-time from modem");
+		int64_t time = 0;
+		date_time_now(&time);
+		lwm2m_engine_set_s32(
+				LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), 
+				(int32_t)(time/1000));
+		break;
+	}
+
+	case DATE_TIME_OBTAINED_NTP:
+	{
+		LOG_INF("Obtained date-time from NTP server");
+		int64_t time = 0;
+		date_time_now(&time);
+		lwm2m_engine_set_s32(
+				LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), 
+				(int32_t)(time/1000));
+		break;
+	}
+
+	case DATE_TIME_NOT_OBTAINED:
+		LOG_INF("Could not obtain date-time update");
+		break;
+	
+	default:
+		break;
+	}
+}
+
 static void rd_client_event(struct lwm2m_ctx *client,
 				enum lwm2m_rd_client_event client_event)
 {
@@ -368,8 +404,13 @@ static void rd_client_event(struct lwm2m_ctx *client,
 
 	case LWM2M_RD_CLIENT_EVENT_REGISTRATION_COMPLETE:
 		LOG_DBG("Registration complete");
+		/* Request date and time update from modem */
+		date_time_update_async(date_time_event_handler);
+		lwm2m_engine_set_u32(
+				LWM2M_PATH(IPSO_OBJECT_SERVER_ID, 2, LIFETIME_RID),
+				CONFIG_LWM2M_ENGINE_DEFAULT_LIFETIME);
 #if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
-		// Ensure that GPS search is only started after bootstrap process is complete.
+		/* Ensure that GPS search is only started after bootstrap is complete */
 		start_gps_search();
 #endif
 		break;
