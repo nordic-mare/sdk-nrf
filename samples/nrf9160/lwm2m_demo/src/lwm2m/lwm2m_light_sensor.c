@@ -9,21 +9,18 @@
 #include <lwm2m_resource_ids.h>
 #include <stdio.h>
 
-#include "sensor_event.h"
 #include "light_sensor.h"
+#include "sensor_event.h"
+#include "lwm2m_defines.h"
 
 #define MODULE app_lwm2m_light_sensor
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
-#define LWM2M_RES_DATA_FLAG_RW	0
-
-#define IPSO_OBJECT_COLOUR_ID 	3335
 #define LIGHT_OBJ_INSTANCE_ID 	0
 #define COLOUR_OBJ_INSTANCE_ID  1
 
-#define MAX_LWM2M_PATH_LEN		20
 #define RGBIR_STR_LENGTH      	11  // '0xRRGGBBIR\0'
 
 #define NOTIFICATION_REQUEST_DELAY_MS	1500
@@ -62,7 +59,8 @@ static void set_timestamp(uint16_t obj_inst_id)
 	int32_t ts;
 	char path[MAX_LWM2M_PATH_LEN];
 
-	lwm2m_engine_get_s32("3/0/13", &ts);
+	lwm2m_engine_get_s32(
+			LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), &ts);
 
 	snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u/%d", 
 			IPSO_OBJECT_COLOUR_ID, obj_inst_id, TIMESTAMP_RID);

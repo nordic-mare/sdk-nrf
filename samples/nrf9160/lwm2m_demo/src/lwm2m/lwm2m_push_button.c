@@ -10,15 +10,12 @@
 
 #include "ui_input.h"
 #include "ui_input_event.h"
+#include "lwm2m_defines.h"
 
 #define MODULE app_lwm2m_push_button
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
-
-#define LWM2M_RES_DATA_FLAG_RW	0
-
-#define MAX_LWM2M_PATH_LEN		20
 
 #define BUTTON1_OBJ_INST_ID		0
 #define BUTTON1_APP_NAME		"Push button 1"
@@ -41,7 +38,8 @@ static void set_timestamp(uint16_t obj_inst_id)
 	int32_t ts;
 	char path[MAX_LWM2M_PATH_LEN];
 
-	lwm2m_engine_get_s32("3/0/13", &ts);
+	lwm2m_engine_get_s32(
+			LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), &ts);
 
 	snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u/%d", 
 			IPSO_OBJECT_PUSH_BUTTON_ID, obj_inst_id, TIMESTAMP_RID);

@@ -11,6 +11,7 @@
 
 #include "accelerometer.h"
 #include "accel_event.h"
+#include "lwm2m_defines.h"
 
 #define MODULE	app_lwm2m_accel
 
@@ -24,8 +25,6 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #endif
 
 #define SENSOR_UNIT_NAME		"m/s^2"
-
-#define LWM2M_RES_DATA_FLAG_RW	0
 
 #define NOTIFICATION_REQUEST_DELAY_MS	1500
 
@@ -78,7 +77,8 @@ static void set_timestamp(void)
 {
 	int32_t ts;
 
-	lwm2m_engine_get_s32("3/0/13", &ts);
+	lwm2m_engine_get_s32(
+			LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), &ts);
 	lwm2m_engine_set_s32(
 			LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, TIMESTAMP_RID),
 			ts);	

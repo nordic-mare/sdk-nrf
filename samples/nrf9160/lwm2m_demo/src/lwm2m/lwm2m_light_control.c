@@ -9,6 +9,8 @@
 #include <lwm2m_resource_ids.h>
 #include <stdlib.h>
 
+#include "lwm2m_defines.h"
+
 #if defined(CONFIG_BOARD_THINGY91_NRF9160NS) && defined(CONFIG_UI_LED_USE_PWM)
 #define THINGY_PWM
 #include "ui_rgb_led_pwm.h"
@@ -25,8 +27,6 @@
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_light_control, CONFIG_APP_LOG_LEVEL);
-
-#define MAX_LWM2M_PATH_LEN		20
 
 #if defined(THINGY_PWM) || defined(THINGY_GPIO) || defined(DK_PWM)
 #define NUM_LEDS				1

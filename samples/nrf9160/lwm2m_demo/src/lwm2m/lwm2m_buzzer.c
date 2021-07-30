@@ -9,11 +9,10 @@
 #include <lwm2m_resource_ids.h>
 
 #include "ui_buzzer.h"
+#include "lwm2m_defines.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_buzzer, CONFIG_APP_LOG_LEVEL);
-
-#define LWM2M_RES_DATA_FLAG_RW	0
 
 #define FREQUENCY_START_VAL		440U
 #define INTENSITY_START_VAL		100U
@@ -27,7 +26,8 @@ static void set_timestamp(void)
 {
 	int32_t ts;
 
-	lwm2m_engine_get_s32("3/0/13", &ts);
+	lwm2m_engine_get_s32(
+			LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), &ts);
 	lwm2m_engine_set_s32(
 			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, TIMESTAMP_RID),
 			ts);

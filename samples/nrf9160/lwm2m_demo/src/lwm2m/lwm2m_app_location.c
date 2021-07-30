@@ -10,17 +10,12 @@
 #include <net/lwm2m_path.h>
 
 #include "app_gps_event.h"
+#include "lwm2m_defines.h"
 
 #define MODULE	lwm2m_app_loc
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
-
-#define LATITUDE_RID 0
-#define LONGITUDE_RID 1
-#define ALTITUDE_RID 2
-#define RADIUS_RID 3
-#define SPEED_RID 6
 
 static float32_value_t float_to_lwm2m_float(float val) {
 	float32_value_t out;
@@ -49,8 +44,8 @@ static bool event_handler(const struct event_header *eh) {
 		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, LATITUDE_RID), &latitude);
 		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, LONGITUDE_RID), &longitude);
 		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, ALTITUDE_RID), &altitude);
-		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, RADIUS_RID), &radius);
-		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, SPEED_RID), &speed);
+		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, LOCATION_RADIUS_RID), &radius);
+		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, LOCATION_SPEED_RID), &speed);
 
 		return true;
 	}
