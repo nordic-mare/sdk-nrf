@@ -50,7 +50,7 @@ config APP_BUZZER
 	select LWM2M_APP_BUZZER
 
 if APP_BUZZER
-	rsource "src/ipso/Kconfig.buzzer"
+	rsource "src/ipso/Kconfig.ipso_buzzer"
 endif # APP_BUZZER
 endmenu # Buzzer
 
@@ -64,12 +64,12 @@ config APP_LIGHT_SENSOR
 
 if APP_LIGHT_SENSOR
 	rsource "src/sensors/Kconfig.light_sensor"
-	rsource "src/ipso/Kconfig.colour_sensor"
+	rsource "src/ipso/Kconfig.ipso_colour_sensor"
 endif # APP_LIGHT_SENSOR
 endmenu # Light sensor
 
 
-menu "Environment sensor"
+menu "Environment sensors"
 config APP_ENV_SENSOR
 	bool "Enable environment sensors"
 	select ENVIRONMENT_SENSOR
