@@ -88,7 +88,7 @@ static void set_timestamp(void)
 static void *accel_x_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	if (is_regular_request(res_inst_id)) {
+	if (is_regular_request(res_id)) {
 		int ret;
 		struct accelerometer_sensor_data accel_data;
 		float32_value_t new_x_val;
@@ -121,7 +121,7 @@ static void *accel_x_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 static void *accel_y_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	if (is_regular_request(res_inst_id)) {
+	if (is_regular_request(res_id)) {
 		int ret;
 		struct accelerometer_sensor_data accel_data;
 		float32_value_t new_y_val;
@@ -154,7 +154,7 @@ static void *accel_y_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 static void *accel_z_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
 			  size_t *data_len)
 {
-	if (is_regular_request(res_inst_id)) {
+	if (is_regular_request(res_id)) {
 		int ret;
 		struct accelerometer_sensor_data accel_data;
 		float32_value_t new_z_val;
