@@ -143,7 +143,7 @@ The sampling period and change threshold of that sensor can also be configured
 independently of all the other sensors.
 
 The sensor module is intended to be used together with `Notifications`_. 
-If notifications are enable for a Sensor Value resource, and the corresponding 
+If notifications are enabled for a Sensor Value resource, and the corresponding 
 sensor is enabled in the sensor module, a notification will be sent only when 
 that value changes significantly (as specified by the change threshold).
 Thus the bandwidth usage can be significantly limited, while simultaneously
@@ -190,18 +190,28 @@ The following instructions describe how to register your device to
       enabled if Leshan is to be used. 
       
       1. Open the Leshan Demo Server web UI.
-      #. Click on "Security" in the upper-right corner.
-      #. Click on "Add new client security configuration".
-      #. Enter the following data and click "Create":
+      #. Click on ``Security`` in the upper-right corner.
+      #. Click on ``Add security information``.
+      #. Enter the following data and click ``Add``:
 
-         * Client endpoint - nrf-{your Device IMEI}
+         * Endpoint - nrf-{your Device IMEI}
+         * Security mode - psk (Pre-Shared Key)
          * Identity: - nrf-{your Device IMEI}
-         * Security mode - Pre-Shared Key
          * Key - {your PSK}
 
    .. tab:: Coiote Device Management
       
-      TODO: Coiote setup instructions.
+      1. Open Coiote Device Management
+      #. Click on ``Device inventory`` in the menu on the left.
+      #. Click on ``Add new device``.
+      #. Click on ``Connect your LwM2M device directly
+         via the management server``.
+      #. Enter the following data and click ``Add device``:
+         
+         * Endpoint - nrf-{your Device IMEI}
+         * Friendly Name - {recognisable name}
+         * Security mode - psk (Pre-Shared Key)
+         * Key - {your PSK}
 
 Then, the server address and PSK must be set in the client:
 
@@ -470,14 +480,9 @@ server:
    .. tab:: Leshan Demo Server
 
       1. Open the Leshan Demo Server bootstrap web UI.
-      #. Click on ``Add new client bootstrap configuration``.
-      #. Enter the client endpoint - nrf-{your device IMEI}
-      #. In the ``LWM2M Bootstrap Server`` tab, enter the following data:
-
-            * Security mode - Pre-Shared Key
-            * Identity - nrf-{your device IMEI}
-            * Key - 000102030405060708090a0b0c0d0e0f
-
+      #. Click on ``Bootstrap`` in the top right corner.
+      #. Click on ``Add clients configuration``.
+      #. Enter the client endpoint - nrf-{your device IMEI} and click on ``Next``.
       #. In the ``LWM2M Server`` section, choose the desired configuration 
          (``No security`` or ``Pre-Shared Key``). 
          If you choose ``Pre-Shared Key``, add the values for ``Identity`` and 
@@ -488,13 +493,32 @@ server:
          If ``No Security`` is chosen, no further configuration is needed.
          Note that in this mode, no DTLS will be used for the communication with 
          the LwM2M server.
+      #. In the ``LWM2M Bootstrap Server`` tab, enter the following data:
+
+            * Security mode - Pre-Shared Key
+            * Identity - nrf-{your device IMEI}
+            * Key - {Your PSK}
+
       #. After adding values for the fields under both the ``LWM2M Bootstrap 
-         Server`` and ``LWM2M Server`` tabs, click ``Create``.
+         Server`` and ``LWM2M Server`` tabs, click ``Add``.
       #. Build and run the sample.
 
    .. tab:: Coiote Device Management
 
-      TODO: Register with Coiote.
+      1. Open Coiote Device Management
+      #. Click on ``Device inventory`` in the menu on the left.
+      #. Click on ``Add new device``.
+      #. Click on ``Connect your LwM2M device
+         via the Bootstrap server``.
+      #. Enter the following data and click ``Configuration``:
+         
+         * Endpoint - nrf-{your Device IMEI}
+         * Friendly Name - {recognisable name}
+         * Security mode - psk (Pre-Shared Key)
+         * Key - {your PSK}
+
+      #. Click ``Add device``.
+      #. Build and run the sample.
 
 FOTA
 ====
@@ -521,6 +545,7 @@ This application uses the following NCS libraries and drivers:
 * :ref:`dk_buttons_and_leds_readme`
 * :ref:`lte_lc_readme`
 * :ref:`lib_date_time`
+* :ref:`nrf9160_gps`
 
 It uses the following ``sdk-nrfxlib`` library:
 
