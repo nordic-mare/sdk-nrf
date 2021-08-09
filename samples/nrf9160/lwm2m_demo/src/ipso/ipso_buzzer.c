@@ -24,7 +24,7 @@
 #define LOG_LEVEL CONFIG_LWM2M_LOG_LEVEL
 
 #include <logging/log.h>
-LOG_MODULE_REGISTER(LOG_MODULE_NAME);
+LOG_MODULE_REGISTER(LOG_MODULE_NAME, CONFIG_LWM2M_LOG_LEVEL);
 
 #include <stdint.h>
 #include <init.h>
@@ -35,13 +35,13 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 
 #define BUZZER_VERSION_MAJOR 1
 
-#if defined(CONFIG_LWM2M_IPSO_BUZZER_VERSION_1_1)
+#if defined(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1)
 #define BUZZER_VERSION_MINOR 1
 #define BUZZER_MAX_ID 8
 #else
 #define BUZZER_VERSION_MINOR 0
 #define BUZZER_MAX_ID 6
-#endif /* defined(CONFIG_LWM2M_IPSO_BUZZER_VERSION_1_1) */
+#endif /* defined(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1) */
 
 #define MAX_INSTANCE_COUNT		CONFIG_LWM2M_IPSO_APP_BUZZER_INSTANCE_COUNT
 #define RESOURCE_INSTANCE_COUNT        (BUZZER_MAX_ID)
@@ -75,7 +75,7 @@ static struct lwm2m_engine_obj_field fields[] = {
 	 * events
 	 */
 	OBJ_FIELD_DATA(DIGITAL_INPUT_STATE_RID, R, BOOL),
-#if defined(CONFIG_LWM2M_IPSO_BUZZER_VERSION_1_1)
+#if defined(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1)
 	OBJ_FIELD_DATA(TIMESTAMP_RID, R_OPT, TIME),
 	OBJ_FIELD_DATA(FRACTIONAL_TIMESTAMP_RID, R_OPT, FLOAT32),
 #endif
@@ -242,17 +242,18 @@ static struct lwm2m_engine_obj_inst *buzzer_create(uint16_t obj_inst_id)
 	INIT_OBJ_RES_DATA(DIGITAL_INPUT_STATE_RID, res[avail], i,
 			  res_inst[avail], j, &buzzer_data[avail].active,
 			  sizeof(buzzer_data[avail].active));
-#if defined(CONFIG_LWM2M_IPSO_BUZZER_VERSION_1_1)
+#if defined(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1)
 	INIT_OBJ_RES_OPTDATA(TIMESTAMP_RID, res[avail], i, res_inst[avail], j);
 	INIT_OBJ_RES_OPTDATA(FRACTIONAL_TIMESTAMP_RID, res[avail], i,
 				 res_inst[avail], j);
+	LOG_DBG("Create IPSO Buzzer instance: %d", obj_inst_id);
 #endif
 
 
 	inst[avail].resources = res[avail];
 	inst[avail].resource_count = i;
 
-	LOG_DBG("Create IPSO Buzzer instance: %d", obj_inst_id);
+	
 
 	return &inst[avail];
 }

@@ -13,6 +13,7 @@
 
 #include "pm_config.h"
 #include "lwm2m_client.h"
+#include "lwm2m_defines.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_device, CONFIG_APP_LOG_LEVEL);
@@ -22,19 +23,6 @@ LOG_MODULE_REGISTER(app_lwm2m_device, CONFIG_APP_LOG_LEVEL);
 #define CLIENT_DEVICE_TYPE	"OMA-LWM2M Client"
 #define CLIENT_HW_VER		CONFIG_SOC
 #define CLIENT_FLASH_SIZE	PM_MCUBOOT_SECONDARY_SIZE
-
-#define MANUFACTURER_RID 0
-#define MODEL_NUMBER_RID 1
-#define SERIAL_NUMBER_RID 2
-#define FACTORY_RESET_RID 5
-#define POWER_SOURCE_RID 6
-#define POWER_SOURCE_VOLTAGE_RID 7
-#define POWER_SOURCE_CURRENT_RID 8
-
-#define DEVICE_TYPE_RID 17
-#define HARDWARE_VERSION_RID 18
-#define BATTERY_STATUS_RID 20
-#define MEMORY_TOTAL_RID 21
 
 static uint8_t bat_idx = LWM2M_DEVICE_PWR_SRC_TYPE_BAT_INT;
 static int bat_mv = 3800;

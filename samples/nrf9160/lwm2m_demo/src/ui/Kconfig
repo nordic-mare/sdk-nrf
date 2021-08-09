@@ -22,6 +22,8 @@ config UI_BUZZER
 
 config UI_INPUT
 	bool
+	select DK_LIBRARY
+	select DK_LIBRARY_INVERT_LEDS
 	help
 		Enable switches and buttons. 
 
