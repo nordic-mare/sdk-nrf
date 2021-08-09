@@ -520,15 +520,59 @@ server:
       #. Click ``Add device``.
       #. Build and run the sample.
 
-FOTA
-====
+Firmware over the air
+=====================
+Follow these steps to upgrade the firmware of the device.
+Note that these steps only apply for Coiote DM, but the process
+is similar for Leshan.
 
-TODO: Instructions for FOTA
+   1. Find hex file to be uploaded to the device.
+   #. Open Coiote DM and click ``LwM2M firmware``.
+   #. Click ``Schedule new firmware upgrade``.
+   #. Click ``Upload file`` in the bottom left corner.
+   #. Upload the file found earlier.
+   #. Configure the settings in the menu to the right.
+   #. Click ``Upgrade``.
+   #. Observe in the terminal window that the upgrade is being downloaded.
+      The download will take some time. If the Server Lifetime is not increased,
+      Coiote may drop its connection to the device. This is not a problem,
+      as it will reconnect later.
+   #. When the download is completed, the device should restart on its own.
+      If for some reason it doesn't, restart the device manually.
+   #. The device should now be running the upgraded firmware, and reconnect
+      to Coiote DM automatically.
+
 
 Testing
 =======
+Follow these steps to ensure that the application works as intended.
+The application should be tested on both Leshan and Coiote DM as well as
+both the NRF9160DK and the Thingy:91.
 
-TODO: Write test procedure
+   1. Select device to be tested.
+   #. Select LwM2M server to be used for testing and register the device on it.
+   #. Configure the application to work with the chosen LwM2M server.
+      This should be done through menuconfig or guiconfig.
+   #. Build the application with the correct overlay configs.
+   #. Connect the kit to the computer using a USB cable.
+   #. Flash the application to the kit.
+   #. Connect to the kit with a terminal emulator.
+   #. Observe that the application starts in the terminal window.
+   #. Check that the device is connected to the LwM2M server of choise.
+   #. Press Button 1 on nrf9160dk or SW3 on Thingy:91 and confirm that the button event appears in the terminal.
+   #. Check that the button press has been registered on the LwM2M server 
+      by confirming that the press count has been updated.
+   #. Retrieve sensor data from various sensors and check if values are reasonable.
+   #. Test GPS module:
+
+      a. Ensure that the configuration giving gps priority on first fix is enabled.
+      #. Ensure that you are in a location with good gps signal, preferably outside.
+      #. Wait for the GPS to recieve a fix. This is noted in the terminal. This many
+         take several minutes for the first fix.
+
+   #. Try to enable or disable some sensors in menuconfig and check if the sensors
+      appear or dissappear correspondingly in the LwM2M server.
+
 
 Known issues and limitations
 ****************************
