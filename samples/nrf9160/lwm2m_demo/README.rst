@@ -222,6 +222,7 @@ Then, the server address and PSK must be set in the client:
      (`public Leshan Demo Server`_).
    * For `Coiote Device Management`_: ``eu.iot.avsystem.cloud``
      (`Coiote Device Management server`_).
+
 #. Set :option:`CONFIG_APP_PSK` to the hexadecimal representation of the
    PSK used when registering the device with the server.
 
@@ -263,12 +264,14 @@ Below are instructions for Leshan and Coiote:
          * If you want to use the `Sensor Module`_, at least the Sensor
            Value resource should be tracked for all sensors enabled in 
            the Sensor Module.
+
       #. Click on the Value Tracking button of the selected resource.
       #. Select Observe or Monitoring from the dropdown menu.
 
          * Observe will only update the Value field of the resource when it
            receives a notification.
          * Monitoring will additionally create a graph of the logged datapoints.
+
       #. Click on ``Limit data usage`` to configure how often notifications
          are sent.
 
@@ -434,6 +437,7 @@ nRF Connect VS Code extension if you are using VS Code.
 
          * This step can be skipped if you have configured the application
            through menuconfig or guiconfig as shown in `Configuration files`_.
+
       #. Run ``west flash -d <build directory>`` to finish building (if 
          menuconfig or guiconfig was used) and to flash the device.
       #. Find your device in the server.
@@ -452,6 +456,7 @@ nRF Connect VS Code extension if you are using VS Code.
 
          * Additional build configurations can be added by clicking on the icon
            next to the application name.
+
       #. Select the correct board from the drop-down menu. See the table in
          `Requirements`_ for build targets.
       #. Select the overlay files you want to use in the drop-down menu under
@@ -502,12 +507,9 @@ server:
          If ``No Security`` is chosen, no further configuration is needed.
          Note that in this mode, no DTLS will be used for the communication with 
          the LwM2M server.
-      #. In the ``LWM2M Bootstrap Server`` tab, enter the following data:
-
-            * Security mode - Pre-Shared Key
-            * Identity - nrf-{your device IMEI}
-            * Key - {Your PSK}
-
+      #. In the ``LWM2M Bootstrap Server`` tab, do the same as in the previous tab
+         but using the desired info for the bootstrap server instead. Note that
+         this is the information that your client will connect to the server with.
       #. After adding values for the fields under both the ``LWM2M Bootstrap 
          Server`` and ``LWM2M Server`` tabs, click ``Add``.
       #. Build and run the sample.
@@ -603,8 +605,9 @@ sensors.
   #. Enable value tracking for sensor value, and max/min measured for the same 
      sensors and the accelerometer.
   #. When the work_cbs are called (sensor module), the error occurs.
-	  Restarts RD Client and all is fine (error MAY occur even after this, but 
+     Restarts RD Client and all is fine (error MAY occur even after this, but 
      rarely).
+
 * Errors:
 
   * net_lwm2m_engine: Poll reported a socket error, 08
