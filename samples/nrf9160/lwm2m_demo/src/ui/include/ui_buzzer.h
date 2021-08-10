@@ -3,11 +3,6 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
-/**@file
- *
- * @brief   Buzzer control for the User Interface module. The module uses PWM to
- *	    control the buzzer output frequency.
- */
 
 #ifndef UI_BUZZER_H__
 #define UI_BUZZER_H__

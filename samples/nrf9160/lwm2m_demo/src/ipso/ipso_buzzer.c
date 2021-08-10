@@ -3,7 +3,6 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-
 /*
  * Source material for IPSO Buzzer object (3338):
  * http://www.openmobilealliance.org/tech/profiles/lwm2m/3338.xml

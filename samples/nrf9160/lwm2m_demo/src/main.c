@@ -3,33 +3,6 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
-/*
-TODO:
-	Fix socket error when tracking many resources and sensor module enabled
-	for many sensors
-		To reproduce: 
-			Enable all sensors (including accelerometer) except light/colour in 
-			sensor module.
-			Enable value tracking for sensor value, and max/min measured for
-			the same sensors and the accelerometer.
-			When the work_cbs are called (sensor module), the error occurs.
-			Restarts RD Client and all is fine (error MAY occur even after this,
-			but rarely).
-		Error: "net_lwm2m_engine: Poll reported a socket error, 08"
-		Error: "net_lwm2m_rd_client: RD Client socket error: 5"
-		Ask Veijjo for help?
-	Write documentation
-		ctrl+f "TODO" in README.rst to see whats missing
-	Test sensor module with gps
-	Increase client lifetime to stop unnecessary disconnects
-		Lifetime is now set in rd_client_event() in main, but anything other
-		than 60 seconds causes problems. > 60 seconds -> resending message and
-		timeout. < 60 seconds trouble when starting up.
-	Fix device Current Time -> Show correct timestamp
-		It works! It uses the Date-Time ncs library
-		Does NTP server use coap/udp?
-	Implement missing callbacks for Device object resources
-*/
 
 #include <zephyr.h>
 #include <ctype.h>
@@ -404,13 +377,13 @@ static void rd_client_event(struct lwm2m_ctx *client,
 
 	case LWM2M_RD_CLIENT_EVENT_REGISTRATION_COMPLETE:
 		LOG_DBG("Registration complete");
-		/* Request date and time update from modem */
+		/* Get current time and date */
 		date_time_update_async(date_time_event_handler);
+		/* Set lifetime */
 		lwm2m_engine_set_u32(
 				LWM2M_PATH(IPSO_OBJECT_SERVER_ID, 2, LIFETIME_RID),
 				CONFIG_LWM2M_ENGINE_DEFAULT_LIFETIME);
-#if defined(CONFIG_LWM2M_LOCATION_OBJ_SUPPORT)
-		/* Ensure that GPS search is only started after bootstrap is complete */
+#if defined(CONFIG_APP_GPS)
 		start_gps_search();
 #endif
 		break;

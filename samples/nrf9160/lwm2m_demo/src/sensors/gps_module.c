@@ -41,6 +41,7 @@ static void gps_event_handler(const struct device *dev, struct gps_event *evt)
 			break;
 		case GPS_EVT_SEARCH_TIMEOUT:
 			LOG_DBG("GPS search timed out");
+			gps_cfg.priority = false;
 			break;
 		case GPS_EVT_PVT:
 			break;

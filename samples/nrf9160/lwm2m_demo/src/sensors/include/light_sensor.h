@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
 #ifndef LIGHT_SENSOR_H__
 #define LIGHT_SENSOR_H__
 
@@ -43,4 +49,4 @@ int light_sensor_init(void);
 }
 #endif
 
-#endif
+#endif /* LIGHT_SENSOR_H__ */

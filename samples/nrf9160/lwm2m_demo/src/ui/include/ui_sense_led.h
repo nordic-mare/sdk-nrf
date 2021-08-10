@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
 #ifndef UI_SENSE_LED_H__
 #define UI_SENSE_LED_H__
 
@@ -26,4 +32,4 @@ int ui_sense_led_init(void);
 }
 #endif
 
-#endif
+#endif /* UI_SENSE_LED_H__ */

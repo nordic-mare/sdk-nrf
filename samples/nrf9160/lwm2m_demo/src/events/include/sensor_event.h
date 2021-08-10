@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
 #ifndef SENSOR_EVENT_H__
 #define SENSOR_EVENT_H__
 
@@ -5,6 +11,10 @@
 #include <net/lwm2m.h>
 #include <event_manager.h>
 #include <drivers/sensor.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 enum sensor_type {
 	LightSensor,
@@ -25,4 +35,8 @@ struct sensor_event {
 
 EVENT_TYPE_DECLARE(sensor_event);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* SENSOR_EVENT_H__ */

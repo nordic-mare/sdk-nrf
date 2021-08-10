@@ -1,7 +1,13 @@
 /*
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+/*
  * Source material for IPSO Colour object (3335) v1.1:
  * https://raw.githubusercontent.com/OpenMobileAlliance/lwm2m-registry/prod/version_history/3335-1_0.xml
  */
+
 #include <zephyr.h>
 #include <init.h>
 

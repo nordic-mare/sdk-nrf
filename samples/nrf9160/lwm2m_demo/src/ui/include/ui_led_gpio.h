@@ -3,10 +3,6 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
-/**@file
- *
- * @brief   LED control for the User Interface module.
- */
 
 #ifndef UI_LED_GPIO_H__
 #define UI_LED_GPIO_H__

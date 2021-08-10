@@ -15,4 +15,8 @@ int initialise_gps(void);
 
 int start_gps_search(void);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* GPS_MODULE_H__ */

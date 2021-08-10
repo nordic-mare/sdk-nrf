@@ -3,11 +3,6 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
-/**@file
- *
- * @brief   LED control for the User Interface module. The module uses PWM to
- *	    control RGB colors and light intensity.
- */
 
 #ifndef UI_LED_PWM_H__
 #define UI_LED_PWM_H__

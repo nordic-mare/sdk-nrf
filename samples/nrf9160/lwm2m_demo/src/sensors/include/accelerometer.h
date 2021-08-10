@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
 #ifndef ACCELEROMETER_H__
 #define ACCELEROMETER_H__
 
@@ -32,4 +38,4 @@ int accelerometer_init(void);
 }
 #endif
 
-#endif
+#endif /* ACCELEROMETER_H__ */
