@@ -534,8 +534,7 @@ server:
 Firmware over the air
 =====================
 Follow these steps to upgrade the firmware of the device.
-Note that these steps only apply for Coiote DM, but the process
-is similar for Leshan.
+Note that these steps only apply for Coiote DM.
 
    1. Find hex file to be uploaded to the device.
    #. Open Coiote DM and click ``LwM2M firmware``.
@@ -558,7 +557,7 @@ Testing
 =======
 Follow these steps to ensure that the application works as intended.
 The application should be tested on both Leshan and Coiote DM as well as
-both the NRF9160DK and the Thingy:91.
+both the nRF9160 DK and the Thingy:91.
 
    1. Select device to be tested.
    #. Select LwM2M server to be used for testing and register the device on it.
@@ -570,7 +569,7 @@ both the NRF9160DK and the Thingy:91.
    #. Connect to the kit with a terminal emulator.
    #. Observe that the application starts in the terminal window.
    #. Check that the device is connected to the LwM2M server of choise.
-   #. Press Button 1 on nrf9160dk or SW3 on Thingy:91 and confirm that the button event appears in the terminal.
+   #. Press Button 1 on nRF9160 DK or SW3 on Thingy:91 and confirm that the button event appears in the terminal.
    #. Check that the button press has been registered on the LwM2M server 
       by confirming that the press count has been updated.
    #. Retrieve sensor data from various sensors and check if values are reasonable.
@@ -582,7 +581,7 @@ both the NRF9160DK and the Thingy:91.
          take several minutes for the first fix.
 
    #. Try to enable or disable some sensors in menuconfig and check if the sensors
-      appear or dissappear correspondingly in the LwM2M server.
+      appear or disappear correspondingly in the LwM2M server.
 
 
 Known issues and limitations
