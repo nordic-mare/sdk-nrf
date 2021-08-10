@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
 #ifndef ENV_SENSOR_H__
 #define ENV_SENSOR_H__
 
@@ -52,4 +58,4 @@ int env_sensor_init(void);
 }
 #endif
 
-#endif
+#endif /* ENV_SENSOR_H__ */

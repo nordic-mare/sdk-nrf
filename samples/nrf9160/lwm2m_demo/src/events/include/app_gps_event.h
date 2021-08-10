@@ -11,6 +11,10 @@
 #include <drivers/gps.h>
 #include <event_manager.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct app_gps_event {
     struct event_header header;
 
@@ -18,4 +22,9 @@ struct app_gps_event {
 };
 
 EVENT_TYPE_DECLARE(app_gps_event);
+
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* APP_GPS_EVENT_H__ */

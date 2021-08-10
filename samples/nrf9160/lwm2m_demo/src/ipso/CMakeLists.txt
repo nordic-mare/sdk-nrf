@@ -9,3 +9,4 @@ target_sources_ifdef(CONFIG_LWM2M_IPSO_APP_COLOUR_SENSOR
 	
 target_sources_ifdef(CONFIG_LWM2M_IPSO_APP_BUZZER
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ipso_buzzer.c)
+	

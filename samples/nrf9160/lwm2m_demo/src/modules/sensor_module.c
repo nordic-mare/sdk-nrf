@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
 #include <zephyr.h>
 #include <drivers/sensor.h>
 #include <net/lwm2m.h>
@@ -76,7 +82,7 @@ static struct k_work_delayable gas_res_work;
 #if defined(CONFIG_SENSOR_MODULE_LIGHT)
 #define LIGHT_STARTUP_DELAY		K_SECONDS(CONFIG_SENSOR_MODULE_LIGHT_STARTUP_DELAY)
 #define LIGHT_PERIOD			CONFIG_SENSOR_MODULE_LIGHT_PERIOD
-#define LIGHT_FETCH_DELAY_MS	(LIGHT_DELAY * MSEC_PER_SEC / 2)
+#define LIGHT_FETCH_DELAY_MS	(LIGHT_PERIOD * MSEC_PER_SEC / 2)
 #define LIGHT_DELTA				((uint32_t)((CONFIG_SENSOR_MODULE_LIGHT_DELTA_R << 24) | \
 										(CONFIG_SENSOR_MODULE_LIGHT_DELTA_G << 16) | \
 										(CONFIG_SENSOR_MODULE_LIGHT_DELTA_B << 8)  | \
@@ -87,7 +93,7 @@ static struct k_work_delayable light_work;
 #if defined(CONFIG_SENSOR_MODULE_COLOUR)
 #define COLOUR_STARTUP_DELAY	K_SECONDS(CONFIG_SENSOR_MODULE_COLOUR_STARTUP_DELAY)
 #define COLOUR_PERIOD			CONFIG_SENSOR_MODULE_COLOUR_PERIOD
-#define COLOUR_FETCH_DELAY_MS	(COLOUR_DELAY * MSEC_PER_SEC / 2)
+#define COLOUR_FETCH_DELAY_MS	(COLOUR_PERIOD * MSEC_PER_SEC / 2)
 #define COLOUR_DELTA			((uint32_t)((CONFIG_SENSOR_MODULE_COLOUR_DELTA_R << 24) | \
 										(CONFIG_SENSOR_MODULE_COLOUR_DELTA_G << 16) | \
 										(CONFIG_SENSOR_MODULE_COLOUR_DELTA_B << 8)  | \

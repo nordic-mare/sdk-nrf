@@ -586,7 +586,29 @@ both the NRF9160DK and the Thingy:91.
 Known issues and limitations
 ****************************
 
-TODO: write issues and limitations
+Changing lifetime does not work correctly.
+
+* Setting lifetime to anything other than 60 seconds causes problems.
+  
+  * > 60 seconds: resending message and timeout. 
+  * < 60 seconds: trouble when starting up.
+
+Socket error when tracking many resources and sensor module enabled for many 
+sensors.
+
+* To reproduce: 
+
+  1. Enable all sensors (including accelerometer) except light/colour in sensor 
+     module.
+  #. Enable value tracking for sensor value, and max/min measured for the same 
+     sensors and the accelerometer.
+  #. When the work_cbs are called (sensor module), the error occurs.
+	  Restarts RD Client and all is fine (error MAY occur even after this, but 
+     rarely).
+* Errors:
+
+  * net_lwm2m_engine: Poll reported a socket error, 08
+  * net_lwm2m_rd_client: RD Client socket error: 5
 
 Dependencies
 ************

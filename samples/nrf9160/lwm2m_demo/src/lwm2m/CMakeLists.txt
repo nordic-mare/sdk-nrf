@@ -39,6 +39,3 @@ target_sources_ifdef(CONFIG_LWM2M_APP_GAS_RES_SENSOR
 	
 target_sources_ifdef(CONFIG_LWM2M_APP_ACCELEROMETER
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_accelerometer.c)
-
-
-	

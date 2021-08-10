@@ -1,5 +1,11 @@
-#ifndef UI_LED_GPIO_H__
-#define UI_LED_GPIO_H__
+/*
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+#ifndef UI_RGB_LED_GPIO_H__
+#define UI_RGB_LED_GPIO_H__
 
 #include <zephyr.h>
 
@@ -40,4 +46,4 @@ int ui_rgb_led_gpio_init(void);
 }
 #endif
 
-#endif /* UI_LED_H__ */
+#endif /* UI_RGB_LED_GPIO_H__ */

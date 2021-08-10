@@ -13,6 +13,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 int lwm2m_app_init_device(char *serial_num);
 
 #if defined(CONFIG_LWM2M_APP_LIGHT_CONTROL)

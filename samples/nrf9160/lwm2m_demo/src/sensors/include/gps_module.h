@@ -29,4 +29,4 @@ int start_gps_search(void);
 }
 #endif
 
-#endif
+#endif /* GPS_MODULE_H__ */
