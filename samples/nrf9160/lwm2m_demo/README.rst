@@ -509,14 +509,12 @@ TODO: Write test procedure
 Known issues and limitations
 ****************************
 
-TODO: write issues and limitations.
-
 Changing lifetime does not work correctly.
 
-* Lifetime is now set in rd_client_event() in main, but anything other
-  than 60 seconds causes problems. 
-  > 60 seconds -> resending message and timeout. 
-  < 60 seconds trouble when starting up.
+* Setting lifetime to anything other than 60 seconds causes problems.
+  
+  * > 60 seconds: resending message and timeout. 
+  * < 60 seconds: trouble when starting up.
 
 Socket error when tracking many resources and sensor module enabled for many 
 sensors.
@@ -532,8 +530,8 @@ sensors.
      rarely).
 * Errors:
 
-  * "net_lwm2m_engine: Poll reported a socket error, 08"
-  * Error: "net_lwm2m_rd_client: RD Client socket error: 5"
+  * net_lwm2m_engine: Poll reported a socket error, 08
+  * net_lwm2m_rd_client: RD Client socket error: 5
 
 Dependencies
 ************
