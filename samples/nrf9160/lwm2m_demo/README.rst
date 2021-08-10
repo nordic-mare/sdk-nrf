@@ -237,7 +237,16 @@ Below are instructions for Leshan and Coiote:
    
    .. tab:: Leshan Demo Server
    
-      TODO: Enable notifications on leshan
+      1. Find your device in the clients tab and select it.
+      #. Select the desired object in the menu on the left.
+      #. Find the resource(s) you want to track and click ``OBS``
+         next to it.
+
+         * This can be any and all the resources of an object, but only
+           resources which can be expected to change make sense to track.
+         * If you want to use the `Sensor Module`_, at least the Sensor
+           Value resource should be tracked for all sensors enabled in 
+           the Sensor Module.
 
    .. tab:: Coiote Device Management
       
@@ -589,7 +598,6 @@ This application uses the following NCS libraries and drivers:
 * :ref:`dk_buttons_and_leds_readme`
 * :ref:`lte_lc_readme`
 * :ref:`lib_date_time`
-* :ref:`nrf9160_gps`
 
 It uses the following ``sdk-nrfxlib`` library:
 
