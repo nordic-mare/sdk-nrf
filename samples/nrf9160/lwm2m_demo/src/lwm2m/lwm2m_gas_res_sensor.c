@@ -17,8 +17,8 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
-#define MIN_RANGE_VALUE			0
-#define MAX_RANGE_VALUE			1000000
+#define MIN_RANGE_VALUE 0
+#define MAX_RANGE_VALUE 1000000
 
 #if defined(CONFIG_ENV_SENSOR_USE_EXTERNAL)
 #define GENERIC_SENSOR_APP_TYPE "BME680 Gas Resistance Sensor"
@@ -26,16 +26,16 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define GENERIC_SENSOR_APP_TYPE "Simulated Gas Resistance Sensor"
 #endif
 
-#define GENERIC_SENSOR_TYPE		"Gas resistance sensor"
-#define GAS_RES_UNIT			"Ω"
+#define GENERIC_SENSOR_TYPE "Gas resistance sensor"
+#define GAS_RES_UNIT "Ω"
 
 static float32_value_t *gas_res_float;
 static int64_t sensor_read_timestamp;
 static int32_t lwm2m_timestamp;
 static uint8_t meas_qual_ind;
 
-static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id,
-					uint16_t res_inst_id, size_t *data_len)
+static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
+				    size_t *data_len)
 {
 	/* Only read sensor if a regular request from server, i.e. not a notify request */
 	if (is_regular_read_cb(sensor_read_timestamp)) {
@@ -56,9 +56,9 @@ static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 		}
 
 		new_gas_res_float = sensor_value_to_float32(gas_res_val);
-		lwm2m_engine_set_float32(
-				LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID),
-				&new_gas_res_float);
+		lwm2m_engine_set_float32(LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0,
+						    SENSOR_VALUE_RID),
+					 &new_gas_res_float);
 	}
 
 	*data_len = sizeof(*gas_res_float);
@@ -100,11 +100,12 @@ int lwm2m_init_gas_res_sensor(void)
 		meas_qual_ind = 0;
 
 		lwm2m_engine_set_res_data(
-				LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, TIMESTAMP_RID),
-				&lwm2m_timestamp, sizeof(lwm2m_timestamp), LWM2M_RES_DATA_FLAG_RW);
-		lwm2m_engine_set_res_data(
-				LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, MEASUREMENT_QUALITY_INDICATOR_RID),
-				&meas_qual_ind, sizeof(meas_qual_ind), LWM2M_RES_DATA_FLAG_RW);
+			LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, TIMESTAMP_RID),
+			&lwm2m_timestamp, sizeof(lwm2m_timestamp), LWM2M_RES_DATA_FLAG_RW);
+		lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0,
+						     MEASUREMENT_QUALITY_INDICATOR_RID),
+					  &meas_qual_ind, sizeof(meas_qual_ind),
+					  LWM2M_RES_DATA_FLAG_RW);
 	}
 
 	return 0;
@@ -128,9 +129,9 @@ static bool event_handler(const struct event_header *eh)
 			}
 
 			received_value = sensor_value_to_float32(event->sensor_value);
-			lwm2m_engine_set_float32(
-				LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID),
-				&received_value);
+			lwm2m_engine_set_float32(LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0,
+							    SENSOR_VALUE_RID),
+						 &received_value);
 
 			return true;
 		}

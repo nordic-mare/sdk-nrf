@@ -32,8 +32,8 @@ int lwm2m_init_onoff_switch(void)
 	/* create switch1 object */
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWICTH1_OBJ_INST_ID));
 	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWICTH1_OBJ_INST_ID, APPLICATION_TYPE_RID),
-			SWITCH1_APP_NAME, sizeof(SWITCH1_APP_NAME), LWM2M_RES_DATA_FLAG_RO);
+		LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWICTH1_OBJ_INST_ID, APPLICATION_TYPE_RID),
+		SWITCH1_APP_NAME, sizeof(SWITCH1_APP_NAME), LWM2M_RES_DATA_FLAG_RO);
 
 	if (IS_ENABLED(CONFIG_LWM2M_IPSO_ONOFF_SWITCH_VERSION_1_1)) {
 		lwm2m_engine_set_res_data(
@@ -45,8 +45,8 @@ int lwm2m_init_onoff_switch(void)
 	/* create switch2 object */
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWITCH2_OBJ_INST_ID));
 	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWITCH2_OBJ_INST_ID, APPLICATION_TYPE_RID),
-			SWITCH2_APP_NAME, sizeof(SWITCH2_APP_NAME), LWM2M_RES_DATA_FLAG_RO);
+		LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWITCH2_OBJ_INST_ID, APPLICATION_TYPE_RID),
+		SWITCH2_APP_NAME, sizeof(SWITCH2_APP_NAME), LWM2M_RES_DATA_FLAG_RO);
 
 	if (IS_ENABLED(CONFIG_LWM2M_IPSO_ONOFF_SWITCH_VERSION_1_1)) {
 		lwm2m_engine_set_res_data(
@@ -69,20 +69,24 @@ static bool event_handler(const struct event_header *eh)
 
 		switch (event->device_number) {
 		case 1:
-			lwm2m_engine_set_bool(
-				LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWICTH1_OBJ_INST_ID, DIGITAL_INPUT_STATE_RID),
-				event->state);
+			lwm2m_engine_set_bool(LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID,
+							 SWICTH1_OBJ_INST_ID,
+							 DIGITAL_INPUT_STATE_RID),
+					      event->state);
 			if (IS_ENABLED(CONFIG_LWM2M_IPSO_ONOFF_SWITCH_VERSION_1_1)) {
-				lwm2m_set_timestamp(IPSO_OBJECT_ONOFF_SWITCH_ID, SWICTH1_OBJ_INST_ID);
+				lwm2m_set_timestamp(IPSO_OBJECT_ONOFF_SWITCH_ID,
+						    SWICTH1_OBJ_INST_ID);
 			}
 			break;
 
 		case 2:
-			lwm2m_engine_set_bool(
-				LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWITCH2_OBJ_INST_ID, DIGITAL_INPUT_STATE_RID),
-				event->state);
+			lwm2m_engine_set_bool(LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID,
+							 SWITCH2_OBJ_INST_ID,
+							 DIGITAL_INPUT_STATE_RID),
+					      event->state);
 			if (IS_ENABLED(CONFIG_LWM2M_IPSO_ONOFF_SWITCH_VERSION_1_1)) {
-				lwm2m_set_timestamp(IPSO_OBJECT_ONOFF_SWITCH_ID, SWITCH2_OBJ_INST_ID);
+				lwm2m_set_timestamp(IPSO_OBJECT_ONOFF_SWITCH_ID,
+						    SWITCH2_OBJ_INST_ID);
 			}
 			break;
 

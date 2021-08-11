@@ -34,10 +34,10 @@ LOG_MODULE_REGISTER(app_lwm2m_light_control, CONFIG_APP_LOG_LEVEL);
 #define NUM_LEDS 4
 #endif
 
-#define THINGY_PWM_APP_TYPE		"PWM RGB LED controller"
-#define THINGY_GPIO_APP_TYPE	"GPIO RGB LED controller"
-#define DK_PWM_APP_TYPE			"PWM LED controller"
-#define DK_GPIO_APP_TYPE		"GPIO LED controller"
+#define THINGY_PWM_APP_TYPE "PWM RGB LED controller"
+#define THINGY_GPIO_APP_TYPE "GPIO RGB LED controller"
+#define DK_PWM_APP_TYPE "PWM LED controller"
+#define DK_GPIO_APP_TYPE "GPIO LED controller"
 
 static bool state[NUM_LEDS];
 

@@ -57,19 +57,23 @@ int lwm2m_init_push_button(void)
 
 	if (CONFIG_LWM2M_IPSO_PUSH_BUTTON_INSTANCE_COUNT == 2) {
 		/* create button2 object */
-		lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON2_OBJ_INST_ID));
-		lwm2m_engine_register_post_write_callback(
-				LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON2_OBJ_INST_ID, DIGITAL_INPUT_STATE_RID),
-				NULL);
-		lwm2m_engine_set_res_data(
-				LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON2_OBJ_INST_ID, APPLICATION_TYPE_RID),
-				BUTTON2_APP_NAME, sizeof(BUTTON2_APP_NAME), LWM2M_RES_DATA_FLAG_RO);
+		lwm2m_engine_create_obj_inst(
+			LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON2_OBJ_INST_ID));
+		lwm2m_engine_register_post_write_callback(LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID,
+								     BUTTON2_OBJ_INST_ID,
+								     DIGITAL_INPUT_STATE_RID),
+							  NULL);
+		lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID,
+						     BUTTON2_OBJ_INST_ID, APPLICATION_TYPE_RID),
+					  BUTTON2_APP_NAME, sizeof(BUTTON2_APP_NAME),
+					  LWM2M_RES_DATA_FLAG_RO);
 
 		if (IS_ENABLED(CONFIG_LWM2M_IPSO_PUSH_BUTTON_VERSION_1_1)) {
-			lwm2m_engine_set_res_data(
-					LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON2_OBJ_INST_ID, TIMESTAMP_RID),
-					&lwm2m_timstamp[BUTTON2_OBJ_INST_ID],
-					sizeof(lwm2m_timstamp[BUTTON2_OBJ_INST_ID]), LWM2M_RES_DATA_FLAG_RW);
+			lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID,
+							     BUTTON2_OBJ_INST_ID, TIMESTAMP_RID),
+						  &lwm2m_timstamp[BUTTON2_OBJ_INST_ID],
+						  sizeof(lwm2m_timstamp[BUTTON2_OBJ_INST_ID]),
+						  LWM2M_RES_DATA_FLAG_RW);
 		}
 	}
 
@@ -94,7 +98,8 @@ static bool event_handler(const struct event_header *eh)
 
 			if (event->state) {
 				if (IS_ENABLED(CONFIG_LWM2M_IPSO_PUSH_BUTTON_VERSION_1_1)) {
-					lwm2m_set_timestamp(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON1_OBJ_INST_ID);
+					lwm2m_set_timestamp(IPSO_OBJECT_PUSH_BUTTON_ID,
+							    BUTTON1_OBJ_INST_ID);
 				}
 
 				/*
@@ -102,9 +107,10 @@ static bool event_handler(const struct event_header *eh)
 				 * object is automatically updated in the ipso_push_button file.
 				 */
 				btn_input_count[BUTTON1_OBJ_INST_ID]++;
-				lwm2m_engine_set_u64(
-				LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON1_OBJ_INST_ID, DIGITAL_INPUT_COUNTER_RID),
-				btn_input_count[BUTTON1_OBJ_INST_ID]);
+				lwm2m_engine_set_u64(LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID,
+								BUTTON1_OBJ_INST_ID,
+								DIGITAL_INPUT_COUNTER_RID),
+						     btn_input_count[BUTTON1_OBJ_INST_ID]);
 			}
 			break;
 
@@ -116,7 +122,8 @@ static bool event_handler(const struct event_header *eh)
 
 			if (event->state) {
 				if (IS_ENABLED(CONFIG_LWM2M_IPSO_PUSH_BUTTON_VERSION_1_1)) {
-					lwm2m_set_timestamp(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON2_OBJ_INST_ID);
+					lwm2m_set_timestamp(IPSO_OBJECT_PUSH_BUTTON_ID,
+							    BUTTON2_OBJ_INST_ID);
 				}
 
 				/*
@@ -124,9 +131,10 @@ static bool event_handler(const struct event_header *eh)
 				 * object is automatically updated in the ipso_push_button file.
 				 */
 				btn_input_count[BUTTON2_OBJ_INST_ID]++;
-				lwm2m_engine_set_u64(
-				LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID, BUTTON2_OBJ_INST_ID, DIGITAL_INPUT_COUNTER_RID),
-				btn_input_count[BUTTON2_OBJ_INST_ID]);
+				lwm2m_engine_set_u64(LWM2M_PATH(IPSO_OBJECT_PUSH_BUTTON_ID,
+								BUTTON2_OBJ_INST_ID,
+								DIGITAL_INPUT_COUNTER_RID),
+						     btn_input_count[BUTTON2_OBJ_INST_ID]);
 			}
 			break;
 

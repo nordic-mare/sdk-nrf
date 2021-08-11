@@ -21,7 +21,7 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define LIGHT_OBJ_INSTANCE_ID 0
 #define COLOUR_OBJ_INSTANCE_ID 1
 
-#define SENSOR_FETCH_DELAY_MS	200
+#define SENSOR_FETCH_DELAY_MS 200
 
 #if defined(CONFIG_LIGHT_SENSOR_USE_EXTERNAL)
 #define LIGHT_APP_TYPE "BH1749 Light Sensor"
@@ -158,24 +158,26 @@ int lwm2m_init_light_sensor(void)
 		/* Ambient light sensor */
 		meas_qual_ind[LIGHT_OBJ_INSTANCE_ID] = 0;
 		lwm2m_engine_set_res_data(
-				LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, LIGHT_OBJ_INSTANCE_ID, TIMESTAMP_RID),
-				&lwm2m_timestamp[LIGHT_OBJ_INSTANCE_ID],
-				sizeof(lwm2m_timestamp[LIGHT_OBJ_INSTANCE_ID]), LWM2M_RES_DATA_FLAG_RW);
-		lwm2m_engine_set_res_data(
-				LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, LIGHT_OBJ_INSTANCE_ID, MEASUREMENT_QUALITY_INDICATOR_RID),
-				&meas_qual_ind[LIGHT_OBJ_INSTANCE_ID],
-				sizeof(meas_qual_ind[LIGHT_OBJ_INSTANCE_ID]), LWM2M_RES_DATA_FLAG_RW);
+			LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, LIGHT_OBJ_INSTANCE_ID, TIMESTAMP_RID),
+			&lwm2m_timestamp[LIGHT_OBJ_INSTANCE_ID],
+			sizeof(lwm2m_timestamp[LIGHT_OBJ_INSTANCE_ID]), LWM2M_RES_DATA_FLAG_RW);
+		lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, LIGHT_OBJ_INSTANCE_ID,
+						     MEASUREMENT_QUALITY_INDICATOR_RID),
+					  &meas_qual_ind[LIGHT_OBJ_INSTANCE_ID],
+					  sizeof(meas_qual_ind[LIGHT_OBJ_INSTANCE_ID]),
+					  LWM2M_RES_DATA_FLAG_RW);
 
 		/* Surface colour sensor */
 		meas_qual_ind[COLOUR_OBJ_INSTANCE_ID] = 0;
 		lwm2m_engine_set_res_data(
-				LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, COLOUR_OBJ_INSTANCE_ID, TIMESTAMP_RID),
-				&lwm2m_timestamp[COLOUR_OBJ_INSTANCE_ID],
-				sizeof(lwm2m_timestamp[COLOUR_OBJ_INSTANCE_ID]), LWM2M_RES_DATA_FLAG_RW);
-		lwm2m_engine_set_res_data(
-				LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, COLOUR_OBJ_INSTANCE_ID, MEASUREMENT_QUALITY_INDICATOR_RID),
-				&meas_qual_ind[COLOUR_OBJ_INSTANCE_ID],
-				sizeof(meas_qual_ind[COLOUR_OBJ_INSTANCE_ID]), LWM2M_RES_DATA_FLAG_RW);
+			LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, COLOUR_OBJ_INSTANCE_ID, TIMESTAMP_RID),
+			&lwm2m_timestamp[COLOUR_OBJ_INSTANCE_ID],
+			sizeof(lwm2m_timestamp[COLOUR_OBJ_INSTANCE_ID]), LWM2M_RES_DATA_FLAG_RW);
+		lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, COLOUR_OBJ_INSTANCE_ID,
+						     MEASUREMENT_QUALITY_INDICATOR_RID),
+					  &meas_qual_ind[COLOUR_OBJ_INSTANCE_ID],
+					  sizeof(meas_qual_ind[COLOUR_OBJ_INSTANCE_ID]),
+					  LWM2M_RES_DATA_FLAG_RW);
 	}
 
 	return 0;

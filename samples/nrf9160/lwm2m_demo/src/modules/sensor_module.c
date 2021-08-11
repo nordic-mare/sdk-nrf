@@ -90,8 +90,8 @@ static struct k_work_delayable gas_res_work;
 static struct k_work_delayable light_work;
 static struct k_work_delayable colour_work;
 
-static bool float32_sufficient_change(float32_value_t new_val,
-		float32_value_t old_val, float32_value_t req_change)
+static bool float32_sufficient_change(float32_value_t new_val, float32_value_t old_val,
+				      float32_value_t req_change)
 {
 	double change;
 

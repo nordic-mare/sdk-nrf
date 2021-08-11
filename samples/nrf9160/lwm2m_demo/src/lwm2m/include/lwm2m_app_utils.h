@@ -46,9 +46,9 @@
 #define LOCATION_SPEED_RID 6
 
 /* Misc */
-#define LWM2M_RES_DATA_FLAG_RW			0
-#define MAX_LWM2M_PATH_LEN				20
-#define RGBIR_STR_LENGTH		        11	/*'0xRRGGBBIR\0' */
+#define LWM2M_RES_DATA_FLAG_RW 0
+#define MAX_LWM2M_PATH_LEN 20
+#define RGBIR_STR_LENGTH 11 /*'0xRRGGBBIR\0' */
 
 /* Set timestamp resource */
 void lwm2m_set_timestamp(int ipso_obj_id, unsigned int obj_inst_id);

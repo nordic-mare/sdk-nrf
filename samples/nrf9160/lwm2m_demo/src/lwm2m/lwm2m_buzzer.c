@@ -89,10 +89,9 @@ int lwm2m_init_buzzer(void)
 	lwm2m_engine_set_float64(LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, LEVEL_RID), &start_intensity);
 
 	if (IS_ENABLED(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1)) {
-		lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, TIMESTAMP_RID),
-			&lwm2m_timestamp, sizeof(lwm2m_timestamp),
-			LWM2M_RES_DATA_FLAG_RW);
+		lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, TIMESTAMP_RID),
+					  &lwm2m_timestamp, sizeof(lwm2m_timestamp),
+					  LWM2M_RES_DATA_FLAG_RW);
 	}
 
 	return 0;
