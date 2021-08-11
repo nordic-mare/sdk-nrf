@@ -29,7 +29,7 @@ LOG_MODULE_REGISTER(app_lwm2m_client, CONFIG_APP_LOG_LEVEL);
 #endif
 
 #include "lwm2m_client.h"
-#include "lwm2m_defines.h"
+#include "lwm2m_app_utils.h"
 #include "sensor_module.h"
 #include "gps_module.h"
 
