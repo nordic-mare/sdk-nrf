@@ -34,8 +34,7 @@ static const char *sensor_type_to_string(enum sensor_type type)
 	}
 }
 
-static int log_sensor_event(const struct event_header *eh, char *buf,
-							size_t buf_len)
+static int log_sensor_event(const struct event_header *eh, char *buf, size_t buf_len)
 {
 	struct sensor_event *event = cast_sensor_event(eh);
 
@@ -45,9 +44,4 @@ static int log_sensor_event(const struct event_header *eh, char *buf,
 			event->sensor_value.val2, event->unsigned_value);
 }
 
-EVENT_TYPE_DEFINE(
-	sensor_event,
-	true,
-	log_sensor_event,
-	NULL
-);
+EVENT_TYPE_DEFINE(sensor_event, true, log_sensor_event, NULL);

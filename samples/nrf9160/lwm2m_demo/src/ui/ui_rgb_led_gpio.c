@@ -9,10 +9,10 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(ui_rgb_led_gpio, CONFIG_UI_LOG_LEVEL);
 
-#define RGB_GPIO_NODE(led_label)    DT_NODELABEL(led_label)
-#define RGB_GPIO_PIN(led_label)     DT_GPIO_PIN(RGB_GPIO_NODE(led_label), gpios)
-#define RGB_GPIO_FLAGS              DT_GPIO_FLAGS(RGB_GPIO_NODE(red_led), gpios)
-#define RGB_GPIO_DEV_LABEL          DT_GPIO_LABEL(RGB_GPIO_NODE(red_led), gpios)
+#define RGB_GPIO_NODE(led_label) DT_NODELABEL(led_label)
+#define RGB_GPIO_PIN(led_label) DT_GPIO_PIN(RGB_GPIO_NODE(led_label), gpios)
+#define RGB_GPIO_FLAGS DT_GPIO_FLAGS(RGB_GPIO_NODE(red_led), gpios)
+#define RGB_GPIO_DEV_LABEL DT_GPIO_LABEL(RGB_GPIO_NODE(red_led), gpios)
 
 static const struct device *rgb_gpio_dev;
 
@@ -76,19 +76,19 @@ int ui_rgb_led_gpio_init(void)
 	}
 
 	ret = gpio_pin_configure(rgb_gpio_dev, RGB_GPIO_PIN(red_led),
-					RGB_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
+				 RGB_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
 		LOG_ERR("Error %d: configure red pin failed", ret);
 		return ret;
 	}
 	ret = gpio_pin_configure(rgb_gpio_dev, RGB_GPIO_PIN(green_led),
-					RGB_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
+				 RGB_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
 		LOG_ERR("Error %d: configure green pin failed", ret);
 		return ret;
 	}
 	ret = gpio_pin_configure(rgb_gpio_dev, RGB_GPIO_PIN(blue_led),
-					RGB_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
+				 RGB_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
 		LOG_ERR("Error %d: configure blue pin failed", ret);
 		return ret;

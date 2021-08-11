@@ -14,10 +14,10 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_buzzer, CONFIG_APP_LOG_LEVEL);
 
-#define FREQUENCY_START_VAL		440U
-#define INTENSITY_START_VAL		100U
+#define FREQUENCY_START_VAL 440U
+#define INTENSITY_START_VAL 100U
 
-#define BUZZER_APP_TYPE			"Buzzer"
+#define BUZZER_APP_TYPE "Buzzer"
 
 #if defined(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1)
 static int32_t timestamp;
@@ -26,18 +26,13 @@ static void set_timestamp(void)
 {
 	int32_t ts;
 
-	lwm2m_engine_get_s32(
-			LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), &ts);
-	lwm2m_engine_set_s32(
-			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, TIMESTAMP_RID),
-			ts);
+	lwm2m_engine_get_s32(LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), &ts);
+	lwm2m_engine_set_s32(LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, TIMESTAMP_RID), ts);
 }
 #endif
 
-static int buzzer_state_cb(uint16_t obj_inst_id,
-			   uint16_t res_id, uint16_t res_inst_id,
-			   uint8_t *data, uint16_t data_len,
-			   bool last_block, size_t total_size)
+static int buzzer_state_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
+			   uint8_t *data, uint16_t data_len, bool last_block, size_t total_size)
 {
 	int ret;
 	bool state = *(bool *)data;
@@ -57,10 +52,8 @@ static int buzzer_state_cb(uint16_t obj_inst_id,
 	return 0;
 }
 
-static int buzzer_intensity_cb(uint16_t obj_inst_id,
-			   uint16_t res_id, uint16_t res_inst_id,
-			   uint8_t *data, uint16_t data_len,
-			   bool last_block, size_t total_size)
+static int buzzer_intensity_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
+			       uint8_t *data, uint16_t data_len, bool last_block, size_t total_size)
 {
 	int ret;
 	uint8_t intensity = *data;
@@ -79,7 +72,7 @@ static int buzzer_intensity_cb(uint16_t obj_inst_id,
 int lwm2m_init_buzzer(void)
 {
 	int ret;
-	float64_value_t start_intensity = {.val1 = INTENSITY_START_VAL, .val2 = 0};
+	float64_value_t start_intensity = { .val1 = INTENSITY_START_VAL, .val2 = 0 };
 
 	ret = ui_buzzer_init();
 	if (ret) {
@@ -96,27 +89,18 @@ int lwm2m_init_buzzer(void)
 		LOG_ERR("Error %d: set buzzer frequency failed", ret);
 	}
 
-	lwm2m_engine_create_obj_inst(
-			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0));
+	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0));
 	lwm2m_engine_register_post_write_callback(
-			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, DIGITAL_INPUT_STATE_RID),
-			buzzer_state_cb);
-	lwm2m_engine_register_post_write_callback(
-			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, LEVEL_RID),
-			buzzer_intensity_cb);
-	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, APPLICATION_TYPE_RID),
-			BUZZER_APP_TYPE, sizeof(BUZZER_APP_TYPE),
-			LWM2M_RES_DATA_FLAG_RO);
-	lwm2m_engine_set_float64(
-			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, LEVEL_RID),
-			&start_intensity);
+		LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, DIGITAL_INPUT_STATE_RID), buzzer_state_cb);
+	lwm2m_engine_register_post_write_callback(LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, LEVEL_RID),
+						  buzzer_intensity_cb);
+	lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, APPLICATION_TYPE_RID),
+				  BUZZER_APP_TYPE, sizeof(BUZZER_APP_TYPE), LWM2M_RES_DATA_FLAG_RO);
+	lwm2m_engine_set_float64(LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, LEVEL_RID), &start_intensity);
 
 #if defined(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1)
-	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, TIMESTAMP_RID),
-			&timestamp, sizeof(timestamp),
-			LWM2M_RES_DATA_FLAG_RW);
+	lwm2m_engine_set_res_data(LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, TIMESTAMP_RID), &timestamp,
+				  sizeof(timestamp), LWM2M_RES_DATA_FLAG_RW);
 #endif
 
 	return 0;

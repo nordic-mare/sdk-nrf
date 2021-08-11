@@ -10,10 +10,10 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(ui_sense_led, CONFIG_UI_LOG_LEVEL);
 
-#define SENSE_GPIO_NODE(led_label)  DT_NODELABEL(led_label)
-#define SENSE_GPIO_PIN(led_label)   DT_GPIO_PIN(SENSE_GPIO_NODE(led_label), gpios)
-#define SENSE_GPIO_FLAGS            DT_GPIO_FLAGS(SENSE_GPIO_NODE(sense_red_led), gpios)
-#define SENSE_GPIO_DEV_LABEL        DT_GPIO_LABEL(SENSE_GPIO_NODE(sense_red_led), gpios)
+#define SENSE_GPIO_NODE(led_label) DT_NODELABEL(led_label)
+#define SENSE_GPIO_PIN(led_label) DT_GPIO_PIN(SENSE_GPIO_NODE(led_label), gpios)
+#define SENSE_GPIO_FLAGS DT_GPIO_FLAGS(SENSE_GPIO_NODE(sense_red_led), gpios)
+#define SENSE_GPIO_DEV_LABEL DT_GPIO_LABEL(SENSE_GPIO_NODE(sense_red_led), gpios)
 
 static const struct device *sense_led_gpio_dev;
 
@@ -50,19 +50,19 @@ int ui_sense_led_init(void)
 	}
 
 	ret = gpio_pin_configure(sense_led_gpio_dev, SENSE_GPIO_PIN(sense_red_led),
-					SENSE_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
+				 SENSE_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
 		LOG_ERR("Error %d: configure red pin failed", ret);
 		return ret;
 	}
 	ret = gpio_pin_configure(sense_led_gpio_dev, SENSE_GPIO_PIN(sense_green_led),
-					SENSE_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
+				 SENSE_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
 		LOG_ERR("Error %d: configure green pin failed", ret);
 		return ret;
 	}
 	ret = gpio_pin_configure(sense_led_gpio_dev, SENSE_GPIO_PIN(sense_blue_led),
-					SENSE_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
+				 SENSE_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
 		LOG_ERR("Error %d: configure blue pin failed", ret);
 		return ret;

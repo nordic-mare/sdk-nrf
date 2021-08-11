@@ -16,10 +16,10 @@ extern "C" {
 
 /**@brief Orientation states. */
 enum accel_orientation_state {
-	ORIENTATION_NOT_KNOWN,   /**< Initial state. */
-	ORIENTATION_NORMAL,      /**< Has normal orientation. */
+	ORIENTATION_NOT_KNOWN, /**< Initial state. */
+	ORIENTATION_NORMAL, /**< Has normal orientation. */
 	ORIENTATION_UPSIDE_DOWN, /**< System is upside down. */
-	ORIENTATION_ON_SIDE      /**< System is placed on its side. */
+	ORIENTATION_ON_SIDE /**< System is placed on its side. */
 };
 
 /**@brief Struct containing current orientation and 3 axis acceleration data. */

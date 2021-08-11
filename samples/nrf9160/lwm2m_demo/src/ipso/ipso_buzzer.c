@@ -43,8 +43,8 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME, CONFIG_LWM2M_LOG_LEVEL);
 #define BUZZER_MAX_ID 6
 #endif /* defined(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1) */
 
-#define MAX_INSTANCE_COUNT		CONFIG_LWM2M_IPSO_APP_BUZZER_INSTANCE_COUNT
-#define RESOURCE_INSTANCE_COUNT        (BUZZER_MAX_ID)
+#define MAX_INSTANCE_COUNT CONFIG_LWM2M_IPSO_APP_BUZZER_INSTANCE_COUNT
+#define RESOURCE_INSTANCE_COUNT (BUZZER_MAX_ID)
 
 /* resource state */
 struct ipso_buzzer_data {
@@ -83,8 +83,7 @@ static struct lwm2m_engine_obj_field fields[] = {
 
 static struct lwm2m_engine_obj_inst inst[MAX_INSTANCE_COUNT];
 static struct lwm2m_engine_res res[MAX_INSTANCE_COUNT][BUZZER_MAX_ID];
-static struct lwm2m_engine_res_inst
-		res_inst[MAX_INSTANCE_COUNT][RESOURCE_INSTANCE_COUNT];
+static struct lwm2m_engine_res_inst res_inst[MAX_INSTANCE_COUNT][RESOURCE_INSTANCE_COUNT];
 
 static int float2ms(float64_value_t *f, uint32_t *ms)
 {
@@ -129,8 +128,8 @@ static int start_buzzer(struct ipso_buzzer_data *buzzer)
 	/* TODO: Check delay_duration > 0 */
 
 	buzzer->trigger_offset = k_uptime_get();
-	snprintk(path, MAX_RESOURCE_LEN, "%d/%u/%d", IPSO_OBJECT_BUZZER_ID,
-		 buzzer->obj_inst_id, DIGITAL_INPUT_STATE_RID);
+	snprintk(path, MAX_RESOURCE_LEN, "%d/%u/%d", IPSO_OBJECT_BUZZER_ID, buzzer->obj_inst_id,
+		 DIGITAL_INPUT_STATE_RID);
 	lwm2m_engine_set_bool(path, true);
 
 	float2ms(&buzzer->delay_duration, &temp);
@@ -148,8 +147,8 @@ static int stop_buzzer(struct ipso_buzzer_data *buzzer, bool cancel)
 		return -EINVAL;
 	}
 
-	snprintk(path, MAX_RESOURCE_LEN, "%d/%u/%d", IPSO_OBJECT_BUZZER_ID,
-		 buzzer->obj_inst_id, DIGITAL_INPUT_STATE_RID);
+	snprintk(path, MAX_RESOURCE_LEN, "%d/%u/%d", IPSO_OBJECT_BUZZER_ID, buzzer->obj_inst_id,
+		 DIGITAL_INPUT_STATE_RID);
 	lwm2m_engine_set_bool(path, false);
 
 	if (cancel) {
@@ -159,10 +158,8 @@ static int stop_buzzer(struct ipso_buzzer_data *buzzer, bool cancel)
 	return 0;
 }
 
-static int onoff_post_write_cb(uint16_t obj_inst_id,
-				   uint16_t res_id, uint16_t res_inst_id,
-				   uint8_t *data, uint16_t data_len,
-				   bool last_block, size_t total_size)
+static int onoff_post_write_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst_id,
+			       uint8_t *data, uint16_t data_len, bool last_block, size_t total_size)
 {
 	int i;
 
@@ -182,9 +179,7 @@ static int onoff_post_write_cb(uint16_t obj_inst_id,
 
 static void buzzer_work_cb(struct k_work *work)
 {
-	struct ipso_buzzer_data *buzzer = CONTAINER_OF(work,
-							  struct ipso_buzzer_data,
-							  buzzer_work);
+	struct ipso_buzzer_data *buzzer = CONTAINER_OF(work, struct ipso_buzzer_data, buzzer_work);
 	stop_buzzer(buzzer, false);
 }
 
@@ -196,7 +191,8 @@ static struct lwm2m_engine_obj_inst *buzzer_create(uint16_t obj_inst_id)
 	for (index = 0; index < ARRAY_SIZE(inst); index++) {
 		if (inst[index].obj && inst[index].obj_inst_id == obj_inst_id) {
 			LOG_ERR("Can not create instance - "
-				"already existing: %u", obj_inst_id);
+				"already existing: %u",
+				obj_inst_id);
 			return NULL;
 		}
 
@@ -207,8 +203,7 @@ static struct lwm2m_engine_obj_inst *buzzer_create(uint16_t obj_inst_id)
 	}
 
 	if (avail < 0) {
-		LOG_ERR("Can not create instance - no more room: %u",
-			obj_inst_id);
+		LOG_ERR("Can not create instance - no more room: %u", obj_inst_id);
 		return NULL;
 	}
 
@@ -219,33 +214,27 @@ static struct lwm2m_engine_obj_inst *buzzer_create(uint16_t obj_inst_id)
 	buzzer_data[avail].delay_duration.val1 = 1; /* 1 seconds */
 	buzzer_data[avail].obj_inst_id = obj_inst_id;
 
-	(void)memset(res[avail], 0,
-			 sizeof(res[avail][0]) * ARRAY_SIZE(res[avail]));
+	(void)memset(res[avail], 0, sizeof(res[avail][0]) * ARRAY_SIZE(res[avail]));
 	init_res_instance(res_inst[avail], ARRAY_SIZE(res_inst[avail]));
 
 	/* initialize instance resource data */
-	INIT_OBJ_RES(ON_OFF_RID, res[avail], i, res_inst[avail], j, 1, false,
-			 true, &buzzer_data[avail].onoff,
-			 sizeof(buzzer_data[avail].onoff),
-			 NULL, NULL, NULL, onoff_post_write_cb, NULL);
-	INIT_OBJ_RES_DATA(LEVEL_RID, res[avail], i, res_inst[avail], j,
-			  &buzzer_data[avail].level,
+	INIT_OBJ_RES(ON_OFF_RID, res[avail], i, res_inst[avail], j, 1, false, true,
+		     &buzzer_data[avail].onoff, sizeof(buzzer_data[avail].onoff), NULL, NULL, NULL,
+		     onoff_post_write_cb, NULL);
+	INIT_OBJ_RES_DATA(LEVEL_RID, res[avail], i, res_inst[avail], j, &buzzer_data[avail].level,
 			  sizeof(buzzer_data[avail].level));
 	INIT_OBJ_RES_DATA(DELAY_DURATION_RID, res[avail], i, res_inst[avail], j,
 			  &buzzer_data[avail].delay_duration,
 			  sizeof(buzzer_data[avail].delay_duration));
-	INIT_OBJ_RES_DATA(MINIMUM_OFF_TIME_RID, res[avail], i, res_inst[avail],
-			  j, &buzzer_data[avail].min_off_time,
+	INIT_OBJ_RES_DATA(MINIMUM_OFF_TIME_RID, res[avail], i, res_inst[avail], j,
+			  &buzzer_data[avail].min_off_time,
 			  sizeof(buzzer_data[avail].min_off_time));
-	INIT_OBJ_RES_OPTDATA(APPLICATION_TYPE_RID, res[avail], i,
-				 res_inst[avail], j);
-	INIT_OBJ_RES_DATA(DIGITAL_INPUT_STATE_RID, res[avail], i,
-			  res_inst[avail], j, &buzzer_data[avail].active,
-			  sizeof(buzzer_data[avail].active));
+	INIT_OBJ_RES_OPTDATA(APPLICATION_TYPE_RID, res[avail], i, res_inst[avail], j);
+	INIT_OBJ_RES_DATA(DIGITAL_INPUT_STATE_RID, res[avail], i, res_inst[avail], j,
+			  &buzzer_data[avail].active, sizeof(buzzer_data[avail].active));
 #if defined(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1)
 	INIT_OBJ_RES_OPTDATA(TIMESTAMP_RID, res[avail], i, res_inst[avail], j);
-	INIT_OBJ_RES_OPTDATA(FRACTIONAL_TIMESTAMP_RID, res[avail], i,
-				 res_inst[avail], j);
+	INIT_OBJ_RES_OPTDATA(FRACTIONAL_TIMESTAMP_RID, res[avail], i, res_inst[avail], j);
 	LOG_DBG("Create IPSO Buzzer instance: %d", obj_inst_id);
 #endif
 
@@ -270,5 +259,4 @@ static int ipso_buzzer_init(const struct device *dev)
 	return 0;
 }
 
-SYS_INIT(ipso_buzzer_init, APPLICATION,
-	 CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);
+SYS_INIT(ipso_buzzer_init, APPLICATION, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);

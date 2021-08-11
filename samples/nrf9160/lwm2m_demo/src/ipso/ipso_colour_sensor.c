@@ -32,9 +32,9 @@ LOG_MODULE_REGISTER(app_ipso_colour_sensor, CONFIG_LWM2M_LOG_LEVEL);
 #define NUMBER_OF_OBJECT_FIELDS 3
 #endif /* ifdef CONFIG_LWM2M_IPSO_APP_COLOUR_VERSION_1_1 */
 
-#define RESOURCE_INSTANCE_COUNT	NUMBER_OF_OBJECT_FIELDS
+#define RESOURCE_INSTANCE_COUNT NUMBER_OF_OBJECT_FIELDS
 
-#define UNIT_STR_MAX_SIZE	8
+#define UNIT_STR_MAX_SIZE 8
 #define COLOUR_STR_MAX_SIZE 16
 #define APP_TYPE_STR_MAX_SIZE 16
 
@@ -59,8 +59,7 @@ static struct lwm2m_engine_obj_field fields[] = {
 
 static struct lwm2m_engine_obj_inst inst[MAX_INSTANCE_COUNT];
 static struct lwm2m_engine_res res[MAX_INSTANCE_COUNT][NUMBER_OF_OBJECT_FIELDS];
-static struct lwm2m_engine_res_inst
-		res_inst[MAX_INSTANCE_COUNT][RESOURCE_INSTANCE_COUNT];
+static struct lwm2m_engine_res_inst res_inst[MAX_INSTANCE_COUNT][RESOURCE_INSTANCE_COUNT];
 
 static struct lwm2m_engine_obj_inst *colour_sensor_create(uint16_t obj_inst_id)
 {
@@ -70,7 +69,8 @@ static struct lwm2m_engine_obj_inst *colour_sensor_create(uint16_t obj_inst_id)
 	for (index = 0; index < MAX_INSTANCE_COUNT; index++) {
 		if (inst[index].obj && inst[index].obj_inst_id == obj_inst_id) {
 			LOG_ERR("Can not create instance - "
-				"already existing: %u", obj_inst_id);
+				"already existing: %u",
+				obj_inst_id);
 			return NULL;
 		}
 	}
@@ -82,8 +82,7 @@ static struct lwm2m_engine_obj_inst *colour_sensor_create(uint16_t obj_inst_id)
 	}
 
 	if (index >= MAX_INSTANCE_COUNT) {
-		LOG_ERR("Can not create instance - no more room: %u",
-			obj_inst_id);
+		LOG_ERR("Can not create instance - no more room: %u", obj_inst_id);
 		return NULL;
 	}
 
@@ -92,33 +91,26 @@ static struct lwm2m_engine_obj_inst *colour_sensor_create(uint16_t obj_inst_id)
 	units[index][0] = '\0';
 	app_type[index][0] = '\0';
 
-	(void)memset(res[index], 0,
-			 sizeof(res[index][0]) * ARRAY_SIZE(res[index]));
+	(void)memset(res[index], 0, sizeof(res[index][0]) * ARRAY_SIZE(res[index]));
 	init_res_instance(res_inst[index], ARRAY_SIZE(res_inst[index]));
 
 	/* initialize instance resource data */
-	INIT_OBJ_RES(COLOUR_RID, res[index], i,
-			res_inst[index], j, 1, false, true,
-			&colour[index], sizeof(*colour),
-			NULL, NULL, NULL, NULL, NULL);
-	INIT_OBJ_RES_DATA(SENSOR_UNITS_RID, res[index], i, res_inst[index], j,
-			units[index], UNIT_STR_MAX_SIZE);
-	INIT_OBJ_RES_DATA(APPLICATION_TYPE_RID, res[index], i, res_inst[index],
-			j, app_type[index], APP_TYPE_STR_MAX_SIZE);
+	INIT_OBJ_RES(COLOUR_RID, res[index], i, res_inst[index], j, 1, false, true, &colour[index],
+		     sizeof(*colour), NULL, NULL, NULL, NULL, NULL);
+	INIT_OBJ_RES_DATA(SENSOR_UNITS_RID, res[index], i, res_inst[index], j, units[index],
+			  UNIT_STR_MAX_SIZE);
+	INIT_OBJ_RES_DATA(APPLICATION_TYPE_RID, res[index], i, res_inst[index], j, app_type[index],
+			  APP_TYPE_STR_MAX_SIZE);
 #ifdef CONFIG_LWM2M_IPSO_APP_COLOUR_SENSOR_VERSION_1_1
 	INIT_OBJ_RES_OPTDATA(TIMESTAMP_RID, res[index], i, res_inst[index], j);
-	INIT_OBJ_RES_OPTDATA(FRACTIONAL_TIMESTAMP_RID, res[index], i,
-				 res_inst[index], j);
-	INIT_OBJ_RES_OPTDATA(MEASUREMENT_QUALITY_INDICATOR_RID, res[index],
-				 i, res_inst[index], j);
-	INIT_OBJ_RES_OPTDATA(MEASUREMENT_QUALITY_LEVEL_RID, res[index], i,
-				 res_inst[index], j);
+	INIT_OBJ_RES_OPTDATA(FRACTIONAL_TIMESTAMP_RID, res[index], i, res_inst[index], j);
+	INIT_OBJ_RES_OPTDATA(MEASUREMENT_QUALITY_INDICATOR_RID, res[index], i, res_inst[index], j);
+	INIT_OBJ_RES_OPTDATA(MEASUREMENT_QUALITY_LEVEL_RID, res[index], i, res_inst[index], j);
 #endif
 
 	inst[index].resources = res[index];
 	inst[index].resource_count = i;
-	LOG_DBG("Created IPSO %s Sensor instance: %d", SENSOR_NAME,
-		obj_inst_id);
+	LOG_DBG("Created IPSO %s Sensor instance: %d", SENSOR_NAME, obj_inst_id);
 	return &inst[index];
 }
 
@@ -137,5 +129,4 @@ static int ipso_colour_sensor_init(const struct device *dev)
 	return 0;
 }
 
-SYS_INIT(ipso_colour_sensor_init, APPLICATION,
-	 CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);
+SYS_INIT(ipso_colour_sensor_init, APPLICATION, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);

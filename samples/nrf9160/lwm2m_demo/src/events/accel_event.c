@@ -28,22 +28,16 @@ static const char *accel_orienation_state_to_string(enum accel_orientation_state
 	}
 }
 
-static int log_accel_event(const struct event_header *eh, char *buf,
-							size_t buf_len)
+static int log_accel_event(const struct event_header *eh, char *buf, size_t buf_len)
 {
 	struct accel_event *event = cast_accel_event(eh);
 
-	return snprintf(buf, buf_len,
-				"Accelerometer event: x = %d.%06d, y = %d.%06d, z = %d.%06d, orientation = %s.",
-				event->data.x.val1, event->data.x.val2,
-				event->data.y.val1, event->data.y.val2,
-				event->data.z.val1, event->data.z.val2,
-				accel_orienation_state_to_string(event->orientation));
+	return snprintf(
+		buf, buf_len,
+		"Accelerometer event: x = %d.%06d, y = %d.%06d, z = %d.%06d, orientation = %s.",
+		event->data.x.val1, event->data.x.val2, event->data.y.val1, event->data.y.val2,
+		event->data.z.val1, event->data.z.val2,
+		accel_orienation_state_to_string(event->orientation));
 }
 
-EVENT_TYPE_DEFINE(
-	accel_event,
-	true,
-	log_accel_event,
-	NULL
-);
+EVENT_TYPE_DEFINE(accel_event, true, log_accel_event, NULL);

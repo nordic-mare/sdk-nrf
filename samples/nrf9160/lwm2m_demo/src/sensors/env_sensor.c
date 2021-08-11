@@ -12,12 +12,12 @@
 LOG_MODULE_REGISTER(env_sensor, CONFIG_APP_LOG_LEVEL);
 
 #if defined(CONFIG_ENV_SENSOR_USE_EXTERNAL)
-#define ENV_SENSOR_NODE			DT_PATH(soc, peripheral_40000000, i2c_a000, bme680_76)
-#define ENV_SENSOR_DEV_LABEL	DT_LABEL(ENV_SENSOR_NODE)
+#define ENV_SENSOR_NODE DT_PATH(soc, peripheral_40000000, i2c_a000, bme680_76)
+#define ENV_SENSOR_DEV_LABEL DT_LABEL(ENV_SENSOR_NODE)
 #elif defined(CONFIG_ENV_SENSOR_USE_SIM)
-#define ENV_SENSOR_DEV_LABEL	"SENSOR_SIM"
-#define GAS_RES_SIM_BASE		CONFIG_ENV_SENSOR_GAS_RES_SIM_BASE
-#define GAS_RES_SIM_MAX_DIFF	CONFIG_ENV_SENSOR_GAS_RES_SIM_MAX_DIFF
+#define ENV_SENSOR_DEV_LABEL "SENSOR_SIM"
+#define GAS_RES_SIM_BASE CONFIG_ENV_SENSOR_GAS_RES_SIM_BASE
+#define GAS_RES_SIM_MAX_DIFF CONFIG_ENV_SENSOR_GAS_RES_SIM_MAX_DIFF
 #endif
 
 static const struct device *env_sensor_dev;
@@ -53,8 +53,7 @@ int env_sensor_read_temperature(struct sensor_value *temp_val)
 		return ret;
 	}
 
-	LOG_INF("%s: read %d.%d °C", env_sensor_dev->name,
-			temp_val->val1, temp_val->val2);
+	LOG_INF("%s: read %d.%d °C", env_sensor_dev->name, temp_val->val1, temp_val->val2);
 
 	return 0;
 }
@@ -69,8 +68,7 @@ int env_sensor_read_pressure(struct sensor_value *press_value)
 		return ret;
 	}
 
-	LOG_INF("%s: read %d.%d kPa", env_sensor_dev->name,
-			press_value->val1, press_value->val2);
+	LOG_INF("%s: read %d.%d kPa", env_sensor_dev->name, press_value->val1, press_value->val2);
 
 	return 0;
 }
@@ -85,8 +83,7 @@ int env_sensor_read_humidity(struct sensor_value *humid_val)
 		return ret;
 	}
 
-	LOG_INF("%s: read %d.%d %%", env_sensor_dev->name,
-			humid_val->val1, humid_val->val2);
+	LOG_INF("%s: read %d.%d %%", env_sensor_dev->name, humid_val->val1, humid_val->val2);
 
 	return 0;
 }
@@ -102,14 +99,14 @@ int env_sensor_read_gas_resistance(struct sensor_value *gas_res_val)
 		return ret;
 	}
 #elif defined(CONFIG_ENV_SENSOR_USE_SIM)
-	int32_t sim_val = MAX(0, GAS_RES_SIM_BASE + (rand() % GAS_RES_SIM_MAX_DIFF)*(1 - 2*(rand() % 2)));
+	int32_t sim_val =
+		MAX(0, GAS_RES_SIM_BASE + (rand() % GAS_RES_SIM_MAX_DIFF) * (1 - 2 * (rand() % 2)));
 
 	gas_res_val->val1 = sim_val;
 	gas_res_val->val2 = 0;
 #endif
 
-	LOG_INF("%s: read %d.%d Ω", env_sensor_dev->name,
-			gas_res_val->val1, gas_res_val->val2);
+	LOG_INF("%s: read %d.%d Ω", env_sensor_dev->name, gas_res_val->val1, gas_res_val->val2);
 
 	return 0;
 }

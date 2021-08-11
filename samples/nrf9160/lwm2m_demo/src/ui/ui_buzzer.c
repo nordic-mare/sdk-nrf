@@ -10,19 +10,19 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(ui_buzzer, CONFIG_UI_LOG_LEVEL);
 
-#define BUZZER_PWM_NODE			DT_ALIAS(buzzer_pwm)
-#define BUZZER_PWM_NAME			DT_LABEL(BUZZER_PWM_NODE)
-#define BUZZER_PWM_PIN			DT_PROP(BUZZER_PWM_NODE, ch0_pin)
-#define BUZZER_PWM_FLAGS        DT_PWMS_FLAGS(BUZZER_PWM_NODE)
+#define BUZZER_PWM_NODE DT_ALIAS(buzzer_pwm)
+#define BUZZER_PWM_NAME DT_LABEL(BUZZER_PWM_NODE)
+#define BUZZER_PWM_PIN DT_PROP(BUZZER_PWM_NODE, ch0_pin)
+#define BUZZER_PWM_FLAGS DT_PWMS_FLAGS(BUZZER_PWM_NODE)
 
 /* Transform frequency in Hz to period in microseconds */
-#define PERIOD(freq)			((USEC_PER_SEC) / (freq))
+#define PERIOD(freq) ((USEC_PER_SEC) / (freq))
 
-#define FREQUENCY_MAX			10000
-#define INTENSITY_MAX			100
+#define FREQUENCY_MAX 10000
+#define INTENSITY_MAX 100
 
 /* Affects curvature of pulse width graph */
-#define CURVE_CONST				50
+#define CURVE_CONST 50
 
 static const struct device *buzzer_pwm_dev;
 
@@ -50,7 +50,7 @@ static uint32_t calculate_pulse_width(int32_t period, int32_t intensity)
 	int32_t divisor = CURVE_CONST + ((2 - CURVE_CONST) * intensity) / INTENSITY_MAX;
 	int32_t offset = (period * (INTENSITY_MAX - intensity)) / (CURVE_CONST * INTENSITY_MAX);
 
-	return (uint32_t)(period/divisor - offset);
+	return (uint32_t)(period / divisor - offset);
 }
 
 int ui_buzzer_on_off(bool new_state)
@@ -61,15 +61,14 @@ int ui_buzzer_on_off(bool new_state)
 
 	if (frequency == 0) {
 		/* Turn off buzzer when frequency = 0 */
-		ret = pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN,
-			USEC_PER_SEC, 0,
-			BUZZER_PWM_FLAGS);
+		ret = pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN, USEC_PER_SEC, 0,
+				       BUZZER_PWM_FLAGS);
 	} else {
 		uint32_t period = PERIOD(frequency);
 		uint32_t pulse_width = calculate_pulse_width(period, intensity);
 
-		ret = pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN,
-					period, pulse_width * state, BUZZER_PWM_FLAGS);
+		ret = pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN, period, pulse_width * state,
+				       BUZZER_PWM_FLAGS);
 	}
 
 	if (ret) {

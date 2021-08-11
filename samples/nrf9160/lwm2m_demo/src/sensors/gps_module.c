@@ -13,9 +13,9 @@
 #define MODULE gps_module
 
 #if defined(CONFIG_GPS_USE_EXTERNAL)
-#define GPS_DEV_LABEL     "NRF9160_GPS"
+#define GPS_DEV_LABEL "NRF9160_GPS"
 #elif defined(CONFIG_GPS_USE_SIM)
-#define GPS_DEV_LABEL     "SENSOR_SIM"
+#define GPS_DEV_LABEL "SENSOR_SIM"
 #endif
 
 #include <logging/log.h>
@@ -23,16 +23,15 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
 static struct gps_pvt pvt_data;
 static const struct device *gps_dev;
-static struct gps_config gps_cfg = {
-	.nav_mode = GPS_NAV_MODE_PERIODIC,
-	.power_mode = GPS_POWER_MODE_DISABLED,
-	.interval = CONFIG_GPS_SEARCH_INTERVAL_TIME,
-	.timeout = CONFIG_GPS_SEARCH_TIMEOUT_TIME,
-	.accuracy = GPS_ACCURACY_NORMAL,
+static struct gps_config gps_cfg = { .nav_mode = GPS_NAV_MODE_PERIODIC,
+				     .power_mode = GPS_POWER_MODE_DISABLED,
+				     .interval = CONFIG_GPS_SEARCH_INTERVAL_TIME,
+				     .timeout = CONFIG_GPS_SEARCH_TIMEOUT_TIME,
+				     .accuracy = GPS_ACCURACY_NORMAL,
 #if defined(CONFIG_GPS_PRIORITY_ON_FIRST_FIX)
-	.priority = true
+				     .priority = true
 #else
-	.priority = false
+				     .priority = false
 #endif
 };
 
@@ -55,8 +54,7 @@ static void gps_event_handler(const struct device *dev, struct gps_event *evt)
 		break;
 	case GPS_EVT_PVT:
 		break;
-	case GPS_EVT_PVT_FIX:
-	{
+	case GPS_EVT_PVT_FIX: {
 		if (k_uptime_get_32() - timestamp_prev < CONFIG_APP_GPS_HOLD_TIME * MSEC_PER_SEC) {
 			break;
 		}
@@ -98,8 +96,7 @@ int initialise_gps(void)
 
 	gps_dev = device_get_binding(GPS_DEV_LABEL);
 	if (gps_dev == NULL) {
-		LOG_ERR("Could not get %s device",
-			log_strdup(GPS_DEV_LABEL));
+		LOG_ERR("Could not get %s device", log_strdup(GPS_DEV_LABEL));
 		return -EINVAL;
 	}
 

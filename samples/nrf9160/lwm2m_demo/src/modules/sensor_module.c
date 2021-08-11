@@ -23,62 +23,62 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
-#define IPSO_OBJECT_COLOUR_ID	3335
-#define LIGHT_OBJ_INSTANCE_ID	0
-#define COLOUR_OBJ_INSTANCE_ID	1
-#define RBG_STR_LEN				11	/* '0xRRGGBBIR\0' */
+#define IPSO_OBJECT_COLOUR_ID 3335
+#define LIGHT_OBJ_INSTANCE_ID 0
+#define COLOUR_OBJ_INSTANCE_ID 1
+#define RBG_STR_LEN 11 /* '0xRRGGBBIR\0' */
 
-#define ACCEL_STARTUP_DELAY		K_SECONDS(CONFIG_SENSOR_MODULE_ACCEL_STARTUP_DELAY)
-#define ACCEL_PERIOD			CONFIG_SENSOR_MODULE_ACCEL_PERIOD
-#define ACCEL_DELTA_X			((float32_value_t){ \
-								.val1 = CONFIG_SENSOR_MODULE_ACCEL_X_DELTA_INT, \
-								.val2 = CONFIG_SENSOR_MODULE_ACCEL_X_DELTA_DEC})
-#define ACCEL_DELTA_Y			((float32_value_t){ \
-								.val1 = CONFIG_SENSOR_MODULE_ACCEL_Y_DELTA_INT, \
-								.val2 = CONFIG_SENSOR_MODULE_ACCEL_Y_DELTA_DEC})
-#define ACCEL_DELTA_Z			((float32_value_t){ \
-								.val1 = CONFIG_SENSOR_MODULE_ACCEL_Z_DELTA_INT, \
-								.val2 = CONFIG_SENSOR_MODULE_ACCEL_Z_DELTA_DEC})
+#define ACCEL_STARTUP_DELAY K_SECONDS(CONFIG_SENSOR_MODULE_ACCEL_STARTUP_DELAY)
+#define ACCEL_PERIOD CONFIG_SENSOR_MODULE_ACCEL_PERIOD
+#define ACCEL_DELTA_X                                                                              \
+	((float32_value_t){ .val1 = CONFIG_SENSOR_MODULE_ACCEL_X_DELTA_INT,                        \
+			    .val2 = CONFIG_SENSOR_MODULE_ACCEL_X_DELTA_DEC })
+#define ACCEL_DELTA_Y                                                                              \
+	((float32_value_t){ .val1 = CONFIG_SENSOR_MODULE_ACCEL_Y_DELTA_INT,                        \
+			    .val2 = CONFIG_SENSOR_MODULE_ACCEL_Y_DELTA_DEC })
+#define ACCEL_DELTA_Z                                                                              \
+	((float32_value_t){ .val1 = CONFIG_SENSOR_MODULE_ACCEL_Z_DELTA_INT,                        \
+			    .val2 = CONFIG_SENSOR_MODULE_ACCEL_Z_DELTA_DEC })
 
-#define TEMP_STARTUP_DELAY		K_SECONDS(CONFIG_SENSOR_MODULE_TEMP_STARTUP_DELAY)
-#define TEMP_PERIOD				CONFIG_SENSOR_MODULE_TEMP_PERIOD
-#define TEMP_DELTA				((float32_value_t){ \
-								.val1 = CONFIG_SENSOR_MODULE_TEMP_DELTA_INT, \
-								.val2 = CONFIG_SENSOR_MODULE_TEMP_DELTA_DEC})
+#define TEMP_STARTUP_DELAY K_SECONDS(CONFIG_SENSOR_MODULE_TEMP_STARTUP_DELAY)
+#define TEMP_PERIOD CONFIG_SENSOR_MODULE_TEMP_PERIOD
+#define TEMP_DELTA                                                                                 \
+	((float32_value_t){ .val1 = CONFIG_SENSOR_MODULE_TEMP_DELTA_INT,                           \
+			    .val2 = CONFIG_SENSOR_MODULE_TEMP_DELTA_DEC })
 
-#define PRESS_STARTUP_DELAY		K_SECONDS(CONFIG_SENSOR_MODULE_PRESS_STARTUP_DELAY)
-#define PRESS_PERIOD			CONFIG_SENSOR_MODULE_PRESS_PERIOD
-#define PRESS_DELTA				((float32_value_t){ \
-								.val1 = CONFIG_SENSOR_MODULE_PRESS_DELTA_INT,\
-								.val2 = CONFIG_SENSOR_MODULE_PRESS_DELTA_DEC})
+#define PRESS_STARTUP_DELAY K_SECONDS(CONFIG_SENSOR_MODULE_PRESS_STARTUP_DELAY)
+#define PRESS_PERIOD CONFIG_SENSOR_MODULE_PRESS_PERIOD
+#define PRESS_DELTA                                                                                \
+	((float32_value_t){ .val1 = CONFIG_SENSOR_MODULE_PRESS_DELTA_INT,                          \
+			    .val2 = CONFIG_SENSOR_MODULE_PRESS_DELTA_DEC })
 
-#define HUMID_STARTUP_DELAY		K_SECONDS(CONFIG_SENSOR_MODULE_HUMID_STARTUP_DELAY)
-#define HUMID_PERIOD			CONFIG_SENSOR_MODULE_HUMID_PERIOD
-#define HUMID_DELTA				((float32_value_t){ \
-								.val1 = CONFIG_SENSOR_MODULE_HUMID_DELTA_INT, \
-								.val2 = CONFIG_SENSOR_MODULE_HUMID_DELTA_DEC})
+#define HUMID_STARTUP_DELAY K_SECONDS(CONFIG_SENSOR_MODULE_HUMID_STARTUP_DELAY)
+#define HUMID_PERIOD CONFIG_SENSOR_MODULE_HUMID_PERIOD
+#define HUMID_DELTA                                                                                \
+	((float32_value_t){ .val1 = CONFIG_SENSOR_MODULE_HUMID_DELTA_INT,                          \
+			    .val2 = CONFIG_SENSOR_MODULE_HUMID_DELTA_DEC })
 
-#define GAS_RES_STARTUP_DELAY	K_SECONDS(CONFIG_SENSOR_MODULE_GAS_RES_STARTUP_DELAY)
-#define GAS_RES_PERIOD			CONFIG_SENSOR_MODULE_GAS_RES_PERIOD
-#define GAS_RES_DELTA			((float32_value_t){ \
-								.val1 = CONFIG_SENSOR_MODULE_GAS_RES_DELTA, \
-								.val2 = 0})
+#define GAS_RES_STARTUP_DELAY K_SECONDS(CONFIG_SENSOR_MODULE_GAS_RES_STARTUP_DELAY)
+#define GAS_RES_PERIOD CONFIG_SENSOR_MODULE_GAS_RES_PERIOD
+#define GAS_RES_DELTA ((float32_value_t){ .val1 = CONFIG_SENSOR_MODULE_GAS_RES_DELTA, .val2 = 0 })
 
-#define LIGHT_STARTUP_DELAY		K_SECONDS(CONFIG_SENSOR_MODULE_LIGHT_STARTUP_DELAY)
-#define LIGHT_PERIOD			CONFIG_SENSOR_MODULE_LIGHT_PERIOD
-#define LIGHT_FETCH_DELAY_MS	(LIGHT_PERIOD * MSEC_PER_SEC / 2)
-#define LIGHT_DELTA				((uint32_t)((CONFIG_SENSOR_MODULE_LIGHT_DELTA_R << 24) | \
-											(CONFIG_SENSOR_MODULE_LIGHT_DELTA_G << 16) | \
-											(CONFIG_SENSOR_MODULE_LIGHT_DELTA_B << 8)  | \
-											(CONFIG_SENSOR_MODULE_LIGHT_DELTA_IR)))
+#define LIGHT_STARTUP_DELAY K_SECONDS(CONFIG_SENSOR_MODULE_LIGHT_STARTUP_DELAY)
+#define LIGHT_PERIOD CONFIG_SENSOR_MODULE_LIGHT_PERIOD
+#define LIGHT_FETCH_DELAY_MS (LIGHT_PERIOD * MSEC_PER_SEC / 2)
+#define LIGHT_DELTA                                                                                \
+	((uint32_t)((CONFIG_SENSOR_MODULE_LIGHT_DELTA_R << 24) |                                   \
+		    (CONFIG_SENSOR_MODULE_LIGHT_DELTA_G << 16) |                                   \
+		    (CONFIG_SENSOR_MODULE_LIGHT_DELTA_B << 8) |                                    \
+		    (CONFIG_SENSOR_MODULE_LIGHT_DELTA_IR)))
 
-#define COLOUR_STARTUP_DELAY	K_SECONDS(CONFIG_SENSOR_MODULE_COLOUR_STARTUP_DELAY)
-#define COLOUR_PERIOD			CONFIG_SENSOR_MODULE_COLOUR_PERIOD
-#define COLOUR_FETCH_DELAY_MS	(COLOUR_PERIOD * MSEC_PER_SEC / 2)
-#define COLOUR_DELTA			((uint32_t)((CONFIG_SENSOR_MODULE_COLOUR_DELTA_R << 24) | \
-											(CONFIG_SENSOR_MODULE_COLOUR_DELTA_G << 16) | \
-											(CONFIG_SENSOR_MODULE_COLOUR_DELTA_B << 8)  | \
-											(CONFIG_SENSOR_MODULE_COLOUR_DELTA_IR)))
+#define COLOUR_STARTUP_DELAY K_SECONDS(CONFIG_SENSOR_MODULE_COLOUR_STARTUP_DELAY)
+#define COLOUR_PERIOD CONFIG_SENSOR_MODULE_COLOUR_PERIOD
+#define COLOUR_FETCH_DELAY_MS (COLOUR_PERIOD * MSEC_PER_SEC / 2)
+#define COLOUR_DELTA                                                                               \
+	((uint32_t)((CONFIG_SENSOR_MODULE_COLOUR_DELTA_R << 24) |                                  \
+		    (CONFIG_SENSOR_MODULE_COLOUR_DELTA_G << 16) |                                  \
+		    (CONFIG_SENSOR_MODULE_COLOUR_DELTA_B << 8) |                                   \
+		    (CONFIG_SENSOR_MODULE_COLOUR_DELTA_IR)))
 
 static struct k_work_delayable accel_work;
 static struct k_work_delayable temp_work;
@@ -93,8 +93,8 @@ static double float32_to_double(float32_value_t *val)
 	return (double)val->val1 + (double)val->val2 / 1000000;
 }
 
-static bool float32_sufficient_change(float32_value_t new_val,
-		float32_value_t old_val, float32_value_t req_change)
+static bool float32_sufficient_change(float32_value_t new_val, float32_value_t old_val,
+				      float32_value_t req_change)
 {
 	double change;
 
@@ -107,7 +107,7 @@ static bool float32_sufficient_change(float32_value_t new_val,
 
 static float32_value_t sensor_value_to_float32(struct sensor_value val)
 {
-	return (float32_value_t){.val1 = val.val1, .val2 = val.val2};
+	return (float32_value_t){ .val1 = val.val1, .val2 = val.val2 };
 }
 
 static void accel_work_cb(struct k_work *work)
@@ -123,24 +123,21 @@ static void accel_work_cb(struct k_work *work)
 	LOG_DBG("ACCEL WORK CB");
 
 	/* Get latest registered accelerometer values */
-	lwm2m_engine_get_res_data(
-		LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, X_VALUE_RID),
-		(void **)(&old_x_val), &dummy_data_len, &dummy_data_flags);
-	lwm2m_engine_get_res_data(
-		LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Y_VALUE_RID),
-		(void **)(&old_y_val), &dummy_data_len, &dummy_data_flags);
-	lwm2m_engine_get_res_data(
-		LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Z_VALUE_RID),
-		(void **)(&old_z_val), &dummy_data_len, &dummy_data_flags);
+	lwm2m_engine_get_res_data(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, X_VALUE_RID),
+				  (void **)(&old_x_val), &dummy_data_len, &dummy_data_flags);
+	lwm2m_engine_get_res_data(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Y_VALUE_RID),
+				  (void **)(&old_y_val), &dummy_data_len, &dummy_data_flags);
+	lwm2m_engine_get_res_data(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Z_VALUE_RID),
+				  (void **)(&old_z_val), &dummy_data_len, &dummy_data_flags);
 
 	accelerometer_read(&new_data);
 
-	sufficient_x = float32_sufficient_change(
-				sensor_value_to_float32(new_data.x), *old_x_val, ACCEL_DELTA_X);
-	sufficient_y = float32_sufficient_change(
-				sensor_value_to_float32(new_data.y), *old_y_val, ACCEL_DELTA_Y);
-	sufficient_z = float32_sufficient_change(
-				sensor_value_to_float32(new_data.z), *old_z_val, ACCEL_DELTA_Z);
+	sufficient_x = float32_sufficient_change(sensor_value_to_float32(new_data.x), *old_x_val,
+						 ACCEL_DELTA_X);
+	sufficient_y = float32_sufficient_change(sensor_value_to_float32(new_data.y), *old_y_val,
+						 ACCEL_DELTA_Y);
+	sufficient_z = float32_sufficient_change(sensor_value_to_float32(new_data.z), *old_z_val,
+						 ACCEL_DELTA_Z);
 
 	if (sufficient_x || sufficient_y || sufficient_z) {
 		struct accel_event *event = new_accel_event();
@@ -163,14 +160,13 @@ static void temp_work_cb(struct k_work *work)
 	LOG_DBG("TEMP WORK CB");
 
 	/* Get latest registered temperature value */
-	lwm2m_engine_get_res_data(
-		LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID),
-		(void **)(&old_temp_val), &dummy_data_len, &dummy_data_flags);
+	lwm2m_engine_get_res_data(LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID),
+				  (void **)(&old_temp_val), &dummy_data_len, &dummy_data_flags);
 
 	env_sensor_read_temperature(&new_temp_val);
 
-	if (float32_sufficient_change(sensor_value_to_float32(new_temp_val),
-	*old_temp_val, TEMP_DELTA)) {
+	if (float32_sufficient_change(sensor_value_to_float32(new_temp_val), *old_temp_val,
+				      TEMP_DELTA)) {
 		struct sensor_event *event = new_sensor_event();
 
 		event->type = TemperatureSensor;
@@ -192,14 +188,13 @@ static void press_work_cb(struct k_work *work)
 	LOG_DBG("PRESS WORK CB");
 
 	/* Get latest registered pressure value */
-	lwm2m_engine_get_res_data(
-		LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID),
-		(void **)(&old_press_val), &dummy_data_len, &dummy_data_flags);
+	lwm2m_engine_get_res_data(LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID),
+				  (void **)(&old_press_val), &dummy_data_len, &dummy_data_flags);
 
 	env_sensor_read_pressure(&new_press_val);
 
-	if (float32_sufficient_change(sensor_value_to_float32(new_press_val),
-	*old_press_val, PRESS_DELTA)) {
+	if (float32_sufficient_change(sensor_value_to_float32(new_press_val), *old_press_val,
+				      PRESS_DELTA)) {
 		struct sensor_event *event = new_sensor_event();
 
 		event->type = PressureSensor;
@@ -221,14 +216,13 @@ static void humid_work_cb(struct k_work *work)
 	LOG_DBG("HUMID WORK CB");
 
 	/* Get latest registered humidity value */
-	lwm2m_engine_get_res_data(
-		LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID),
-		(void **)(&old_humid_val), &dummy_data_len, &dummy_data_flags);
+	lwm2m_engine_get_res_data(LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID),
+				  (void **)(&old_humid_val), &dummy_data_len, &dummy_data_flags);
 
 	env_sensor_read_humidity(&new_humid_val);
 
-	if (float32_sufficient_change(sensor_value_to_float32(new_humid_val),
-	*old_humid_val, HUMID_DELTA)) {
+	if (float32_sufficient_change(sensor_value_to_float32(new_humid_val), *old_humid_val,
+				      HUMID_DELTA)) {
 		struct sensor_event *event = new_sensor_event();
 
 		event->type = HumiditySensor;
@@ -250,14 +244,13 @@ static void gas_res_work_cb(struct k_work *work)
 	LOG_DBG("GAS RES WORK CB");
 
 	/* Get latest registered gas resistance value */
-	lwm2m_engine_get_res_data(
-		LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID),
-		(void **)(&old_gas_res_val), &dummy_data_len, &dummy_data_flags);
+	lwm2m_engine_get_res_data(LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID),
+				  (void **)(&old_gas_res_val), &dummy_data_len, &dummy_data_flags);
 
 	env_sensor_read_gas_resistance(&new_gas_res_val);
 
-	if (float32_sufficient_change(sensor_value_to_float32(new_gas_res_val),
-	*old_gas_res_val, GAS_RES_DELTA)) {
+	if (float32_sufficient_change(sensor_value_to_float32(new_gas_res_val), *old_gas_res_val,
+				      GAS_RES_DELTA)) {
 		struct sensor_event *event = new_sensor_event();
 
 		event->type = GasResistanceSensor;
@@ -269,8 +262,8 @@ static void gas_res_work_cb(struct k_work *work)
 	k_work_schedule(&gas_res_work, K_SECONDS(GAS_RES_PERIOD));
 }
 
-static bool rgbir_sufficient_change(uint32_t new_light_val,
-		uint32_t old_light_val, uint32_t req_change)
+static bool rgbir_sufficient_change(uint32_t new_light_val, uint32_t old_light_val,
+				    uint32_t req_change)
 {
 	uint8_t *new_val_ptr = (uint8_t *)(&new_light_val);
 	uint8_t *old_val_ptr = (uint8_t *)(&old_light_val);
@@ -282,12 +275,12 @@ static bool rgbir_sufficient_change(uint32_t new_light_val,
 		new_byte = *(new_val_ptr + i);
 		old_byte = *(old_val_ptr + i);
 
-		change |= (uint32_t)(fabs(new_byte - old_byte)) << 8*i;
+		change |= (uint32_t)(fabs(new_byte - old_byte)) << 8 * i;
 	}
 
 	/* Check if any of the colour channels has changed sufficiently */
 	for (int i = 0; i < 4; i++) {
-		if ((uint8_t)(change >> 8*i) > (uint8_t)(req_change >> 8*i)) {
+		if ((uint8_t)(change >> 8 * i) > (uint8_t)(req_change >> 8 * i)) {
 			return true;
 		}
 	}

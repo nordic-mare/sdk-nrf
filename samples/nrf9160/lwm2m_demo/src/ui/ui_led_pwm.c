@@ -11,24 +11,23 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(ui_led_pwm, CONFIG_UI_LOG_LEVEL);
 
-#define LED_PWM_NODE		DT_NODELABEL(pwm0)
-#define LED_PWM_PIN			DT_PROP(LED_PWM_NODE, ch0_pin)
-#define LED_PWM_FLAGS		DT_PWMS_FLAGS(LED_PWM_NODE)
-#define LED_PWM_DEV_LABEL	DT_LABEL(LED_PWM_NODE)
+#define LED_PWM_NODE DT_NODELABEL(pwm0)
+#define LED_PWM_PIN DT_PROP(LED_PWM_NODE, ch0_pin)
+#define LED_PWM_FLAGS DT_PWMS_FLAGS(LED_PWM_NODE)
+#define LED_PWM_DEV_LABEL DT_LABEL(LED_PWM_NODE)
 
-#define PERIOD_USEC			(USEC_PER_SEC / 100U)
+#define PERIOD_USEC (USEC_PER_SEC / 100U)
 
-#define INTENSITY_MAX		100U
+#define INTENSITY_MAX 100U
 
 static const struct device *led_pwm_dev;
 
 static uint8_t intensity;
 static bool state;
 
-
 static uint32_t calculate_pulse_width(uint8_t intensity)
 {
-	return PERIOD_USEC  * intensity / (INTENSITY_MAX);
+	return PERIOD_USEC * intensity / (INTENSITY_MAX);
 }
 
 int ui_led_pwm_on_off(bool new_state)
@@ -40,8 +39,8 @@ int ui_led_pwm_on_off(bool new_state)
 
 	pulse_width = calculate_pulse_width(intensity);
 
-	ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN,
-				PERIOD_USEC, pulse_width * state, LED_PWM_FLAGS);
+	ret = pwm_pin_set_usec(led_pwm_dev, LED_PWM_PIN, PERIOD_USEC, pulse_width * state,
+			       LED_PWM_FLAGS);
 	if (ret != 0) {
 		LOG_ERR("Error %d: set red pin failed", ret);
 		return ret;

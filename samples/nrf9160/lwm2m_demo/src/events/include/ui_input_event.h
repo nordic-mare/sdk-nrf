@@ -14,10 +14,7 @@
 extern "C" {
 #endif
 
-enum ui_input_type {
-	Button,
-	Switch
-};
+enum ui_input_type { Button, Switch };
 
 struct ui_input_event {
 	struct event_header header;

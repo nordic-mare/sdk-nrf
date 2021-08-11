@@ -34,23 +34,23 @@ LOG_MODULE_REGISTER(app_lwm2m_client, CONFIG_APP_LOG_LEVEL);
 #include "gps_module.h"
 
 #if !defined(CONFIG_LTE_LINK_CONTROL)
-#error "Missing CONFIG_LTE_LINK_CONTROL"
+#error  "Missing CONFIG_LTE_LINK_CONTROL"
 #endif
 
 BUILD_ASSERT(sizeof(CONFIG_APP_LWM2M_SERVER) > 1,
-		 "CONFIG_APP_LWM2M_SERVER must be set in prj.conf");
+	     "CONFIG_APP_LWM2M_SERVER must be set in prj.conf");
 
 #define APP_BANNER "Run LWM2M client"
 
-#define IMEI_LEN		15
-#define ENDPOINT_NAME_LEN	(IMEI_LEN + 8)
+#define IMEI_LEN 15
+#define ENDPOINT_NAME_LEN (IMEI_LEN + 8)
 
 #define LWM2M_SECURITY_PRE_SHARED_KEY 0
 #define LWM2M_SECURITY_RAW_PUBLIC_KEY 1
 #define LWM2M_SECURITY_CERTIFICATE 2
 #define LWM2M_SECURITY_NO_SEC 3
 
-static uint8_t endpoint_name[ENDPOINT_NAME_LEN+1];
+static uint8_t endpoint_name[ENDPOINT_NAME_LEN + 1];
 static uint8_t imei_buf[IMEI_LEN + 5]; /* account for /n/r */
 static struct lwm2m_ctx client;
 
@@ -60,8 +60,7 @@ static struct lwm2m_ctx client;
 
 static struct k_sem lwm2m_restart;
 
-static void rd_client_event(struct lwm2m_ctx *client,
-				enum lwm2m_rd_client_event client_event);
+static void rd_client_event(struct lwm2m_ctx *client, enum lwm2m_rd_client_event client_event);
 
 void client_acknowledge(void)
 {
@@ -97,8 +96,7 @@ static int query_modem(const char *cmd, char *buf, size_t buf_len)
 
 	ret = at_cmd_write(cmd, buf, buf_len, &at_state);
 	if (ret) {
-		LOG_ERR("at_cmd_write [%s] error:%d, at_state: %d",
-			cmd, ret, at_state);
+		LOG_ERR("at_cmd_write [%s] error:%d, at_state: %d", cmd, ret, at_state);
 		strncpy(buf, "error", buf_len);
 		return ret;
 	}
@@ -224,12 +222,10 @@ static void provision_psk(int instance)
 	uint16_t psk_len;
 	uint8_t flags;
 
-
 	/* Obtain identity. */
 	snprintk(pathstr, sizeof(pathstr), "0/%d/3", instance);
 
-	ret = lwm2m_engine_get_res_data(pathstr, (void **)&identity,
-					&identity_len, &flags);
+	ret = lwm2m_engine_get_res_data(pathstr, (void **)&identity, &identity_len, &flags);
 	if (ret < 0) {
 		LOG_ERR("Error %d: failed to obtain client identity", ret);
 		return;
@@ -238,8 +234,7 @@ static void provision_psk(int instance)
 	/* Obtain PSK. */
 	snprintk(pathstr, sizeof(pathstr), "0/%d/5", instance);
 
-	ret = lwm2m_engine_get_res_data(pathstr, (void **)&psk,
-					&psk_len, &flags);
+	ret = lwm2m_engine_get_res_data(pathstr, (void **)&psk, &psk_len, &flags);
 	if (ret < 0) {
 		LOG_ERR("Error %d: failed to obtain PSK", ret);
 		return;
@@ -255,21 +250,18 @@ static void provision_psk(int instance)
 	lwm2m_rd_client_stop(&client, rd_client_event);
 	lte_lc_offline();
 
-	ret = modem_key_mgmt_write(client.tls_tag,
-				   MODEM_KEY_MGMT_CRED_TYPE_PSK,
-				   psk_hex, psk_len);
+	ret = modem_key_mgmt_write(client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_PSK, psk_hex, psk_len);
 	if (ret < 0) {
-		LOG_ERR("Error %d: setting cred tag %d type %d failed",
-			ret, client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_PSK);
+		LOG_ERR("Error %d: setting cred tag %d type %d failed", ret, client.tls_tag,
+			MODEM_KEY_MGMT_CRED_TYPE_PSK);
 		goto exit;
 	}
 
-	ret = modem_key_mgmt_write(client.tls_tag,
-				   MODEM_KEY_MGMT_CRED_TYPE_IDENTITY,
-				   identity, identity_len);
+	ret = modem_key_mgmt_write(client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_IDENTITY, identity,
+				   identity_len);
 	if (ret < 0) {
-		LOG_ERR("Error %d: setting cred tag %d type %d failed",
-			ret, client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_IDENTITY);
+		LOG_ERR("Error %d: setting cred tag %d type %d failed", ret, client.tls_tag,
+			MODEM_KEY_MGMT_CRED_TYPE_IDENTITY);
 	}
 
 exit:
@@ -316,27 +308,23 @@ static void provision_credentials(void)
 static void date_time_event_handler(const struct date_time_evt *evt)
 {
 	switch (evt->type) {
-	case DATE_TIME_OBTAINED_MODEM:
-	{
+	case DATE_TIME_OBTAINED_MODEM: {
 		int64_t time = 0;
 
 		LOG_INF("Obtained date-time from modem");
 		date_time_now(&time);
-		lwm2m_engine_set_s32(
-				LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID),
-				(int32_t)(time/1000));
+		lwm2m_engine_set_s32(LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID),
+				     (int32_t)(time / 1000));
 		break;
 	}
 
-	case DATE_TIME_OBTAINED_NTP:
-	{
+	case DATE_TIME_OBTAINED_NTP: {
 		int64_t time = 0;
 
 		LOG_INF("Obtained date-time from NTP server");
 		date_time_now(&time);
-		lwm2m_engine_set_s32(
-				LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID),
-				(int32_t)(time/1000));
+		lwm2m_engine_set_s32(LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID),
+				     (int32_t)(time / 1000));
 		break;
 	}
 
@@ -349,11 +337,9 @@ static void date_time_event_handler(const struct date_time_evt *evt)
 	}
 }
 
-static void rd_client_event(struct lwm2m_ctx *client,
-				enum lwm2m_rd_client_event client_event)
+static void rd_client_event(struct lwm2m_ctx *client, enum lwm2m_rd_client_event client_event)
 {
 	switch (client_event) {
-
 	case LWM2M_RD_CLIENT_EVENT_NONE:
 		/* do nothing */
 		break;
@@ -381,9 +367,8 @@ static void rd_client_event(struct lwm2m_ctx *client,
 		/* Get current time and date */
 		date_time_update_async(date_time_event_handler);
 		/* Set lifetime */
-		lwm2m_engine_set_u32(
-				LWM2M_PATH(IPSO_OBJECT_SERVER_ID, 2, LIFETIME_RID),
-				CONFIG_LWM2M_ENGINE_DEFAULT_LIFETIME);
+		lwm2m_engine_set_u32(LWM2M_PATH(IPSO_OBJECT_SERVER_ID, 2, LIFETIME_RID),
+				     CONFIG_LWM2M_ENGINE_DEFAULT_LIFETIME);
 #if defined(CONFIG_APP_GPS)
 		start_gps_search();
 #endif
@@ -435,8 +420,7 @@ static void modem_connect(void)
 
 		ret = lte_lc_connect();
 		if (ret < 0) {
-			LOG_WRN("Failed to establish LTE connection (%d).",
-				ret);
+			LOG_WRN("Failed to establish LTE connection (%d).", ret);
 			LOG_WRN("Will retry in a minute.");
 			lte_lc_offline();
 			k_sleep(K_SECONDS(60));
@@ -449,7 +433,8 @@ static void modem_connect(void)
 void main(void)
 {
 	uint32_t flags = IS_ENABLED(CONFIG_LWM2M_RD_CLIENT_SUPPORT_BOOTSTRAP) ?
-					LWM2M_RD_CLIENT_FLAG_BOOTSTRAP : 0;
+				       LWM2M_RD_CLIENT_FLAG_BOOTSTRAP :
+				       0;
 	int ret;
 
 	LOG_INF(APP_BANNER);
@@ -505,20 +490,18 @@ void main(void)
 	}
 
 #if defined(CONFIG_LWM2M_DTLS_SUPPORT)
-	ret = modem_key_mgmt_write(client.tls_tag,
-				   MODEM_KEY_MGMT_CRED_TYPE_PSK,
-				   client_psk, strlen(client_psk));
+	ret = modem_key_mgmt_write(client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_PSK, client_psk,
+				   strlen(client_psk));
 	if (ret < 0) {
-		LOG_ERR("Error %d: setting cred tag %d type %d failed",
-			ret, client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_PSK);
+		LOG_ERR("Error %d: setting cred tag %d type %d failed", ret, client.tls_tag,
+			MODEM_KEY_MGMT_CRED_TYPE_PSK);
 	}
 
-	ret = modem_key_mgmt_write(client.tls_tag,
-				   MODEM_KEY_MGMT_CRED_TYPE_IDENTITY,
-				   endpoint_name, strlen(endpoint_name));
+	ret = modem_key_mgmt_write(client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_IDENTITY, endpoint_name,
+				   strlen(endpoint_name));
 	if (ret < 0) {
-		LOG_ERR("Error %d: setting cred tag %d type %d failed",
-			ret, client.tls_tag, MODEM_KEY_MGMT_CRED_TYPE_IDENTITY);
+		LOG_ERR("Error %d: setting cred tag %d type %d failed", ret, client.tls_tag,
+			MODEM_KEY_MGMT_CRED_TYPE_IDENTITY);
 	}
 #endif
 
@@ -539,8 +522,7 @@ void main(void)
 #endif
 
 	while (true) {
-		lwm2m_rd_client_start(&client, endpoint_name, flags,
-					  rd_client_event);
+		lwm2m_rd_client_start(&client, endpoint_name, flags, rd_client_event);
 
 		k_sem_take(&lwm2m_restart, K_FOREVER);
 
@@ -553,8 +535,7 @@ void main(void)
 		/* Try to reconnect to the network. */
 		ret = lte_lc_offline();
 		if (ret < 0) {
-			LOG_ERR("Error %d: failed to put LTE link in offline state",
-				ret);
+			LOG_ERR("Error %d: failed to put LTE link in offline state", ret);
 		}
 
 		modem_connect();
