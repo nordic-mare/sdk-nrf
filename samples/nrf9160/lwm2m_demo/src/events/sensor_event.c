@@ -8,10 +8,9 @@
 
 #include <stdio.h>
 
-static const char* sensor_type_to_string(enum sensor_type type)
+static const char *sensor_type_to_string(enum sensor_type type)
 {
-	switch (type)
-	{
+	switch (type) {
 	case TemperatureSensor:
 		return "Temperature sensor";
 
@@ -29,7 +28,7 @@ static const char* sensor_type_to_string(enum sensor_type type)
 
 	case ColourSensor:
 		return "Colour sensor";
-	
+
 	default:
 		return "";
 	}
@@ -40,9 +39,9 @@ static int log_sensor_event(const struct event_header *eh, char *buf,
 {
 	struct sensor_event *event = cast_sensor_event(eh);
 
-	return snprintf(buf, buf_len, 
+	return snprintf(buf, buf_len,
 			"%s sensor event: sensor_value: val1 = %d, val2 = %d; unsigned_value = %d",
-			sensor_type_to_string(event->type), event->sensor_value.val1, 
+			sensor_type_to_string(event->type), event->sensor_value.val1,
 			event->sensor_value.val2, event->unsigned_value);
 }
 

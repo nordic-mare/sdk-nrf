@@ -12,10 +12,10 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(ui_rgb_led_pwm, CONFIG_UI_LOG_LEVEL);
 
-#define RGB_PWM_NODE           		DT_ALIAS(rgb_pwm)
+#define RGB_PWM_NODE				DT_ALIAS(rgb_pwm)
 #define RGB_PWM_CHANNEL(channel)	DT_PROP(RGB_PWM_NODE, ch##channel##_pin)
-#define RGB_PWM_FLAGS               DT_PWMS_FLAGS(RGB_PWM_NODE)
-#define RGB_PWM_DEV_LABEL           DT_LABEL(RGB_PWM_NODE)
+#define RGB_PWM_FLAGS				DT_PWMS_FLAGS(RGB_PWM_NODE)
+#define RGB_PWM_DEV_LABEL			DT_LABEL(RGB_PWM_NODE)
 
 #define PERIOD_USEC	            (USEC_PER_SEC / 100U)
 
@@ -32,7 +32,7 @@ static bool state;
 
 static uint32_t calculate_pulse_width(uint8_t colour_val, uint8_t intensity)
 {
-	return PERIOD_USEC * colour_val * intensity 
+	return PERIOD_USEC * colour_val * intensity
 			/ (COLOUR_MAX * INTENSITY_MAX);
 }
 
@@ -47,19 +47,19 @@ int ui_rgb_led_pwm_on_off(bool new_state)
 	pulse_width_green = calculate_pulse_width(green_val, intensity);
 	pulse_width_blue = calculate_pulse_width(blue_val, intensity);
 
-	ret = pwm_pin_set_usec(rgb_pwm_dev, RGB_PWM_CHANNEL(0), 
+	ret = pwm_pin_set_usec(rgb_pwm_dev, RGB_PWM_CHANNEL(0),
 				PERIOD_USEC, pulse_width_red * state, RGB_PWM_FLAGS);
 	if (ret != 0) {
 		LOG_ERR("Error %d: set red pin failed", ret);
 		return ret;
 	}
-	ret = pwm_pin_set_usec(rgb_pwm_dev, RGB_PWM_CHANNEL(1), 
+	ret = pwm_pin_set_usec(rgb_pwm_dev, RGB_PWM_CHANNEL(1),
 				PERIOD_USEC, pulse_width_green * state, RGB_PWM_FLAGS);
 	if (ret != 0) {
 		LOG_ERR("Error %d: set green pin failed", ret);
 		return ret;
 	}
-	ret = pwm_pin_set_usec(rgb_pwm_dev, RGB_PWM_CHANNEL(2), 
+	ret = pwm_pin_set_usec(rgb_pwm_dev, RGB_PWM_CHANNEL(2),
 				PERIOD_USEC, pulse_width_blue * state, RGB_PWM_FLAGS);
 	if (ret != 0) {
 		LOG_ERR("Error %d: set blue pin failed", ret);
@@ -112,11 +112,11 @@ int ui_rgb_led_pwm_set_intensity(uint8_t new_intensity)
 
 int ui_rgb_led_pwm_init(void)
 {
-    rgb_pwm_dev = device_get_binding(RGB_PWM_DEV_LABEL);
+	rgb_pwm_dev = device_get_binding(RGB_PWM_DEV_LABEL);
 	if (!rgb_pwm_dev) {
 		LOG_ERR("Error %d: could not bind to RGB LED PWM device", -ENODEV);
 		return -ENODEV;
 	}
-    
+
 	return 0;
 }

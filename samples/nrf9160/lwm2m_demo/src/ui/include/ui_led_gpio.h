@@ -14,9 +14,9 @@ extern "C" {
 #endif
 
 /**
- * @brief Turn the LED on or off. If false the 
+ * @brief Turn the LED on or off. If false the
  * LEDs will be dark regardless of colour value.
- * 
+ *
  * @param new_state The LED's new state.
  * @return int 0 if successful, negative error code if not.
  */
@@ -24,7 +24,7 @@ int ui_led_gpio_on_off(uint8_t led_num, bool new_state);
 
 /**
  * @brief Initialize the LED to use GPIO.
- * 
+ *
  * @return int 0 if successful, negative error code if not.
  */
 int ui_led_gpio_init(void);

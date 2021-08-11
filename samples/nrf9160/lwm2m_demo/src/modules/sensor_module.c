@@ -23,10 +23,10 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
-#define IPSO_OBJECT_COLOUR_ID 	3335
-#define LIGHT_OBJ_INSTANCE_ID 	0
-#define COLOUR_OBJ_INSTANCE_ID  1
-#define RBG_STR_LEN				11	// '0xRRGGBBIR\0'
+#define IPSO_OBJECT_COLOUR_ID	3335
+#define LIGHT_OBJ_INSTANCE_ID	0
+#define COLOUR_OBJ_INSTANCE_ID	1
+#define RBG_STR_LEN				11	/* '0xRRGGBBIR\0' */
 
 #if defined(CONFIG_SENSOR_MODULE_ACCEL)
 #define ACCEL_STARTUP_DELAY		K_SECONDS(CONFIG_SENSOR_MODULE_ACCEL_STARTUP_DELAY)
@@ -45,7 +45,7 @@ static struct k_work_delayable accel_work;
 
 #if defined(CONFIG_SENSOR_MODULE_TEMP)
 #define TEMP_STARTUP_DELAY		K_SECONDS(CONFIG_SENSOR_MODULE_TEMP_STARTUP_DELAY)
-#define TEMP_PERIOD          	CONFIG_SENSOR_MODULE_TEMP_PERIOD
+#define TEMP_PERIOD				CONFIG_SENSOR_MODULE_TEMP_PERIOD
 #define TEMP_DELTA				((float32_value_t){ \
 								.val1 = CONFIG_SENSOR_MODULE_TEMP_DELTA_INT, \
 								.val2 = CONFIG_SENSOR_MODULE_TEMP_DELTA_DEC})
@@ -102,14 +102,14 @@ static struct k_work_delayable colour_work;
 #endif
 
 #if defined(CONFIG_SENSOR_MODULE_TEMP) || defined(CONFIG_SENSOR_MODULE_PRESS) || \
-    defined(CONFIG_SENSOR_MODULE_HUMID) || defined(CONFIG_SENSOR_MODULE_GAS_RES) || \
+	defined(CONFIG_SENSOR_MODULE_HUMID) || defined(CONFIG_SENSOR_MODULE_GAS_RES) || \
 	defined(CONFIG_SENSOR_MODULE_ACCEL)
 static double float32_to_double(float32_value_t *val)
 {
 	return (double)val->val1 + (double)val->val2 / 1000000;
 }
 
-static bool float32_sufficient_change(float32_value_t new_val, float32_value_t old_val, 
+static bool float32_sufficient_change(float32_value_t new_val, float32_value_t old_val,
 						float32_value_t req_change)
 {
 	double change = fabs(float32_to_double(&new_val) - float32_to_double(&old_val));
@@ -124,8 +124,11 @@ static float32_value_t sensor_value_to_float32(struct sensor_value val)
 {
 	return (float32_value_t){.val1 = val.val1, .val2 = val.val2};
 }
-#endif /* if defined(CONFIG_SENSOR_MODULE_TEMP) || defined(CONFIG_SENSOR_MODULE_PRESS) || \
-    		 defined(CONFIG_SENSOR_MODULE_HUMID) || defined(CONFIG_SENSOR_MODULE_GAS_RES) */
+#endif
+/*
+ * if defined(CONFIG_SENSOR_MODULE_TEMP) || defined(CONFIG_SENSOR_MODULE_PRESS) || \
+ * defined(CONFIG_SENSOR_MODULE_HUMID) || defined(CONFIG_SENSOR_MODULE_GAS_RES)
+ */
 
 #if defined(CONFIG_SENSOR_MODULE_ACCEL)
 static void accel_work_cb(struct k_work *work)
@@ -136,7 +139,7 @@ static void accel_work_cb(struct k_work *work)
 	uint16_t dummy_data_len;
 	uint8_t dummy_data_flags;
 	struct accelerometer_sensor_data new_data;
-	bool sufficient_x, sufficient_y, sufficient_z; 
+	bool sufficient_x, sufficient_y, sufficient_z;
 
 	LOG_DBG("ACCEL WORK CB");
 
@@ -170,7 +173,7 @@ static void accel_work_cb(struct k_work *work)
 #endif /* if defined(CONFIG_SENSOR_MODULE_ACCEL) */
 
 #if defined(CONFIG_SENSOR_MODULE_TEMP)
-static void temp_work_cb(struct k_work *work) 
+static void temp_work_cb(struct k_work *work)
 {
 	float32_value_t *old_temp_val;
 	uint16_t dummy_data_len;
@@ -178,7 +181,7 @@ static void temp_work_cb(struct k_work *work)
 	struct sensor_value new_temp_val;
 
 	LOG_DBG("TEMP WORK CB");
-	
+
 	/* Get latest registered temperature value */
 	lwm2m_engine_get_res_data(
 		LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID),
@@ -404,7 +407,7 @@ int sensor_module_init(void)
 	k_work_init_delayable(&press_work, press_work_cb);
 	k_work_schedule(&press_work, PRESS_STARTUP_DELAY);
 #endif
-	
+
 #if defined(CONFIG_SENSOR_MODULE_HUMID)
 	k_work_init_delayable(&humid_work, humid_work_cb);
 	k_work_schedule(&humid_work, HUMID_STARTUP_DELAY);
@@ -426,4 +429,4 @@ int sensor_module_init(void)
 #endif
 
 	return 0;
-} 
+}

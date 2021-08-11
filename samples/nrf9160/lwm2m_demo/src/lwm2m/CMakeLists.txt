@@ -36,6 +36,6 @@ target_sources_ifdef(CONFIG_LWM2M_APP_HUMID_SENSOR
 
 target_sources_ifdef(CONFIG_LWM2M_APP_GAS_RES_SENSOR
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_gas_res_sensor.c)
-	
+
 target_sources_ifdef(CONFIG_LWM2M_APP_ACCELEROMETER
 	app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_accelerometer.c)

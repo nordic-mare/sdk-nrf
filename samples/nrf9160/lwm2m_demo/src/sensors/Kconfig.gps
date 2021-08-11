@@ -1,4 +1,4 @@
-# 
+#
 # Copyright (c) 2021 Nordic Semiconductor ASA
 #
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
@@ -7,7 +7,7 @@
 config GPS
 	bool
 	help
-        Enable GPS
+		Enable GPS
 
 if GPS
 choice
@@ -62,6 +62,6 @@ config GPS_SEARCH_TIMEOUT_TIME
 	default 270
 	depends on GPS
 	help
-		Length of time the GPS can spend looking for a fix in seconds. 
+		Length of time the GPS can spend looking for a fix in seconds.
 		In areas with poor connection, this should be increased.
 endif #GPS

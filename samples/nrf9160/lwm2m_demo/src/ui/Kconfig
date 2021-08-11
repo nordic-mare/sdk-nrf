@@ -10,14 +10,14 @@ visible if FALSE # Hide menu
 config UI_LED
 	bool
 	help
-		Enable LEDs. 
+		Enable LEDs.
 
 config UI_BUZZER
 	bool
 	select PWM
 	select PWM_1
 	help
-		If enabled, a buzzer will be controllable with PWM. 
+		If enabled, a buzzer will be controllable with PWM.
 
 
 config UI_INPUT
@@ -25,11 +25,11 @@ config UI_INPUT
 	select DK_LIBRARY
 	select DK_LIBRARY_INVERT_LEDS
 	help
-		Enable switches and buttons. 
+		Enable switches and buttons.
 
 
 config UI_SENSE_LED
-	bool 
+	bool
 	help
 		Enables the sense LEDs available on the Thingy:91.
 

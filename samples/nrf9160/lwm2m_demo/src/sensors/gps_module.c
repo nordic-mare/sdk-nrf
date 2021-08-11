@@ -31,48 +31,54 @@ static void gps_event_handler(const struct device *dev, struct gps_event *evt)
 {
 	ARG_UNUSED(dev);
 	static uint32_t timestamp_prev;
-	switch (evt->type)
+
+	switch (evt->type) {
+	case GPS_EVT_SEARCH_STARTED:
+		LOG_DBG("GPS search started");
+		break;
+	case GPS_EVT_SEARCH_STOPPED:
+		LOG_DBG("GPS search stopped");
+		break;
+	case GPS_EVT_SEARCH_TIMEOUT:
+		LOG_DBG("GPS search timed out");
+		gps_cfg.priority = false;
+		break;
+	case GPS_EVT_PVT:
+		break;
+	case GPS_EVT_PVT_FIX:
 	{
-		case GPS_EVT_SEARCH_STARTED:
-			LOG_DBG("GPS search started");
+		if (k_uptime_get_32() - timestamp_prev < CONFIG_APP_GPS_HOLD_TIME * MSEC_PER_SEC) {
 			break;
-		case GPS_EVT_SEARCH_STOPPED:
-			LOG_DBG("GPS search stopped");
-			break;
-		case GPS_EVT_SEARCH_TIMEOUT:
-			LOG_DBG("GPS search timed out");
-			gps_cfg.priority = false;
-			break;
-		case GPS_EVT_PVT:
-			break;
-		case GPS_EVT_PVT_FIX:
-			if (k_uptime_get_32() - timestamp_prev < CONFIG_APP_GPS_HOLD_TIME * MSEC_PER_SEC) {
-				break;
-			}
-			LOG_DBG("Recieved PVT Fix. GPS search completed.");
-			memcpy(&pvt_data, &evt->pvt, sizeof(struct gps_pvt));
-            struct app_gps_event *event = new_app_gps_event();
-            event->pvt = pvt_data;
-            EVENT_SUBMIT(event);
-			gps_cfg.priority = false;
-			timestamp_prev = k_uptime_get_32();
-			break;
-		case GPS_EVT_NMEA:
-			break;
-		case GPS_EVT_NMEA_FIX:
-			break;
-		case GPS_EVT_OPERATION_BLOCKED:
-			LOG_DBG("GPS search blocked");
-			break;
-		case GPS_EVT_OPERATION_UNBLOCKED:
-			LOG_DBG("GPS unblocked. Resuming search.");
-			break;
-		case GPS_EVT_AGPS_DATA_NEEDED:
-			LOG_DBG("GPS requests AGPS Data. AGPS is not implemented.");
-			break;
-		case GPS_EVT_ERROR:
-			LOG_DBG("GPS error occured");
-			break;	
+		}
+		LOG_DBG("Recieved PVT Fix. GPS search completed.");
+		struct app_gps_event *event = new_app_gps_event();
+
+		memcpy(&pvt_data, &evt->pvt, sizeof(struct gps_pvt));
+		event->pvt = pvt_data;
+		EVENT_SUBMIT(event);
+
+		gps_cfg.priority = false;
+		timestamp_prev = k_uptime_get_32();
+		break;
+	}
+	case GPS_EVT_NMEA:
+		break;
+	case GPS_EVT_NMEA_FIX:
+		break;
+	case GPS_EVT_OPERATION_BLOCKED:
+		LOG_DBG("GPS search blocked");
+		break;
+	case GPS_EVT_OPERATION_UNBLOCKED:
+		LOG_DBG("GPS unblocked. Resuming search.");
+		break;
+	case GPS_EVT_AGPS_DATA_NEEDED:
+		LOG_DBG("GPS requests AGPS Data. AGPS is not implemented.");
+		break;
+	case GPS_EVT_ERROR:
+		LOG_DBG("GPS error occured");
+		break;
+	default:
+		break;
 	}
 }
 
@@ -98,9 +104,10 @@ int initialise_gps(void)
 	return 0;
 }
 
-int start_gps_search(void) 
+int start_gps_search(void)
 {
 	int err;
+
 	err = gps_start(gps_dev, &gps_cfg);
 	if (err) {
 		LOG_ERR("Could not start GPS, error code : %d", err);

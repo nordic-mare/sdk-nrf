@@ -22,7 +22,7 @@ LOG_MODULE_REGISTER(ui_buzzer, CONFIG_UI_LOG_LEVEL);
 #define INTENSITY_MAX			100
 
 /* Affects curvature of pulse width graph */
-#define CURVE_CONST				50						
+#define CURVE_CONST				50
 
 static const struct device *buzzer_pwm_dev;
 
@@ -32,22 +32,24 @@ static bool state;
 
 /**
  * @brief Calculate pulse width.
- * 
+ *
  * Perceived sound level is logarithmic with respect to the pulse width.
  * This transformation is exponential to try to get a linear relationship
  * between intensity and perceived sound level.
- * 
+ *
  * Designed to achieve pulse width = 0 with intensity = 0,
  * and pulse width = period/2 with intensity = 100.
- * 
+ *
  * @param period Period in microseconds.
  * @param intensity Integer between [0, 100], describing
  * a percentage of the maximum buzzer volume intensity.
  * @return uint32_t Pulse width in microseconds.
  */
-static uint32_t calculate_pulse_width(int32_t period, int32_t intensity) {
+static uint32_t calculate_pulse_width(int32_t period, int32_t intensity)
+{
 	int32_t divisor = CURVE_CONST + ((2 - CURVE_CONST) * intensity) / INTENSITY_MAX;
 	int32_t offset = (period * (INTENSITY_MAX - intensity)) / (CURVE_CONST * INTENSITY_MAX);
+
 	return (uint32_t)(period/divisor - offset);
 }
 
@@ -65,6 +67,7 @@ int ui_buzzer_on_off(bool new_state)
 	} else {
 		uint32_t period = PERIOD(frequency);
 		uint32_t pulse_width = calculate_pulse_width(period, intensity);
+
 		ret = pwm_pin_set_usec(buzzer_pwm_dev, BUZZER_PWM_PIN,
 					period, pulse_width * state, BUZZER_PWM_FLAGS);
 	}
@@ -95,7 +98,7 @@ int ui_buzzer_set_frequency(uint32_t freq)
 			return ret;
 		}
 	}
-	
+
 	return 0;
 }
 

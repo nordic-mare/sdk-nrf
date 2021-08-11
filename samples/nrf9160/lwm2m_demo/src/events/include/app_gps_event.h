@@ -16,9 +16,9 @@ extern "C" {
 #endif
 
 struct app_gps_event {
-    struct event_header header;
+	struct event_header header;
 
-    struct gps_pvt pvt;
+	struct gps_pvt pvt;
 };
 
 EVENT_TYPE_DECLARE(app_gps_event);

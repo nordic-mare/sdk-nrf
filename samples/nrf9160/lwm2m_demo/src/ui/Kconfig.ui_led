@@ -1,4 +1,4 @@
-# 
+#
 # Copyright (c) 2021 Nordic Semiconductor ASA
 #
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
@@ -14,7 +14,7 @@ choice
 
 config UI_LED_USE_PWM
 	bool "Use PWM to control LEDs"
-	select PWM 
+	select PWM
 	select PWM_0
 	help
 		If enabled, LEDs will be controlled with PWM.
@@ -22,6 +22,6 @@ config UI_LED_USE_PWM
 config UI_LED_USE_GPIO
 	bool "Use GPIO to control LEDs"
 	help
-		If enabled, LEDs will be controlled with GPIO. 
+		If enabled, LEDs will be controlled with GPIO.
 endchoice # LED device
 endif # UI_LED

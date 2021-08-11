@@ -16,7 +16,7 @@ extern "C" {
  * @brief Initialize the dk_buttons_and_leds library
  * with a callback function that submits a ui input event
  * when a input device's state changes.
- * 
+ *
  * @return int 0 if successful, negative error code if not.
  */
 int ui_input_init(void);

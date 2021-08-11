@@ -26,7 +26,7 @@ int ui_rgb_led_gpio_on_off(bool new_state)
 	int ret;
 
 	state = new_state;
-	
+
 	ret = gpio_pin_set(rgb_gpio_dev, RGB_GPIO_PIN(red_led), state * red_val);
 	if (ret) {
 		LOG_ERR("Error %d: set red pin failed", ret);
@@ -67,7 +67,7 @@ int ui_rgb_led_gpio_set_colour(uint32_t colour_values)
 
 int ui_rgb_led_gpio_init(void)
 {
-    int ret;
+	int ret;
 
 	rgb_gpio_dev = device_get_binding(RGB_GPIO_DEV_LABEL);
 	if (!rgb_gpio_dev) {
@@ -75,19 +75,19 @@ int ui_rgb_led_gpio_init(void)
 		return -ENODEV;
 	}
 
-	ret = gpio_pin_configure(rgb_gpio_dev, RGB_GPIO_PIN(red_led), 
+	ret = gpio_pin_configure(rgb_gpio_dev, RGB_GPIO_PIN(red_led),
 					RGB_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
 		LOG_ERR("Error %d: configure red pin failed", ret);
 		return ret;
 	}
-	ret = gpio_pin_configure(rgb_gpio_dev, RGB_GPIO_PIN(green_led), 
+	ret = gpio_pin_configure(rgb_gpio_dev, RGB_GPIO_PIN(green_led),
 					RGB_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
 		LOG_ERR("Error %d: configure green pin failed", ret);
 		return ret;
-	}                            
-	ret = gpio_pin_configure(rgb_gpio_dev, RGB_GPIO_PIN(blue_led), 
+	}
+	ret = gpio_pin_configure(rgb_gpio_dev, RGB_GPIO_PIN(blue_led),
 					RGB_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
 		LOG_ERR("Error %d: configure blue pin failed", ret);

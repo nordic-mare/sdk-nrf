@@ -40,7 +40,7 @@ LOG_MODULE_REGISTER(app_ipso_colour_sensor, CONFIG_LWM2M_LOG_LEVEL);
 
 #define SENSOR_NAME "Colour"
 
-static char colour[MAX_INSTANCE_COUNT][COLOUR_STR_MAX_SIZE]; 
+static char colour[MAX_INSTANCE_COUNT][COLOUR_STR_MAX_SIZE];
 static char units[MAX_INSTANCE_COUNT][UNIT_STR_MAX_SIZE];
 static char app_type[MAX_INSTANCE_COUNT][APP_TYPE_STR_MAX_SIZE];
 
@@ -122,7 +122,7 @@ static struct lwm2m_engine_obj_inst *colour_sensor_create(uint16_t obj_inst_id)
 	return &inst[index];
 }
 
-static int ipso_colour_sensor_init()
+static int ipso_colour_sensor_init(void)
 {
 	sensor.obj_id = IPSO_OBJECT_COLOUR_ID;
 	sensor.version_major = COLOUR_VERSION_MAJOR;

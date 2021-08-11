@@ -20,6 +20,7 @@ static const struct device *sense_led_gpio_dev;
 int ui_sense_led_on_off(bool new_state)
 {
 	int ret;
+
 	ret = gpio_pin_set(sense_led_gpio_dev, SENSE_GPIO_PIN(sense_red_led), new_state);
 	if (ret) {
 		LOG_ERR("Error %d: set red pin failed", ret);
@@ -48,19 +49,19 @@ int ui_sense_led_init(void)
 		return -ENODEV;
 	}
 
-	ret = gpio_pin_configure(sense_led_gpio_dev, SENSE_GPIO_PIN(sense_red_led), 
+	ret = gpio_pin_configure(sense_led_gpio_dev, SENSE_GPIO_PIN(sense_red_led),
 					SENSE_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
 		LOG_ERR("Error %d: configure red pin failed", ret);
 		return ret;
 	}
-	ret = gpio_pin_configure(sense_led_gpio_dev, SENSE_GPIO_PIN(sense_green_led), 
+	ret = gpio_pin_configure(sense_led_gpio_dev, SENSE_GPIO_PIN(sense_green_led),
 					SENSE_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
 		LOG_ERR("Error %d: configure green pin failed", ret);
 		return ret;
 	}
-	ret = gpio_pin_configure(sense_led_gpio_dev, SENSE_GPIO_PIN(sense_blue_led), 
+	ret = gpio_pin_configure(sense_led_gpio_dev, SENSE_GPIO_PIN(sense_blue_led),
 					SENSE_GPIO_FLAGS | GPIO_OUTPUT_INACTIVE);
 	if (ret) {
 		LOG_ERR("Error %d: configure blue pin failed", ret);

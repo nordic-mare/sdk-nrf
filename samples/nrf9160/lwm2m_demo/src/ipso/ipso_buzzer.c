@@ -8,7 +8,8 @@
  * http://www.openmobilealliance.org/tech/profiles/lwm2m/3338.xml
  */
 
-/* This file exists due to an error in zephyrs handling of receiving floats over lwm2m.
+/*
+ * This file exists due to an error in zephyrs handling of receiving floats over lwm2m.
  * The lwm2m standard does not specify what size a float has to be, and allows it to
  * wary across implementations. Coiote has decided that all floats are 64 bit whereas
  * zephyr has made 32 and 64 bit floats distinct types and expects that all floats that
@@ -248,11 +249,8 @@ static struct lwm2m_engine_obj_inst *buzzer_create(uint16_t obj_inst_id)
 	LOG_DBG("Create IPSO Buzzer instance: %d", obj_inst_id);
 #endif
 
-
 	inst[avail].resources = res[avail];
 	inst[avail].resource_count = i;
-
-	
 
 	return &inst[avail];
 }

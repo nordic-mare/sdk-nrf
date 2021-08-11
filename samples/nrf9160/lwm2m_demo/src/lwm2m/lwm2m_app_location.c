@@ -17,21 +17,26 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
-static float32_value_t float_to_lwm2m_float(float val) {
+static float32_value_t float_to_lwm2m_float(float val)
+{
 	float32_value_t out;
+
 	out.val1 = (int32_t) val;
 	out.val2 = (int32_t) ((out.val1 - val) * LWM2M_FLOAT32_DEC_MAX);
 	return out;
 }
 
-static float32_value_t double_to_lwm2m_float(double val) {
+static float32_value_t double_to_lwm2m_float(double val)
+{
 	float32_value_t out;
+
 	out.val1 = (int32_t) val;
 	out.val2 = (int32_t) ((out.val1 - val) * LWM2M_FLOAT32_DEC_MAX);
 	return out;
 }
 
-static bool event_handler(const struct event_header *eh) {
+static bool event_handler(const struct event_header *eh)
+{
 	if (is_app_gps_event(eh)) {
 		struct app_gps_event *event = cast_app_gps_event(eh);
 
@@ -49,7 +54,7 @@ static bool event_handler(const struct event_header *eh) {
 
 		return true;
 	}
-	
+
 	return false;
 }
 

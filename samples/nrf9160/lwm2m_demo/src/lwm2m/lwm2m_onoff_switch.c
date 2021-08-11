@@ -35,7 +35,7 @@ static void set_timestamp(uint16_t obj_inst_id)
 	lwm2m_engine_get_s32(
 			LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), &ts);
 
-	snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u/%d", 
+	snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u/%d",
 			IPSO_OBJECT_ONOFF_SWITCH_ID, obj_inst_id, TIMESTAMP_RID);
 
 	lwm2m_engine_set_s32(path, ts);
@@ -53,7 +53,7 @@ int lwm2m_init_onoff_switch(void)
 			SWITCH1_APP_NAME, sizeof(SWITCH1_APP_NAME), LWM2M_RES_DATA_FLAG_RO);
 #if defined(CONFIG_LWM2M_IPSO_ONOFF_SWITCH_VERSION_1_1)
 	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWICTH1_OBJ_INST_ID, TIMESTAMP_RID), 
+			LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWICTH1_OBJ_INST_ID, TIMESTAMP_RID),
 			&timestamp_switch1, sizeof(timestamp_switch1), LWM2M_RES_DATA_FLAG_RW);
 #endif
 
@@ -64,7 +64,7 @@ int lwm2m_init_onoff_switch(void)
 			SWITCH2_APP_NAME, sizeof(SWITCH2_APP_NAME), LWM2M_RES_DATA_FLAG_RO);
 #if defined(CONFIG_LWM2M_IPSO_ONOFF_SWITCH_VERSION_1_1)
 	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWITCH2_OBJ_INST_ID, TIMESTAMP_RID), 
+			LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWITCH2_OBJ_INST_ID, TIMESTAMP_RID),
 			&timestamp_switch2, sizeof(timestamp_switch2), LWM2M_RES_DATA_FLAG_RW);
 #endif
 
@@ -84,7 +84,7 @@ static bool event_handler(const struct event_header *eh)
 		switch (event->device_number) {
 		case 1:
 			lwm2m_engine_set_bool(
-				LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWICTH1_OBJ_INST_ID, DIGITAL_INPUT_STATE_RID), 
+				LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWICTH1_OBJ_INST_ID, DIGITAL_INPUT_STATE_RID),
 				event->state);
 
 #if defined(CONFIG_LWM2M_IPSO_ONOFF_SWITCH_VERSION_1_1)
@@ -94,7 +94,7 @@ static bool event_handler(const struct event_header *eh)
 
 		case 2:
 			lwm2m_engine_set_bool(
-				LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWITCH2_OBJ_INST_ID, DIGITAL_INPUT_STATE_RID), 
+				LWM2M_PATH(IPSO_OBJECT_ONOFF_SWITCH_ID, SWITCH2_OBJ_INST_ID, DIGITAL_INPUT_STATE_RID),
 				event->state);
 
 #if defined(CONFIG_LWM2M_IPSO_ONOFF_SWITCH_VERSION_1_1)

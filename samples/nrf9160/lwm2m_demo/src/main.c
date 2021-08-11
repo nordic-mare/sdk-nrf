@@ -315,26 +315,27 @@ static void provision_credentials(void)
 
 static void date_time_event_handler(const struct date_time_evt *evt)
 {
-	switch (evt->type)
-	{
+	switch (evt->type) {
 	case DATE_TIME_OBTAINED_MODEM:
 	{
-		LOG_INF("Obtained date-time from modem");
 		int64_t time = 0;
+
+		LOG_INF("Obtained date-time from modem");
 		date_time_now(&time);
 		lwm2m_engine_set_s32(
-				LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), 
+				LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID),
 				(int32_t)(time/1000));
 		break;
 	}
 
 	case DATE_TIME_OBTAINED_NTP:
 	{
-		LOG_INF("Obtained date-time from NTP server");
 		int64_t time = 0;
+
+		LOG_INF("Obtained date-time from NTP server");
 		date_time_now(&time);
 		lwm2m_engine_set_s32(
-				LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), 
+				LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID),
 				(int32_t)(time/1000));
 		break;
 	}
@@ -342,7 +343,7 @@ static void date_time_event_handler(const struct date_time_evt *evt)
 	case DATE_TIME_NOT_OBTAINED:
 		LOG_INF("Could not obtain date-time update");
 		break;
-	
+
 	default:
 		break;
 	}
@@ -458,7 +459,7 @@ void main(void)
 	ret = event_manager_init();
 	if (ret) {
 		LOG_ERR("Error %d: unable to init event manager", ret);
-		return;	
+		return;
 	}
 
 	ret = fota_settings_init();
