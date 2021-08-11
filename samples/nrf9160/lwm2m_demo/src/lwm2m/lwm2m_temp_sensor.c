@@ -54,9 +54,7 @@ static void *temperature_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 			lwm2m_set_timestamp(IPSO_OBJECT_TEMP_SENSOR_ID, obj_inst_id);
 		}
 
-		new_temp_float.val1 = temp_val.val1;
-		new_temp_float.val2 = temp_val.val2;
-
+		new_temp_float = sensor_value_to_float32(temp_val);
 		lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID),
 				&new_temp_float);
@@ -133,9 +131,7 @@ static bool event_handler(const struct event_header *eh)
 				lwm2m_set_timestamp(IPSO_OBJECT_TEMP_SENSOR_ID, 0);
 			}
 
-			received_value.val1 = event->sensor_value.val1;
-			received_value.val2 = event->sensor_value.val2;
-
+			received_value = sensor_value_to_float32(event->sensor_value);
 			lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID),
 				&received_value);

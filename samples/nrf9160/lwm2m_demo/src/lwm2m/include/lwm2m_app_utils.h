@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+#include <zephyr.h>
+#include <net/lwm2m.h>
+#include <drivers/sensor.h>
+
 #ifndef LWM2M_APP_UTILS_H__
 #define LWM2M_APP_UTILS_H__
 
@@ -51,5 +55,10 @@ void lwm2m_set_timestamp(int ipso_obj_id, unsigned int obj_inst_id);
 
 /* Check whether notification read callback or regular read callback */
 bool is_regular_read_cb(int64_t read_timestamp);
+
+float32_value_t double_to_float32(double val);
+float32_value_t sensor_value_to_float32(struct sensor_value val);
+
+double float32_to_double(float32_value_t val);
 
 #endif /* LWM2M_APP_UTILS_H__ */

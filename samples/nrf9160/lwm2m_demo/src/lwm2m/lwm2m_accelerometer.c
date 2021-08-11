@@ -77,13 +77,11 @@ static void *accel_x_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 
 		accel_read_timestamp[0] = k_uptime_get();
 
-	if (IS_ENABLED(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)) {
-		lwm2m_set_timestamp(IPSO_OBJECT_ACCELEROMETER_ID, obj_inst_id);
-	}
+		if (IS_ENABLED(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)) {
+			lwm2m_set_timestamp(IPSO_OBJECT_ACCELEROMETER_ID, obj_inst_id);
+		}
 
-		new_x_val.val1 = accel_data.x.val1;
-		new_x_val.val2 = accel_data.x.val2;
-
+		new_x_val = sensor_value_to_float32(accel_data.x);
 		lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, X_VALUE_RID),
 				&new_x_val);
@@ -116,9 +114,7 @@ static void *accel_y_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 			lwm2m_set_timestamp(IPSO_OBJECT_ACCELEROMETER_ID, obj_inst_id);
 		}
 
-		new_y_val.val1 = accel_data.y.val1;
-		new_y_val.val2 = accel_data.y.val2;
-
+		new_y_val = sensor_value_to_float32(accel_data.y);
 		lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Y_VALUE_RID),
 				&new_y_val);
@@ -151,9 +147,7 @@ static void *accel_z_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 			lwm2m_set_timestamp(IPSO_OBJECT_ACCELEROMETER_ID, obj_inst_id);
 		}
 
-		new_z_val.val1 = accel_data.z.val1;
-		new_z_val.val2 = accel_data.z.val2;
-
+		new_z_val = sensor_value_to_float32(accel_data.z);
 		lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Z_VALUE_RID),
 				&new_z_val);
@@ -228,7 +222,6 @@ int lwm2m_init_accel(void)
 	return 0;
 }
 
-
 static bool event_handler(const struct event_header *eh)
 {
 	if (is_accel_event(eh)) {
@@ -248,20 +241,17 @@ static bool event_handler(const struct event_header *eh)
 					event->data.y.val1, event->data.y.val2,
 					event->data.z.val1, event->data.z.val2);
 
-		received_value.val1 = event->data.x.val1;
-		received_value.val2 = event->data.x.val2;
+		received_value = sensor_value_to_float32(event->data.x);
 		lwm2m_engine_set_float32(
 			LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, X_VALUE_RID),
 			&received_value);
 
-		received_value.val1 = event->data.y.val1;
-		received_value.val2 = event->data.y.val2;
+		received_value = sensor_value_to_float32(event->data.y);
 		lwm2m_engine_set_float32(
 			LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Y_VALUE_RID),
 			&received_value);
 
-		received_value.val1 = event->data.z.val1;
-		received_value.val2 = event->data.z.val2;
+		received_value = sensor_value_to_float32(event->data.z);
 		lwm2m_engine_set_float32(
 			LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, Z_VALUE_RID),
 			&received_value);

@@ -17,34 +17,16 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
-static float32_value_t float_to_lwm2m_float(float val)
-{
-	float32_value_t out;
-
-	out.val1 = (int32_t) val;
-	out.val2 = (int32_t) ((out.val1 - val) * LWM2M_FLOAT32_DEC_MAX);
-	return out;
-}
-
-static float32_value_t double_to_lwm2m_float(double val)
-{
-	float32_value_t out;
-
-	out.val1 = (int32_t) val;
-	out.val2 = (int32_t) ((out.val1 - val) * LWM2M_FLOAT32_DEC_MAX);
-	return out;
-}
-
 static bool event_handler(const struct event_header *eh)
 {
 	if (is_app_gps_event(eh)) {
 		struct app_gps_event *event = cast_app_gps_event(eh);
 
-		float32_value_t latitude = double_to_lwm2m_float(event->pvt.latitude);
-		float32_value_t longitude = double_to_lwm2m_float(event->pvt.longitude);
-		float32_value_t altitude = float_to_lwm2m_float(event->pvt.altitude);
-		float32_value_t speed = float_to_lwm2m_float(event->pvt.speed);
-		float32_value_t radius = float_to_lwm2m_float(event->pvt.accuracy);
+		float32_value_t latitude = double_to_float32(event->pvt.latitude);
+		float32_value_t longitude = double_to_float32(event->pvt.longitude);
+		float32_value_t altitude = double_to_float32(event->pvt.altitude);
+		float32_value_t speed = double_to_float32(event->pvt.speed);
+		float32_value_t radius = double_to_float32(event->pvt.accuracy);
 
 		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, LATITUDE_RID), &latitude);
 		lwm2m_engine_set_float32(LWM2M_PATH(LWM2M_OBJECT_LOCATION_ID, 0, LONGITUDE_RID), &longitude);

@@ -55,9 +55,7 @@ static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 			lwm2m_set_timestamp(IPSO_OBJECT_GENERIC_SENSOR_ID, 0);
 		}
 
-		new_gas_res_float.val1 = gas_res_val.val1;
-		new_gas_res_float.val2 = gas_res_val.val2;
-
+		new_gas_res_float = sensor_value_to_float32(gas_res_val);
 		lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID),
 				&new_gas_res_float);
@@ -136,9 +134,7 @@ static bool event_handler(const struct event_header *eh)
 				lwm2m_set_timestamp(IPSO_OBJECT_GENERIC_SENSOR_ID, 0);
 			}
 
-			received_value.val1 = event->sensor_value.val1;
-			received_value.val2 = event->sensor_value.val2;
-
+			received_value = sensor_value_to_float32(event->sensor_value);
 			lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID),
 				&received_value);

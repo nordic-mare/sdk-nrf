@@ -11,6 +11,8 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include "lwm2m_app_utils.h"
+
 #include "accelerometer.h"
 #include "accel_event.h"
 
@@ -88,26 +90,16 @@ static struct k_work_delayable gas_res_work;
 static struct k_work_delayable light_work;
 static struct k_work_delayable colour_work;
 
-static double float32_to_double(float32_value_t *val)
-{
-	return (double)val->val1 + (double)val->val2 / 1000000;
-}
-
 static bool float32_sufficient_change(float32_value_t new_val,
 		float32_value_t old_val, float32_value_t req_change)
 {
 	double change;
 
-	change = fabs(float32_to_double(&new_val) - float32_to_double(&old_val));
-	if (change > float32_to_double(&req_change)) {
+	change = fabs(float32_to_double(new_val) - float32_to_double(old_val));
+	if (change > float32_to_double(req_change)) {
 		return true;
 	}
 	return false;
-}
-
-static float32_value_t sensor_value_to_float32(struct sensor_value val)
-{
-	return (float32_value_t){.val1 = val.val1, .val2 = val.val2};
 }
 
 static void accel_work_cb(struct k_work *work)

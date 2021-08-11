@@ -54,9 +54,7 @@ static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 			lwm2m_set_timestamp(IPSO_OBJECT_PRESSURE_ID, obj_inst_id);
 		}
 
-		new_press_float.val1 = press_val.val1;
-		new_press_float.val2 = press_val.val2;
-
+		new_press_float = sensor_value_to_float32(press_val);
 		lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID),
 				&new_press_float);
@@ -132,9 +130,7 @@ static bool event_handler(const struct event_header *eh)
 				lwm2m_set_timestamp(IPSO_OBJECT_PRESSURE_ID, 0);
 			}
 
-			received_value.val1 = event->sensor_value.val1;
-			received_value.val2 = event->sensor_value.val2;
-
+			received_value = sensor_value_to_float32(event->sensor_value);
 			lwm2m_engine_set_float32(
 				LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID),
 				&received_value);
