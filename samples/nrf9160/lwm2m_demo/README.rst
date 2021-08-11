@@ -16,7 +16,7 @@ nRF9160: LwM2M Demo
      :local:
      :depth: 2
 
-The LwM2M Demo demonstrates usage of the Lightweight Machine to Machine (LwM2M) 
+The LwM2M Demo demonstrates usage of the Lightweight Machine to Machine (LwM2M)
 protocol to connect a Thingy:91 or an nRF9160 DK to an LwM2M server via LTE.
 
 .. _Requirements:
@@ -29,18 +29,18 @@ The sample supports the following development kits:
    :header: heading
    :rows: thingy91_nrf9160ns, nrf9160dk_nrf9160ns
 
-The sample requires an activated sim card, and an LwM2M server such as 
+The sample requires an activated sim card, and an LwM2M server such as
 `Leshan Demo Server`_ or `Coiote Device Management`_.
 
 Overview
 ********
 
 LwM2M is an application layer protocol based on CoAP/UDP.
-It is designed to expose various resources for reading, writing and executing 
+It is designed to expose various resources for reading, writing and executing
 via an LwM2M server in a very lightweight environment.
-The client sends data such as button and switch states, accelerometer data, 
+The client sends data such as button and switch states, accelerometer data,
 temperature and GPS position to the LWM2M server.
-It can also receive activation commands such as buzzer activation and light 
+It can also receive activation commands such as buzzer activation and light
 control.
 
 The following LwM2M objects are implemented in this sample:
@@ -102,29 +102,29 @@ The following LwM2M objects are implemented in this sample:
 Sensor simulation
 =================
 
-The sample allows choosing whether to use actual sensor measurements or 
+The sample allows choosing whether to use actual sensor measurements or
 simulated sensor data for all sensors (including the accelerometer).
-If the sample is running on the nRF9160 DK, only simulated sensor data is 
-available, as it does not have any of the external sensors needed for actual 
+If the sample is running on the nRF9160 DK, only simulated sensor data is
+available, as it does not have any of the external sensors needed for actual
 measurements.
 
-Instructions on how to configure the sample to use the simulated sensors when 
+Instructions on how to configure the sample to use the simulated sensors when
 running on the Thingy:91 can be found in the `Configuration options`_.
 
 .. _Notifications:
 
-Notifications 
+Notifications
 =============
 
 LwM2M specifies the Notify operation, which can be used to notify the server of
-changes to the value of a resource field, e.g. the measured value of a 
-temperature sensor. 
-This allows active monitoring while using minimal bandwidth, as notifications 
-can be sent with the updated values without the need for the server querying the 
+changes to the value of a resource field, e.g. the measured value of a
+temperature sensor.
+This allows active monitoring while using minimal bandwidth, as notifications
+can be sent with the updated values without the need for the server querying the
 client regularly.
 
 To enable notifications, the server must initiate an observation request on the
-resource(s) in question. 
+resource(s) in question.
 See `Setup`_ for how to do this.
 
 .. _Sensor Module:
@@ -134,17 +134,17 @@ Sensor Module
 
 The sample has a sensor module that, if enabled, reads the selected sensors
 and updates the client's resource values if it detects a sufficiently large
-change in one of the values. 
-The threshold for what is a sufficiently large change can be configured, and can 
+change in one of the values.
+The threshold for what is a sufficiently large change can be configured, and can
 e.g. be a change in temperature of 1 degree Celsius.
 
-Each sensor can be enabled separately. 
-The sampling period and change threshold of that sensor can also be configured 
+Each sensor can be enabled separately.
+The sampling period and change threshold of that sensor can also be configured
 independently of all the other sensors.
 
-The sensor module is intended to be used together with `Notifications`_. 
-If notifications are enabled for a Sensor Value resource, and the corresponding 
-sensor is enabled in the sensor module, a notification will be sent only when 
+The sensor module is intended to be used together with `Notifications`_.
+If notifications are enable for a Sensor Value resource, and the corresponding
+sensor is enabled in the sensor module, a notification will be sent only when
 that value changes significantly (as specified by the change threshold).
 Thus the bandwidth usage can be significantly limited, while simultaneously
 catching important changes in sensor values.
@@ -179,16 +179,16 @@ Configuration
 Setup
 =====
 
-The following instructions describe how to register your device to 
+The following instructions describe how to register your device to
 `Leshan Demo Server`_ or `Coiote Device Management`_.
 
 .. tabs::
-   
+
    .. tab:: Leshan Demo Server
-   
+
       Since Leshan does not have a No Security option, DTLS must be
-      enabled if Leshan is to be used. 
-      
+      enabled if Leshan is to be used.
+
       1. Open the Leshan Demo Server web UI.
       #. Click on ``Security`` in the upper-right corner.
       #. Click on ``Add security information``.
@@ -215,7 +215,7 @@ The following instructions describe how to register your device to
 
 Then, the server address and PSK must be set in the client:
 
-1. Open :file:`src/prj.conf`. 
+1. Open :file:`src/prj.conf`.
 #. Set :option:`CONFIG_APP_LWM2M_SERVER` to the correct server URL.
 
    * For `Leshan Demo Server`_: ``leshan.eclipseprojects.io``
@@ -227,15 +227,15 @@ Then, the server address and PSK must be set in the client:
    PSK used when registering the device with the server.
 
 The sample can now be built and run, and the client should connect to the
-server. 
+server.
 See `Building and running`_ for instructions.
 
-Enabling notifications for a resource varies slightly from server to server. 
-The client must be connected to the server to enable notifications. 
+Enabling notifications for a resource varies slightly from server to server.
+The client must be connected to the server to enable notifications.
 Below are instructions for Leshan and Coiote:
 
 .. tabs::
-   
+
    .. tab:: Leshan Demo Server
    
       1. Find your device in the clients tab and select it.
@@ -250,19 +250,19 @@ Below are instructions for Leshan and Coiote:
            the Sensor Module.
 
    .. tab:: Coiote Device Management
-      
+
       1. Find your device in the Device inventory tab in the menu to the left
          and click on the blue ID in the Identity column.
       #. Click on the Objects tab in the new menu to the left, just below
          Dashboard.
       #. Find the object(s) that you want to receive notifications from, and
          expand it by clicking on it.
-      #. Find the resource(s) you want to track. 
+      #. Find the resource(s) you want to track.
 
          * This can be any and all the resources of an object, but only
            resources which can be expected to change make sense to track.
          * If you want to use the `Sensor Module`_, at least the Sensor
-           Value resource should be tracked for all sensors enabled in 
+           Value resource should be tracked for all sensors enabled in
            the Sensor Module.
 
       #. Click on the Value Tracking button of the selected resource.
@@ -290,20 +290,20 @@ Server options:
 
 .. option:: CONFIG_APP_PSK - Pre Shared Key
 
-   The hexadecimal representation of the PSK used when registering the device 
+   The hexadecimal representation of the PSK used when registering the device
    with the server.
 
 LwM2M objects options:
 
 .. option:: CONFIG_APP_<OBJECT TYPE> - Enable an LwM2M object
 
-   Enable an LwM2M object. 
-   Objects not enabled (all compatible are by default) will not show up in the 
+   Enable an LwM2M object.
+   Objects not enabled (all compatible are by default) will not show up in the
    server.
 
 .. option:: CONFIG_<SENSOR TYPE>_USE_SIM - Simulate sensor data
 
-   Sensor returns simulated data and not actual measurements. 
+   Sensor returns simulated data and not actual measurements.
    Available for all sensors, including the accelerometer.
 
 .. option:: CONFIG_LWM2M_IPSO_APP_<OBJECT TYPE>_VERSION_1_X - Select IPSO object version for app defined IPSO objects
@@ -312,7 +312,7 @@ LwM2M objects options:
    the user defined IPSO objects.
    See the `LwM2M registry`_ for a list of objects and their available versions.
    User defined IPSO objects in this sample are:
-   
+
    * Buzzer - ID 3338
    * Colour - ID 3335
 
@@ -322,7 +322,7 @@ Sensor module options:
 .. option:: CONFIG_SENSOR_MODULE - Periodic sensor reading
 
    Enable periodic reading of sensors, and updating the resource values when
-   the change is sufficiently large. 
+   the change is sufficiently large.
    Notify server if the resource(s) is observed.
 
 .. option:: CONFIG_SENSOR_MODULE_<SENSOR TYPE> - Enable sensors
@@ -345,20 +345,20 @@ Additional configuration
 
 LwM2M options:
 
-:option:`CONFIG_LWM2M_ENGINE_MAX_OBSERVER` - Max number of resources that can be 
-tracked. 
+:option:`CONFIG_LWM2M_ENGINE_MAX_OBSERVER` - Max number of resources that can be
+tracked.
 Must be increased if you want to observe more than 10 resources.
 
 :option:`CONFIG_LWM2M_ENGINE_MAX_MESSAGES` - Max number of LwM2M message
-objects. 
+objects.
 Needs to be increased if a large amount of notifications will be sent at once.
 
 :option:`CONFIG_LWM2M_ENGINE_MAX_PENDING` - Max number of pending LwM2M message
-objects. 
+objects.
 Needs to be increased if a large amount of notifications will be sent at once.
 
 :option:`CONFIG_LWM2M_ENGINE_MAX_REPLIES` - Max number of LwM2M reply
-objects. 
+objects.
 Needs to be increased if a large amount of notifications will be sent at once.
 
 :option:`CONFIG_LWM2M_COAP_BLOCK_SIZE` - Increase if you want to add many new
@@ -366,18 +366,18 @@ LwM2M objects to the sample, as the registration procedure contains info about
 all the LwM2M objects in one block.
 
 :option:`CONFIG_LWM2M_ENGINE_DEFAULT_LIFETIME` - Set this to configure how often
-the client sends *I'm alive* messages to the server. 
+the client sends *I'm alive* messages to the server.
 
 .. option:: CONFIG_LWM2M_IPSO_<OBJECT TYPE>_VERSION_1_X - Select IPSO object version
 
    Select which version of the OMA IPSO object specification is to be used.
    See the `LwM2M registry`_ for a list of objects and their available versions.
 
-ADXL362 accelerometer sensor range. 
-Choose one. 
-Default is |plusminus| 2g. 
-Resolution depends on range: |plusminus| 2g has higher resolution than 
-|plusminus| 4g, which again has higher resolution than |plusminus| 8g. 
+ADXL362 accelerometer sensor range.
+Choose one.
+Default is |plusminus| 2g.
+Resolution depends on range: |plusminus| 2g has higher resolution than
+|plusminus| 4g, which again has higher resolution than |plusminus| 8g.
 Only affects the Thingy:91.
 
 :option:`CONFIG_ADXL362_ACCEL_RANGE_2G` - Sensor range of |plusminus| 2g.
@@ -401,23 +401,23 @@ The following files are available:
 * ``overlay-thingy91.conf`` - Thingy:91 specific configuration
 * ``overlay-nrf9160dk.conf`` - nRF9160 DK specific configuration
 
-The sample can either be configured by editing the :file:`prj.conf` file and the 
+The sample can either be configured by editing the :file:`prj.conf` file and the
 relevant overlay files, or through menuconfig or guiconfig.
 
 To open menuconfig or guiconfig:
 
-Run ``west build -d <build directory> -b <build target> -t <menu or gui>config 
+Run ``west build -d <build directory> -b <build target> -t <menu or gui>config
 -- -DOVERLAY_CONFIG=<overlay files>``
 
 Example:
 
-``west build -d build_thingy91_nrf9160ns -b thingy91_nrf9160ns -t menuconfig 
+``west build -d build_thingy91_nrf9160ns -b thingy91_nrf9160ns -t menuconfig
 -- -DOVERLAY_CONFIG=overlay-thingy91.conf overlay-bootstrap.conf``
-opens menuconfig and configures the application to run on the Thingy:91 with 
+opens menuconfig and configures the application to run on the Thingy:91 with
 LwM2M bootstrap support.
 
-Note: the device specific config file corresponding to your build target should 
-always be used, as it contains configuration options that is essential for the 
+Note: the device specific config file corresponding to your build target should
+always be used, as it contains configuration options that is essential for the
 sample to run correctly on that device.
 
 .. _Building and running:
@@ -429,16 +429,15 @@ Building the sample can either be done from a commandline, or through the
 nRF Connect VS Code extension if you are using VS Code.
 
 .. tabs::
-  
+
    .. tab:: Commandline
 
-      1. Run ``west build -d <build directory> -b <build target>  
+      1. Run ``west build -d <build directory> -b <build target>
          -- -DOVERLAY_CONFIG=<overlay files>`` to build the sample.
 
          * This step can be skipped if you have configured the application
            through menuconfig or guiconfig as shown in `Configuration files`_.
-
-      #. Run ``west flash -d <build directory>`` to finish building (if 
+      #. Run ``west flash -d <build directory>`` to finish building (if
          menuconfig or guiconfig was used) and to flash the device.
       #. Find your device in the server.
 
@@ -448,11 +447,11 @@ nRF Connect VS Code extension if you are using VS Code.
    .. tab:: nRF Connect for VS Code
 
       1. Click on the nRF Connect extension icon in the menu to the left.
-      #. Click the ``Add Application`` button, or click on the 
-         ``Open Welcome Page`` and click on ``Add an existing application``, 
+      #. Click the ``Add Application`` button, or click on the
+         ``Open Welcome Page`` and click on ``Add an existing application``,
          and select the :file:`lwm2m_demo/` folder.
       #. Add a build configuration by clicking on ``No build configurations``
-         under the ``APPLICATIONS`` tab in the extension menu. 
+         under the ``APPLICATIONS`` tab in the extension menu.
 
          * Additional build configurations can be added by clicking on the icon
            next to the application name.
@@ -463,7 +462,7 @@ nRF Connect VS Code extension if you are using VS Code.
          ``Kconfig fragments``. You can select multiple overlay files by opening
          the drop-down again.
       #. Hit ``Generate Config``.
-      #. To build the sample, click on the ``Build`` action under the 
+      #. To build the sample, click on the ``Build`` action under the
          ``ACTIONS`` tab in the extension menu.
       #. Finally, click the ``Flash`` action to flash the device.
       #. Find your device in the server.
@@ -474,16 +473,16 @@ nRF Connect VS Code extension if you are using VS Code.
 Queue Mode support
 ==================
 
-To use the LwM2M Demo with LwM2M Queue Mode support, build it with the 
+To use the LwM2M Demo with LwM2M Queue Mode support, build it with the
 ``-DOVERLAY_CONFIG=overlay-queue.conf`` option.
 
 Bootstrap support
 =================
 
-To build the LwM2M Demo with LwM2M bootstrap support, build it with the 
+To build the LwM2M Demo with LwM2M bootstrap support, build it with the
 ``-DOVERLAY_CONFIG=overlay-bootstrap.conf`` option.
 
-In order to successfully run the bootstrap procedure, the device must be first 
+In order to successfully run the bootstrap procedure, the device must be first
 registered in the LwM2M bootstrap server.
 
 The following instructions describe how to register your device with a bootstrap
@@ -497,20 +496,20 @@ server:
       #. Click on ``Bootstrap`` in the top right corner.
       #. Click on ``Add clients configuration``.
       #. Enter the client endpoint - nrf-{your device IMEI} and click on ``Next``.
-      #. In the ``LWM2M Server`` section, choose the desired configuration 
-         (``No security`` or ``Pre-Shared Key``). 
-         If you choose ``Pre-Shared Key``, add the values for ``Identity`` and 
-         ``Key`` fields (the configured Identity/Key need not match the 
+      #. In the ``LWM2M Server`` section, choose the desired configuration
+         (``No security`` or ``Pre-Shared Key``).
+         If you choose ``Pre-Shared Key``, add the values for ``Identity`` and
+         ``Key`` fields (the configured Identity/Key need not match the
          Bootstrap Server configuration).
-         The same credentials will be provided in the Leshan Demo Server 
+         The same credentials will be provided in the Leshan Demo Server
          Security configuration page.
          If ``No Security`` is chosen, no further configuration is needed.
-         Note that in this mode, no DTLS will be used for the communication with 
+         Note that in this mode, no DTLS will be used for the communication with
          the LwM2M server.
       #. In the ``LWM2M Bootstrap Server`` tab, do the same as in the previous tab
          but using the desired info for the bootstrap server instead. Note that
          this is the information that your client will connect to the server with.
-      #. After adding values for the fields under both the ``LWM2M Bootstrap 
+      #. After adding values for the fields under both the ``LWM2M Bootstrap
          Server`` and ``LWM2M Server`` tabs, click ``Add``.
       #. Build and run the sample.
 
@@ -590,21 +589,21 @@ Known issues and limitations
 Changing lifetime does not work correctly.
 
 * Setting lifetime to anything other than 60 seconds causes problems.
-  
-  * > 60 seconds: resending message and timeout. 
+
+  * > 60 seconds: resending message and timeout.
   * < 60 seconds: trouble when starting up.
 
-Socket error when tracking many resources and sensor module enabled for many 
+Socket error when tracking many resources and sensor module enabled for many
 sensors.
 
-* To reproduce: 
+* To reproduce:
 
-  1. Enable all sensors (including accelerometer) except light/colour in sensor 
+  1. Enable all sensors (including accelerometer) except light/colour in sensor
      module.
-  #. Enable value tracking for sensor value, and max/min measured for the same 
+  #. Enable value tracking for sensor value, and max/min measured for the same
      sensors and the accelerometer.
   #. When the work_cbs are called (sensor module), the error occurs.
-     Restarts RD Client and all is fine (error MAY occur even after this, but 
+     Restarts RD Client and all is fine (error MAY occur even after this, but
      rarely).
 
 * Errors:

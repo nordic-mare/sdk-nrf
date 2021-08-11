@@ -31,7 +31,7 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define SCALE_LIGHT_MEAS(raw_value)     MIN((raw_value * 255U / CONFIG_LIGHT_SENSOR_LIGHT_MEASUREMENT_MAX_VALUE), UINT8_MAX)
 #define SCALE_COLOUR_MEAS(raw_value)    MIN((raw_value * 255U / CONFIG_LIGHT_SENSOR_COLOUR_MEASUREMENT_MAX_VALUE), UINT8_MAX)
 
-#define NUM_CHANNELS    		4U
+#define NUM_CHANNELS			4U
 
 #define RGBIR_STR_LENGTH        11U  /* Format: '0xRRGGBBIR\0'. */
 
@@ -40,10 +40,10 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
 #if defined(CONFIG_LIGHT_SENSOR_USE_EXTERNAL)
 static const struct device *light_sensor_dev;
-static int64_t fetch_timestamp = 0;
+static int64_t fetch_timestamp;
 
 /* sensor_sample_fetch_chan fails if called multiple times in a row with no delay. */
-static bool fetch_ready()
+static bool fetch_ready(void)
 {
 	return k_uptime_get() > fetch_timestamp + SENSOR_FETCH_DELAY_MS;
 }
@@ -60,8 +60,7 @@ static int sensor_read(struct sensor_value measurements[])
 			return ret;
 		}
 		fetch_timestamp = k_uptime_get();
-	}
-	else {
+	} else {
 		LOG_DBG("Sensor fetch not ready");
 		return -EBUSY;
 	}
@@ -102,11 +101,11 @@ int light_sensor_read(uint32_t *light_value)
 	ret = sensor_read(light_values);
 	if (ret == -EBUSY) {
 		return ret;
-	}
-	else if (ret) {
+	} else if (ret) {
 		LOG_ERR("Error %d: sensor read failed", ret);
 		return ret;
 	}
+
 #elif defined(CONFIG_LIGHT_SENSOR_USE_SIM)
 	/* TODO: Simulate with rng */
 	for (int i = 0; i < NUM_CHANNELS; i++) {
@@ -118,7 +117,7 @@ int light_sensor_read(uint32_t *light_value)
 
 	/* Scale measurements and combine in 4-byte light value, one byte per colour channel */
 	for (int i = 0; i < NUM_CHANNELS; ++i) {
-		scaled_measurement = SCALE_LIGHT_MEAS(light_values[i].val1); 
+		scaled_measurement = SCALE_LIGHT_MEAS(light_values[i].val1);
 		*light_value |= scaled_measurement << 8*i;
 	}
 
@@ -144,8 +143,7 @@ int colour_sensor_read(uint32_t *colour_value)
 
 	if (ret == -EBUSY) {
 		return ret;
-	}
-	else if (ret) {
+	} else if (ret) {
 		LOG_ERR("Error %d: sensor read failed", ret);
 		return ret;
 	}
@@ -165,7 +163,7 @@ int colour_sensor_read(uint32_t *colour_value)
 	}
 
 	LOG_INF("Colour sensor: read 0x%08X", *colour_value);
-	
+
 	return 0;
 }
 

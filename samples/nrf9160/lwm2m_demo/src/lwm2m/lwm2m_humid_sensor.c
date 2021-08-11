@@ -28,7 +28,7 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 #define HUMID_APP_TYPE "Simulated Humidity Sensor"
 #endif
 
-#define HUMID_UNIT 				"%"
+#define HUMID_UNIT				"%"
 
 static float32_value_t *humid_float;
 static int64_t sensor_read_timestamp;
@@ -36,6 +36,7 @@ static int64_t sensor_read_timestamp;
 static bool is_regular_request(void)
 {
 	int64_t dt = k_uptime_get() - sensor_read_timestamp;
+
 	return dt > NOTIFICATION_REQUEST_DELAY_MS;
 }
 
@@ -55,7 +56,7 @@ static void set_timestamp(void)
 }
 #endif
 
-static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, 
+static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 					uint16_t res_inst_id, size_t *data_len)
 {
 	/* Only read sensor if a regular request from server, i.e. not a notify request */
@@ -92,14 +93,14 @@ static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 int lwm2m_init_humid_sensor(void)
 {
 	float32_value_t min_range_val = {
-		.val1 = MIN_RANGE_VALUE, 
+		.val1 = MIN_RANGE_VALUE,
 		.val2 = 0};
 	float32_value_t max_range_val = {
-		.val1 = MAX_RANGE_VALUE, 
+		.val1 = MAX_RANGE_VALUE,
 		.val2 = 0};
 	uint16_t dummy_data_len;
 	uint8_t dummy_data_flags;
-	
+
 	sensor_read_timestamp = k_uptime_get();
 
 	env_sensor_init();
@@ -111,7 +112,7 @@ int lwm2m_init_humid_sensor(void)
 			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID),
 			(void **)&humid_float, &dummy_data_len, &dummy_data_flags);
 	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_UNITS_RID), 
+			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_UNITS_RID),
 			HUMID_UNIT, sizeof(HUMID_UNIT), LWM2M_RES_DATA_FLAG_RO);
 	lwm2m_engine_set_float32(
 			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, MIN_RANGE_VALUE_RID),
@@ -124,17 +125,17 @@ int lwm2m_init_humid_sensor(void)
 	meas_qual_ind = 0;
 
 	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, APPLICATION_TYPE_RID), 
+			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, APPLICATION_TYPE_RID),
 			HUMID_APP_TYPE, sizeof(HUMID_APP_TYPE), LWM2M_RES_DATA_FLAG_RO);
 	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, TIMESTAMP_RID), 
+			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, TIMESTAMP_RID),
 			&timestamp, sizeof(timestamp), LWM2M_RES_DATA_FLAG_RW);
 	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, MEASUREMENT_QUALITY_INDICATOR_RID), 
+			LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, MEASUREMENT_QUALITY_INDICATOR_RID),
 			&meas_qual_ind, sizeof(meas_qual_ind), LWM2M_RES_DATA_FLAG_RW);
 #endif
 
-    return 0;
+	return 0;
 }
 
 static bool event_handler(const struct event_header *eh)
@@ -142,12 +143,12 @@ static bool event_handler(const struct event_header *eh)
 	if (is_sensor_event(eh)) {
 		struct sensor_event *event = cast_sensor_event(eh);
 
-        if (event->type == HumiditySensor) {
-            float32_value_t received_value;
+		if (event->type == HumiditySensor) {
+			float32_value_t received_value;
 
-            sensor_read_timestamp = k_uptime_get();
+			sensor_read_timestamp = k_uptime_get();
 
-            LOG_DBG("Humidity sensor event received: val1 = %06d, val2 = %06d", 
+			LOG_DBG("Humidity sensor event received: val1 = %06d, val2 = %06d",
 					event->sensor_value.val1, event->sensor_value.val2);
 
 #if defined(CONFIG_LWM2M_IPSO_HUMIDITY_SENSOR_VERSION_1_1)
@@ -161,11 +162,11 @@ static bool event_handler(const struct event_header *eh)
 				LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID),
 				&received_value);
 
-            return true;
-        }
-		
-        return false;
-	} 
+			return true;
+		}
+
+		return false;
+	}
 
 	return false;
 }

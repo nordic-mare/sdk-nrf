@@ -39,7 +39,7 @@ LOG_MODULE_REGISTER(app_lwm2m_light_control, CONFIG_APP_LOG_LEVEL);
 #define THINGY_PWM_APP_TYPE		"PWM RGB LED controller"
 #define THINGY_GPIO_APP_TYPE	"GPIO RGB LED controller"
 #define DK_PWM_APP_TYPE			"PWM LED controller"
-#define DK_GPIO_APP_TYPE 		"GPIO LED controller"
+#define DK_GPIO_APP_TYPE		"GPIO LED controller"
 
 static bool state[NUM_LEDS];
 
@@ -69,7 +69,8 @@ static int lc_on_off_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 		/* Reset on-time if transition from off to on */
 		if (state[obj_inst_id] == false) {
 			char path[MAX_LWM2M_PATH_LEN];
-			snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u/%d", 
+
+			snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u/%d",
 					IPSO_OBJECT_LIGHT_CONTROL_ID, obj_inst_id, ON_TIME_RID);
 			lwm2m_engine_set_s32(path, 0);
 		}
@@ -91,7 +92,7 @@ static int lc_colour_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res_inst
 	ret = ui_rgb_led_pwm_set_colour(colour_val);
 #elif defined(THINGY_GPIO)
 	ret = ui_rgb_led_gpio_set_colour(colour_val);
-#endif 
+#endif
 
 	if (ret) {
 		LOG_ERR("Error %d: set colour value failed", ret);
@@ -155,7 +156,7 @@ int lwm2m_init_light_control(void)
 
 	ui_rgb_led_gpio_init();
 	snprintk(colour_str, RGB_STR_LEN, "0x010101");
-	
+
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0));
 	lwm2m_engine_register_post_write_callback(
 			LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0, ON_OFF_RID), lc_on_off_cb);
@@ -171,7 +172,7 @@ int lwm2m_init_light_control(void)
 	state[0] = false;
 
 	ui_led_pwm_init();
-	
+
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0));
 	lwm2m_engine_register_post_write_callback(
 			LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0, ON_OFF_RID), lc_on_off_cb);
@@ -190,18 +191,18 @@ int lwm2m_init_light_control(void)
 
 	for (int i = 0; i < NUM_LEDS; i++) {
 		state[i] = false;
-		
-		snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u", 
+
+		snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u",
 				IPSO_OBJECT_LIGHT_CONTROL_ID, i);
 		lwm2m_engine_create_obj_inst(path);
 
-		snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u/%d", 
+		snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u/%d",
 				IPSO_OBJECT_LIGHT_CONTROL_ID, i, ON_OFF_RID);
 		lwm2m_engine_register_post_write_callback(path, lc_on_off_cb);
 
-		snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u/%d", 
+		snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u/%d",
 				IPSO_OBJECT_LIGHT_CONTROL_ID, i, APPLICATION_TYPE_RID);
-		lwm2m_engine_set_res_data(path, DK_GPIO_APP_TYPE, 
+		lwm2m_engine_set_res_data(path, DK_GPIO_APP_TYPE,
 				sizeof(DK_GPIO_APP_TYPE), LWM2M_RES_DATA_FLAG_RO);
 	}
 #endif

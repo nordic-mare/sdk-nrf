@@ -29,80 +29,80 @@ static double accel_offset[3];
 
 int accelerometer_read(struct accelerometer_sensor_data *data)
 {
-    int ret;
-    double x_temp, y_temp, z_temp;
+	int ret;
+	double x_temp, y_temp, z_temp;
 
-    ret = sensor_sample_fetch(accel_dev);
-    if (ret) {
-        LOG_ERR("Error %d: fetch sample failed", ret);
-        return ret;
-    }
+	ret = sensor_sample_fetch(accel_dev);
+	if (ret) {
+		LOG_ERR("Error %d: fetch sample failed", ret);
+		return ret;
+	}
 
-    ret = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_X,
-                            &(data->x));
-    if(ret) {
-        LOG_ERR("Error %d: get x channel failed", ret);
-        return ret;
-    }
-    ret = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_Y,
-                            &(data->y));
-    if(ret) {
-        LOG_ERR("Error %d: get y channel failed", ret);
-        return ret;
-    }
-    ret = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_Z,
-                            &(data->z));
-    if(ret) {
-        LOG_ERR("Error %d: get z channel failed", ret);
-        return ret;
-    }
+	ret = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_X,
+							&(data->x));
+	if (ret) {
+		LOG_ERR("Error %d: get x channel failed", ret);
+		return ret;
+	}
+	ret = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_Y,
+							&(data->y));
+	if (ret) {
+		LOG_ERR("Error %d: get y channel failed", ret);
+		return ret;
+	}
+	ret = sensor_channel_get(accel_dev, SENSOR_CHAN_ACCEL_Z,
+							&(data->z));
+	if (ret) {
+		LOG_ERR("Error %d: get z channel failed", ret);
+		return ret;
+	}
 
-    /* Adjust for sensor bias */
-    x_temp = sensor_value_to_double(&(data->x)) - accel_offset[0];
+	/* Adjust for sensor bias */
+	x_temp = sensor_value_to_double(&(data->x)) - accel_offset[0];
 	y_temp = sensor_value_to_double(&(data->y)) - accel_offset[1];
 	z_temp = sensor_value_to_double(&(data->z)) - accel_offset[2];
-    sensor_value_from_double(&(data->x), x_temp);
-    sensor_value_from_double(&(data->y), y_temp);
-    sensor_value_from_double(&(data->z), z_temp);
+	sensor_value_from_double(&(data->x), x_temp);
+	sensor_value_from_double(&(data->y), y_temp);
+	sensor_value_from_double(&(data->z), z_temp);
 
-    LOG_INF("%s: read x = %d.%06d m/s^2", accel_dev->name, 
+	LOG_INF("%s: read x = %d.%06d m/s^2", accel_dev->name,
 			data->x.val1, data->x.val2);
-    LOG_INF("%s: read y = %d.%06d m/s^2", accel_dev->name, 
+	LOG_INF("%s: read y = %d.%06d m/s^2", accel_dev->name,
 			data->y.val1, data->y.val2);
-    LOG_INF("%s: read z = %d.%06d m/s^2", accel_dev->name, 
+	LOG_INF("%s: read z = %d.%06d m/s^2", accel_dev->name,
 			data->z.val1, data->z.val2);
 
-    return 0;
+	return 0;
 }
 
 #if defined(CONFIG_ACCEL_CALIBRATE_ON_STARTUP)
 static int accelerometer_calibrate(void)
 {
-    int ret;
-    struct accelerometer_sensor_data accel_data;
-    double aggr_data[3] = {0};
+	int ret;
+	struct accelerometer_sensor_data accel_data;
+	double aggr_data[3] = {0};
 
-    /* What does this do? */
-    k_sleep(K_SECONDS(2));
+	/* TODO: Check if thi is needed for accurate calibration */
+	k_sleep(K_SECONDS(2));
 
-    for (int i = 0; i < CALIBRATION_ITERATIONS; i++) {
-        ret = accelerometer_read(&accel_data);
-        if (ret) {
-            LOG_ERR("Error %d: read accelerometer failed", ret);
-            return ret;
-        }
+	for (int i = 0; i < CALIBRATION_ITERATIONS; i++) {
+		ret = accelerometer_read(&accel_data);
+		if (ret) {
+			LOG_ERR("Error %d: read accelerometer failed", ret);
+			return ret;
+		}
 
-        aggr_data[0] += sensor_value_to_double(&(accel_data.x));
-        aggr_data[1] += sensor_value_to_double(&(accel_data.y));
-        aggr_data[2] += sensor_value_to_double(&(accel_data.z))
-                        + ((double)SENSOR_G) / 1000000.0;
-    }
+		aggr_data[0] += sensor_value_to_double(&(accel_data.x));
+		aggr_data[1] += sensor_value_to_double(&(accel_data.y));
+		aggr_data[2] += sensor_value_to_double(&(accel_data.z))
+						+ ((double)SENSOR_G) / 1000000.0;
+	}
 
-    accel_offset[0] = aggr_data[0] / (double)CALIBRATION_ITERATIONS;
+	accel_offset[0] = aggr_data[0] / (double)CALIBRATION_ITERATIONS;
 	accel_offset[1] = aggr_data[1] / (double)CALIBRATION_ITERATIONS;
 	accel_offset[2] = aggr_data[2] / (double)CALIBRATION_ITERATIONS;
 
-    return 0;
+	return 0;
 }
 #endif /* if defined(CONFIG_ACCEL_CALIBRATE_ON_STARTUP) */
 
@@ -115,8 +115,8 @@ int accelerometer_init(void)
 	}
 
 #if defined(CONFIG_ACCEL_CALIBRATE_ON_STARTUP)
-    int ret;
-    
+	int ret;
+
 	ret = accelerometer_calibrate();
 	if (ret) {
 		LOG_ERR("Error %d: calibrate accelerometer failed", ret);
@@ -124,5 +124,5 @@ int accelerometer_init(void)
 	}
 #endif
 
-    return 0;
+	return 0;
 }

@@ -8,16 +8,15 @@
 
 #include <stdio.h>
 
-static const char* ui_input_type_to_string(enum ui_input_type type)
+static const char *ui_input_type_to_string(enum ui_input_type type)
 {
-	switch (type)
-	{
+	switch (type) {
 	case Button:
 		return "Button";
 
 	case Switch:
 		return "Switch";
-	
+
 	default:
 		return "";
 	}
@@ -28,9 +27,9 @@ static int log_ui_input_event(const struct event_header *eh, char *buf,
 {
 	struct ui_input_event *event = cast_ui_input_event(eh);
 
-	return snprintf(buf, buf_len, 
+	return snprintf(buf, buf_len,
 				"%s event: device number = %d, state = %d",
-				ui_input_type_to_string(event->type), 
+				ui_input_type_to_string(event->type),
 				event->device_number, event->type);
 }
 

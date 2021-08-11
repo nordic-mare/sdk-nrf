@@ -128,7 +128,7 @@ config APP_GPS_HOLD_TIME
 	help
 	  The minimum time in seconds that notifications can be sent to
 	  observers of the Location data.
-	  
+
 	rsource "src/sensors/Kconfig.gps"
 endif # APP_GPS
 endmenu # GPS

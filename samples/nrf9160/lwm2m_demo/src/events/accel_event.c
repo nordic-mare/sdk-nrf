@@ -8,25 +8,24 @@
 
 #include <stdio.h>
 
-static const char* accel_orienation_state_to_string(enum accel_orientation_state state)
+static const char *accel_orienation_state_to_string(enum accel_orientation_state state)
 {
-    switch (state)
-    {
-    case ORIENTATION_NOT_KNOWN:
-        return "not known";
+	switch (state) {
+	case ORIENTATION_NOT_KNOWN:
+		return "not known";
 
-    case ORIENTATION_NORMAL:
-        return "normal";
+	case ORIENTATION_NORMAL:
+		return "normal";
 
-    case ORIENTATION_UPSIDE_DOWN:
-        return "upside down";
-        
-    case ORIENTATION_ON_SIDE:
-        return "on side";
-    
-    default:
-       return "";
-    }
+	case ORIENTATION_UPSIDE_DOWN:
+		return "upside down";
+
+	case ORIENTATION_ON_SIDE:
+		return "on side";
+
+	default:
+		return "";
+	}
 }
 
 static int log_accel_event(const struct event_header *eh, char *buf,
@@ -34,12 +33,12 @@ static int log_accel_event(const struct event_header *eh, char *buf,
 {
 	struct accel_event *event = cast_accel_event(eh);
 
-	return snprintf(buf, buf_len, 
+	return snprintf(buf, buf_len,
 				"Accelerometer event: x = %d.%06d, y = %d.%06d, z = %d.%06d, orientation = %s.",
-				event->data.x.val1, event->data.x.val2, 
-                event->data.y.val1, event->data.y.val2,
-                event->data.z.val1, event->data.z.val2, 
-                accel_orienation_state_to_string(event->orientation));
+				event->data.x.val1, event->data.x.val2,
+				event->data.y.val1, event->data.y.val2,
+				event->data.z.val1, event->data.z.val2,
+				accel_orienation_state_to_string(event->orientation));
 }
 
 EVENT_TYPE_DEFINE(

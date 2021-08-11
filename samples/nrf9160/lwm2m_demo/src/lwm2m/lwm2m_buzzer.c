@@ -73,14 +73,14 @@ static int buzzer_intensity_cb(uint16_t obj_inst_id,
 
 	LOG_DBG("Intensity: %u", intensity);
 
-	return 0; 
+	return 0;
 }
 
 int lwm2m_init_buzzer(void)
 {
 	int ret;
 	float64_value_t start_intensity = {.val1 = INTENSITY_START_VAL, .val2 = 0};
-	
+
 	ret = ui_buzzer_init();
 	if (ret) {
 		LOG_ERR("Error %d: init ui buzzer failed", ret);
@@ -95,7 +95,7 @@ int lwm2m_init_buzzer(void)
 	if (ret) {
 		LOG_ERR("Error %d: set buzzer frequency failed", ret);
 	}
-	
+
 	lwm2m_engine_create_obj_inst(
 			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0));
 	lwm2m_engine_register_post_write_callback(
