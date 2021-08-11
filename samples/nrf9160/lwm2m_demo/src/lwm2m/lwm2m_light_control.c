@@ -9,7 +9,7 @@
 #include <lwm2m_resource_ids.h>
 #include <stdlib.h>
 
-#include "lwm2m_defines.h"
+#include "lwm2m_app_utils.h"
 
 #if defined(CONFIG_BOARD_THINGY91_NRF9160NS) && defined(CONFIG_UI_LED_USE_PWM)
 #define THINGY_PWM
@@ -33,8 +33,6 @@ LOG_MODULE_REGISTER(app_lwm2m_light_control, CONFIG_APP_LOG_LEVEL);
 #elif defined(DK_GPIO)
 #define NUM_LEDS				4
 #endif
-
-#define RGB_STR_LEN				11
 
 #define THINGY_PWM_APP_TYPE		"PWM RGB LED controller"
 #define THINGY_GPIO_APP_TYPE	"GPIO RGB LED controller"
@@ -130,10 +128,10 @@ int lwm2m_init_light_control(void)
 {
 #if defined(THINGY_PWM)
 	state[0] = false;
-	char colour_str[RGB_STR_LEN];
+	char colour_str[RGBIR_STR_LENGTH];
 
 	ui_rgb_led_pwm_init();
-	snprintk(colour_str, RGB_STR_LEN, "0xFFFFFF");
+	snprintk(colour_str, RGBIR_STR_LENGTH, "0xFFFFFF");
 
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0));
 	lwm2m_engine_register_post_write_callback(
@@ -152,10 +150,10 @@ int lwm2m_init_light_control(void)
 			LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0, DIMMER_RID), 100);
 #elif defined(THINGY_GPIO)
 	state[0] = false;
-	char colour_str[RGB_STR_LEN];
+	char colour_str[RGBIR_STR_LENGTH];
 
 	ui_rgb_led_gpio_init();
-	snprintk(colour_str, RGB_STR_LEN, "0x010101");
+	snprintk(colour_str, RGBIR_STR_LENGTH, "0x010101");
 
 	lwm2m_engine_create_obj_inst(LWM2M_PATH(IPSO_OBJECT_LIGHT_CONTROL_ID, 0));
 	lwm2m_engine_register_post_write_callback(

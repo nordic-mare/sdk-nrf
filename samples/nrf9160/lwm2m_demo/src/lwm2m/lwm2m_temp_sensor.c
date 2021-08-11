@@ -10,14 +10,12 @@
 
 #include "env_sensor.h"
 #include "sensor_event.h"
-#include "lwm2m_defines.h"
+#include "lwm2m_app_utils.h"
 
 #define MODULE app_lwm2m_temp_sensor
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
-
-#define NOTIFICATION_REQUEST_DELAY_MS	1500
 
 #define MIN_RANGE_VALUE			-40
 #define MAX_RANGE_VALUE			85
@@ -32,35 +30,14 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_APP_LOG_LEVEL);
 
 static float32_value_t *temp_float;
 static int64_t sensor_read_timestamp;
-
-static bool is_regular_request(void)
-{
-	int64_t dt = k_uptime_get() - sensor_read_timestamp;
-
-	return dt > NOTIFICATION_REQUEST_DELAY_MS;
-}
-
-#if defined(CONFIG_LWM2M_IPSO_TEMP_SENSOR_VERSION_1_1)
-static int32_t timestamp;
+static int32_t lwm2m_timestamp;
 static uint8_t meas_qual_ind;
-
-static void set_timestamp(void)
-{
-	int32_t ts;
-
-	lwm2m_engine_get_s32(
-			LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), &ts);
-	lwm2m_engine_set_s32(
-			LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, TIMESTAMP_RID),
-			ts);
-}
-#endif
 
 static void *temperature_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 					uint16_t res_inst_id, size_t *data_len)
 {
 	/* Only read sensor if a regular request from server, i.e. not a notify request */
-	if (is_regular_request()) {
+	if (is_regular_read_cb(sensor_read_timestamp)) {
 		int ret;
 		struct sensor_value temp_val;
 		float32_value_t new_temp_float;
@@ -73,9 +50,9 @@ static void *temperature_read_cb(uint16_t obj_inst_id, uint16_t res_id,
 
 		sensor_read_timestamp = k_uptime_get();
 
-#if defined(CONFIG_LWM2M_IPSO_TEMP_SENSOR_VERSION_1_1)
-		set_timestamp();
-#endif
+		if (IS_ENABLED(CONFIG_LWM2M_IPSO_TEMP_SENSOR_VERSION_1_1)) {
+			lwm2m_set_timestamp(IPSO_OBJECT_TEMP_SENSOR_ID, obj_inst_id);
+		}
 
 		new_temp_float.val1 = temp_val.val1;
 		new_temp_float.val2 = temp_val.val2;
@@ -122,19 +99,19 @@ int lwm2m_init_temp_sensor(void)
 			LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, MAX_RANGE_VALUE_RID),
 			&max_range_val);
 
-#if defined(CONFIG_LWM2M_IPSO_TEMP_SENSOR_VERSION_1_1)
-	meas_qual_ind = 0;
+	if (IS_ENABLED(CONFIG_LWM2M_IPSO_TEMP_SENSOR_VERSION_1_1)) {
+		meas_qual_ind = 0;
 
-	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, APPLICATION_TYPE_RID),
-			TEMP_APP_TYPE, sizeof(TEMP_APP_TYPE), LWM2M_RES_DATA_FLAG_RO);
-	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, TIMESTAMP_RID),
-			&timestamp, sizeof(timestamp), LWM2M_RES_DATA_FLAG_RW);
-	lwm2m_engine_set_res_data(
-			LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, MEASUREMENT_QUALITY_INDICATOR_RID),
-			&meas_qual_ind, sizeof(meas_qual_ind), LWM2M_RES_DATA_FLAG_RW);
-#endif
+		lwm2m_engine_set_res_data(
+				LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, APPLICATION_TYPE_RID),
+				TEMP_APP_TYPE, sizeof(TEMP_APP_TYPE), LWM2M_RES_DATA_FLAG_RO);
+		lwm2m_engine_set_res_data(
+				LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, TIMESTAMP_RID),
+				&lwm2m_timestamp, sizeof(lwm2m_timestamp), LWM2M_RES_DATA_FLAG_RW);
+		lwm2m_engine_set_res_data(
+				LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, MEASUREMENT_QUALITY_INDICATOR_RID),
+				&meas_qual_ind, sizeof(meas_qual_ind), LWM2M_RES_DATA_FLAG_RW);
+	}
 
 	return 0;
 }
@@ -152,9 +129,9 @@ static bool event_handler(const struct event_header *eh)
 			LOG_DBG("Temperature sensor event received: val1 = %06d, val2 = %06d",
 					event->sensor_value.val1, event->sensor_value.val2);
 
-#if defined(CONFIG_LWM2M_IPSO_TEMP_SENSOR_VERSION_1_1)
-			set_timestamp();
-#endif
+			if (IS_ENABLED(CONFIG_LWM2M_IPSO_TEMP_SENSOR_VERSION_1_1)) {
+				lwm2m_set_timestamp(IPSO_OBJECT_TEMP_SENSOR_ID, 0);
+			}
 
 			received_value.val1 = event->sensor_value.val1;
 			received_value.val2 = event->sensor_value.val2;

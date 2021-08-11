@@ -10,7 +10,7 @@
 #include <net/lwm2m_path.h>
 
 #include "app_gps_event.h"
-#include "lwm2m_defines.h"
+#include "lwm2m_app_utils.h"
 
 #define MODULE	lwm2m_app_loc
 

@@ -9,7 +9,7 @@
 #include <lwm2m_resource_ids.h>
 
 #include "ui_buzzer.h"
-#include "lwm2m_defines.h"
+#include "lwm2m_app_utils.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_buzzer, CONFIG_APP_LOG_LEVEL);
@@ -19,20 +19,7 @@ LOG_MODULE_REGISTER(app_lwm2m_buzzer, CONFIG_APP_LOG_LEVEL);
 
 #define BUZZER_APP_TYPE			"Buzzer"
 
-#if defined(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1)
-static int32_t timestamp;
-
-static void set_timestamp(void)
-{
-	int32_t ts;
-
-	lwm2m_engine_get_s32(
-			LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), &ts);
-	lwm2m_engine_set_s32(
-			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, TIMESTAMP_RID),
-			ts);
-}
-#endif
+static int32_t lwm2m_timestamp;
 
 static int buzzer_state_cb(uint16_t obj_inst_id,
 			   uint16_t res_id, uint16_t res_inst_id,
@@ -48,9 +35,9 @@ static int buzzer_state_cb(uint16_t obj_inst_id,
 		return ret;
 	}
 
-#if defined(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1)
-	set_timestamp();
-#endif
+	if (IS_ENABLED(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1)) {
+		lwm2m_set_timestamp(IPSO_OBJECT_BUZZER_ID, obj_inst_id);
+	}
 
 	LOG_DBG("Buzzer on/off: %d", state);
 
@@ -112,12 +99,12 @@ int lwm2m_init_buzzer(void)
 			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, LEVEL_RID),
 			&start_intensity);
 
-#if defined(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1)
-	lwm2m_engine_set_res_data(
+	if (IS_ENABLED(CONFIG_LWM2M_IPSO_APP_BUZZER_VERSION_1_1)) {
+		lwm2m_engine_set_res_data(
 			LWM2M_PATH(IPSO_OBJECT_BUZZER_ID, 0, TIMESTAMP_RID),
-			&timestamp, sizeof(timestamp),
+			&lwm2m_timestamp, sizeof(lwm2m_timestamp),
 			LWM2M_RES_DATA_FLAG_RW);
-#endif
+	}
 
 	return 0;
 }
