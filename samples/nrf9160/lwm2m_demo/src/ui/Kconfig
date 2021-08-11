@@ -1,0 +1,40 @@
+#
+# Copyright (c) 2019 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menu "User Interface"
+visible if FALSE # Hide menu
+
+config UI_LED
+	bool
+	help
+		Enable LEDs.
+
+config UI_BUZZER
+	bool
+	select PWM
+	select PWM_1
+	help
+		If enabled, a buzzer will be controllable with PWM.
+
+
+config UI_INPUT
+	bool
+	select DK_LIBRARY
+	select DK_LIBRARY_INVERT_LEDS
+	help
+		Enable switches and buttons.
+
+
+config UI_SENSE_LED
+	bool
+	help
+		Enables the sense LEDs available on the Thingy:91.
+
+endmenu # User Interface
+
+module = UI
+module-str = User Interface
+source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"

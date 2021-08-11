@@ -1,0 +1,171 @@
+#
+# Copyright (c) 2018 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menu "Application sample"
+
+rsource "src/ui/Kconfig"
+rsource "src/modules/Kconfig"
+rsource "src/lwm2m/Kconfig"
+
+menu "LwM2M objects"
+menu "Push buttons and on/off switches"
+config APP_PUSH_BUTTON
+	bool "Enable button(s)"
+	select UI_INPUT
+	select LWM2M_IPSO_PUSH_BUTTON
+	select LWM2M_APP_PUSH_BUTTON
+
+
+config APP_ONOFF_SWITCH
+	bool "Enable switches"
+	depends on BOARD_NRF9160DK_NRF9160NS
+	select UI_INPUT
+	select LWM2M_IPSO_ONOFF_SWITCH
+	select LWM2M_APP_ONOFF_SWITCH
+endmenu # Buttons and switches
+
+
+menu "LEDs"
+config APP_LIGHT_CONTROL
+	bool "Enable LED(s)"
+	select UI_LED
+	select LWM2M_IPSO_LIGHT_CONTROL
+	select LWM2M_APP_LIGHT_CONTROL
+
+if APP_LIGHT_CONTROL
+	rsource "src/ui/Kconfig.ui_led"
+endif # APP_LIGHT_CONTROL
+endmenu # LEDs
+
+
+menu "Buzzer"
+config APP_BUZZER
+	bool "Enable buzzer"
+	depends on BOARD_THINGY91_NRF9160NS
+	select UI_BUZZER
+	select LWM2M_IPSO_APP_BUZZER
+	select LWM2M_APP_BUZZER
+
+if APP_BUZZER
+	rsource "src/ipso/Kconfig.ipso_buzzer"
+endif # APP_BUZZER
+endmenu # Buzzer
+
+
+menu "Light sensor"
+config APP_LIGHT_SENSOR
+	bool "Enable light sensor"
+	select LIGHT_SENSOR
+	select LWM2M_IPSO_APP_COLOUR_SENSOR
+	select LWM2M_APP_LIGHT_SENSOR
+
+if APP_LIGHT_SENSOR
+	rsource "src/sensors/Kconfig.light_sensor"
+	rsource "src/ipso/Kconfig.ipso_colour_sensor"
+endif # APP_LIGHT_SENSOR
+endmenu # Light sensor
+
+
+menu "Environment sensors"
+config APP_ENV_SENSOR
+	bool "Enable environment sensors"
+	select ENVIRONMENT_SENSOR
+	help
+		Enables options for enabling temperature,
+		pressure, humidity and gas resistance sensors.
+
+if APP_ENV_SENSOR
+rsource "src/sensors/Kconfig.env_sensor"
+
+config APP_TEMP_SENSOR
+	bool "Enable temperature sensor"
+	select LWM2M_IPSO_TEMP_SENSOR
+	select LWM2M_APP_TEMP_SENSOR
+
+config APP_PRESS_SENSOR
+	bool "Enable air pressure sensor"
+	select LWM2M_IPSO_PRESSURE_SENSOR
+	select LWM2M_APP_PRESS_SENSOR
+
+config APP_HUMID_SENSOR
+	bool "Enable humidity sensor"
+	select LWM2M_IPSO_HUMIDITY_SENSOR
+	select LWM2M_APP_HUMID_SENSOR
+
+config APP_GAS_RES_SENSOR
+	bool "Enable gas resistance sensor"
+	select LWM2M_IPSO_GENERIC_SENSOR
+	select LWM2M_APP_GAS_RES_SENSOR
+endif # APP_ENV_SENSOR
+endmenu # Environment sensor
+
+
+menu "Accelerometer"
+config APP_ACCELEROMETER
+	bool "Enable accelerometer"
+	select ACCELEROMETER
+	select LWM2M_IPSO_ACCELEROMETER
+	select LWM2M_APP_ACCELEROMETER
+
+if APP_ACCELEROMETER
+	rsource "src/sensors/Kconfig.accelerometer"
+endif # APP_ACCELEROMETER
+endmenu # Accelerometer
+
+menu "GPS"
+config APP_GPS
+	bool "Enable GPS"
+	select GPS
+	select LWM2M_LOCATION_OBJ_SUPPORT
+
+if APP_GPS
+config APP_GPS_HOLD_TIME
+	int "Minimum time [s] between location data notification messages"
+	default 60
+	help
+	  The minimum time in seconds that notifications can be sent to
+	  observers of the Location data.
+
+	rsource "src/sensors/Kconfig.gps"
+endif # APP_GPS
+endmenu # GPS
+endmenu # LwM2M objects
+
+config APP_LWM2M_SERVER
+	string "LwM2M server name or IP address"
+	help
+	  Choose the LwM2M server you wish to connect to.
+
+config APP_PSK
+	string "Pre Shared Key"
+	help
+		Pre Shared Key must be identical to the PSK registered with the
+		device on the LwM2M server. Use the hexadeciaml representation.
+
+config APP_HOLD_TIME_RSRP
+	int "Minimum time [s] between RSRP notification messages"
+	default 60
+	help
+	  The minimum time in seconds that notifications can be sent to
+	  observers of the Connectivity Monitoring data.
+
+config APP_MCUBOOT_FLASH_BUF_SZ
+	int "Size of buffer used for flash write operations during MCUboot updates"
+	depends on DFU_TARGET_MCUBOOT
+	default 512
+	help
+	  Buffer size must be aligned to the minimal flash write block size.
+
+module = APP
+module-dep = LOG
+module-str = Log level for sample
+source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
+endmenu # Application sample
+
+
+menu "Zephyr Kernel"
+source "Kconfig.zephyr"
+endmenu # Zephyr Kernel
