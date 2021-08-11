@@ -70,7 +70,7 @@ int lwm2m_init_push_button(void)
 					&lwm2m_timstamp[BUTTON2_OBJ_INST_ID],
 					sizeof(lwm2m_timstamp[BUTTON2_OBJ_INST_ID]), LWM2M_RES_DATA_FLAG_RW);
 		}
-	}	
+	}
 
 	return 0;
 }

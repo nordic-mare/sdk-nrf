@@ -16,12 +16,12 @@ bool is_regular_read_cb(int64_t read_timestamp)
 void lwm2m_set_timestamp(int ipso_obj_id, unsigned int obj_inst_id)
 {
 	int32_t timestamp;
-    char path[MAX_LWM2M_PATH_LEN];
+	char path[MAX_LWM2M_PATH_LEN];
 
 	lwm2m_engine_get_s32(
 			LWM2M_PATH(IPSO_OBJECT_DEVICE_ID, 0, CURRENT_TIME_RID), &timestamp);
-    snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u/%d",
-            ipso_obj_id, obj_inst_id, TIMESTAMP_RID);
+	snprintk(path, MAX_LWM2M_PATH_LEN, "%d/%u/%d",
+			ipso_obj_id, obj_inst_id, TIMESTAMP_RID);
 	lwm2m_engine_set_s32(path, timestamp);
 }
 
