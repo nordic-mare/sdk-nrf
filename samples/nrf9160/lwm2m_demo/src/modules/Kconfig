@@ -27,7 +27,9 @@ config SENSOR_MODULE_ACCEL
 		and Z Value under Accelerometer object,
 		with no attributes selected, on the LwM2M server.
 
-if SENSOR_MODULE_ACCEL
+menu "Accelerometer settings"
+visible if SENSOR_MODULE_ACCEL
+
 config SENSOR_MODULE_ACCEL_STARTUP_DELAY
 	int "Time before first accelerometer read"
 	default 30
@@ -99,7 +101,7 @@ config SENSOR_MODULE_ACCEL_Z_DELTA_DEC
 		Unit is decimal part of m/s^2.
 		Divide by 1E6 to get actual decimal value.
 		Set this and the integer part to 0 to always send the latest measurement.
-endif # SENSOR_MODULE_ACCEL
+endmenu # Accelerometer settings
 endmenu # Accelerometer
 
 
@@ -114,7 +116,9 @@ config SENSOR_MODULE_TEMP
 		Requires enabling value tracking for Sensor Value under Temperature object,
 		with no attributes selected, on the LwM2M server.
 
-if SENSOR_MODULE_TEMP
+menu "Temperature settings"
+visible if SENSOR_MODULE_TEMP
+
 config SENSOR_MODULE_TEMP_STARTUP_DELAY
 	int "Time before first temperature read"
 	default 30
@@ -147,7 +151,7 @@ config SENSOR_MODULE_TEMP_DELTA_DEC
 		Unit is decimal part of degrees Celsius.
 		Divide by 1E6 to get actual decimal value.
 		Set this and the integer part to 0 to always send the latest measurement.
-endif # SENSOR_MODULE_TEMP
+endmenu # Temperature settings
 endmenu # Temperature
 
 
@@ -162,7 +166,9 @@ config SENSOR_MODULE_PRESS
 		Requires enabling value tracking for Sensor Value under Pressure object,
 		with no attributes selected, on the LwM2M server.
 
-if SENSOR_MODULE_PRESS
+menu "Pressure settings"
+visible if SENSOR_MODULE_PRESS
+
 config SENSOR_MODULE_PRESS_STARTUP_DELAY
 	int "Time before first pressure read"
 	default 30
@@ -195,7 +201,7 @@ config SENSOR_MODULE_PRESS_DELTA_DEC
 		Unit is decimal part of kilo Pascal.
 		Divide by 1E6 to get actual decimal value.
 		Set this and the integer part to 0 to always send the latest measurement.
-endif # SENSOR_MODULE_PRESS
+endmenu # Pressure settings
 endmenu # Pressure
 
 
@@ -210,7 +216,9 @@ config SENSOR_MODULE_HUMID
 		Requires enabling value tracking for Sensor Value under Humidity object,
 		with no attributes selected, on the LwM2M server.
 
-if SENSOR_MODULE_HUMID
+menu "Humidity settings"
+visible if SENSOR_MODULE_HUMID
+
 config SENSOR_MODULE_HUMID_STARTUP_DELAY
 	int "Time before first humidity read"
 	default 30
@@ -243,7 +251,7 @@ config SENSOR_MODULE_HUMID_DELTA_DEC
 		Unit is decimal part of relative humidity represented as a percentage.
 		Divide by 1E6 to get actual decimal value.
 		Set this and the integer part to 0 to always send the latest measurement.
-endif # SENSOR_MODULE_HUMID
+endmenu # Humidity settings
 endmenu # Humidity
 
 
@@ -258,7 +266,9 @@ config SENSOR_MODULE_GAS_RES
 		Requires enabling value tracking for Sensor Value under Generic Sensor object,
 		with no attributes selected, on the LwM2M server.
 
-if SENSOR_MODULE_GAS_RES
+menu "Gas resistance settings"
+visible if SENSOR_MODULE_GAS_RES
+
 config SENSOR_MODULE_GAS_RES_STARTUP_DELAY
 	int "Time before first gas resistance read"
 	default 30
@@ -282,7 +292,7 @@ config SENSOR_MODULE_GAS_RES_DELTA
 		Required difference in gas resistance to send a notification to the server.
 		Unit is Ohm.
 		Set this to 0 to always send the latest measurement.
-endif # SENSOR_MODULE_GAS_RES
+endmenu # Gas resistance settings
 endmenu # Gas resistance
 
 
@@ -297,7 +307,9 @@ config SENSOR_MODULE_LIGHT
 		Requires enabling value tracking for Colour under Colour object instance 0,
 		with no attributes selected, on the LwM2M server.
 
-if SENSOR_MODULE_LIGHT
+menu "Light settings"
+visible if SENSOR_MODULE_LIGHT
+
 config SENSOR_MODULE_LIGHT_STARTUP_DELAY
 	int "Time before first light sensor read"
 	default 30
@@ -345,7 +357,7 @@ config SENSOR_MODULE_LIGHT_DELTA_IR
 	help
 		Required difference in infrared light to send a notification to the server.
 		Set this to 0 to always send the latest measurement.
-endif # SENSOR_MODULE_LIGHT
+endmenu # Light settings
 endmenu # Light
 
 
@@ -360,7 +372,9 @@ config SENSOR_MODULE_COLOUR
 		Requires enabling value tracking for Colour under Colour object instance 1,
 		with no attributes selected, on the LwM2M server.
 
-if SENSOR_MODULE_COLOUR
+menu "Colour settings"
+visible if SENSOR_MODULE_COLOUR
+
 config SENSOR_MODULE_COLOUR_STARTUP_DELAY
 	int "Time before first colour sensor read"
 	default 30
@@ -408,7 +422,7 @@ config SENSOR_MODULE_COLOUR_DELTA_IR
 	help
 		Required difference in infrared colour send a notification to the server.
 		Set this to 0 to always send the latest measurement.
-endif # SENSOR_MODULE_COLOUR
+endmenu # Colour settings
 endmenu # Colour
 endif # SENSOR_MODULE
 endmenu # Sensor Module
