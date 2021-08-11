@@ -13,7 +13,7 @@
 
 #include "pm_config.h"
 #include "lwm2m_client.h"
-#include "lwm2m_defines.h"
+#include "lwm2m_app_utils.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_lwm2m_device, CONFIG_APP_LOG_LEVEL);

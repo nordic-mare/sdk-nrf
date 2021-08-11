@@ -8,6 +8,7 @@ zephyr_include_directories(include)
 
 target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_app_device.c)
 target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_app_location.c)
+target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lwm2m_app_utils.c)
 
 
 target_sources_ifdef(CONFIG_LWM2M_APP_LIGHT_CONTROL

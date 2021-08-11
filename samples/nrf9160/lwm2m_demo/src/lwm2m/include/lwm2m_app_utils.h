@@ -4,8 +4,12 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
-#ifndef LWM2M_DEFINES_H__
-#define LWM2M_DEFINES_H__
+#include <zephyr.h>
+#include <net/lwm2m.h>
+#include <drivers/sensor.h>
+
+#ifndef LWM2M_APP_UTILS_H__
+#define LWM2M_APP_UTILS_H__
 
 /* LwM2M IPSO Object IDs */
 #define IPSO_OBJECT_SECURITY_ID 0
@@ -42,7 +46,19 @@
 #define LOCATION_SPEED_RID 6
 
 /* Misc */
-#define LWM2M_RES_DATA_FLAG_RW 0
-#define MAX_LWM2M_PATH_LEN 20
+#define LWM2M_RES_DATA_FLAG_RW			0
+#define MAX_LWM2M_PATH_LEN				20
+#define RGBIR_STR_LENGTH		        11	/*'0xRRGGBBIR\0' */
 
-#endif /* LWM2M_DEFINES_H__ */
+/* Set timestamp resource */
+void lwm2m_set_timestamp(int ipso_obj_id, unsigned int obj_inst_id);
+
+/* Check whether notification read callback or regular read callback */
+bool is_regular_read_cb(int64_t read_timestamp);
+
+float32_value_t double_to_float32(double val);
+float32_value_t sensor_value_to_float32(struct sensor_value val);
+
+double float32_to_double(float32_value_t val);
+
+#endif /* LWM2M_APP_UTILS_H__ */
