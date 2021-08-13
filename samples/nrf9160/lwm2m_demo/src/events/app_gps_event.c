@@ -17,4 +17,4 @@ static int log_gps_event(const struct event_header *eh, char *buf, size_t buf_le
 			(int)event->pvt.altitude);
 }
 
-EVENT_TYPE_DEFINE(app_gps_event, true, log_gps_event, NULL);
+EVENT_TYPE_DEFINE(app_gps_event, false, log_gps_event, NULL);

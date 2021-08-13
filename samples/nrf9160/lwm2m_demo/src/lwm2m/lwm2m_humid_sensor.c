@@ -48,6 +48,8 @@ static void *humidity_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 			return NULL;
 		}
 
+		LOG_INF("Humidity: %d.%06d %%", humid_val.val1, humid_val.val2);
+
 		sensor_read_timestamp = k_uptime_get();
 
 		if (IS_ENABLED(CONFIG_LWM2M_IPSO_HUMIDITY_SENSOR_VERSION_1_1)) {

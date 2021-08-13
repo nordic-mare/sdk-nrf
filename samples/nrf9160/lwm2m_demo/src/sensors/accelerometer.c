@@ -62,10 +62,6 @@ int accelerometer_read(struct accelerometer_sensor_data *data)
 	sensor_value_from_double(&(data->y), y_temp);
 	sensor_value_from_double(&(data->z), z_temp);
 
-	LOG_INF("%s: read x = %d.%06d m/s^2", accel_dev->name, data->x.val1, data->x.val2);
-	LOG_INF("%s: read y = %d.%06d m/s^2", accel_dev->name, data->y.val1, data->y.val2);
-	LOG_INF("%s: read z = %d.%06d m/s^2", accel_dev->name, data->z.val1, data->z.val2);
-
 	return 0;
 }
 

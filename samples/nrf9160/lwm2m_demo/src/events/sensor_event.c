@@ -44,4 +44,4 @@ static int log_sensor_event(const struct event_header *eh, char *buf, size_t buf
 			event->sensor_value.val2, event->unsigned_value);
 }
 
-EVENT_TYPE_DEFINE(sensor_event, true, log_sensor_event, NULL);
+EVENT_TYPE_DEFINE(sensor_event, false, log_sensor_event, NULL);

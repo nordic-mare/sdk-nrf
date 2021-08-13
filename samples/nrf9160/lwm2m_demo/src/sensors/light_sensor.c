@@ -123,8 +123,6 @@ int light_sensor_read(uint32_t *light_value)
 		*light_value |= scaled_measurement << 8 * i;
 	}
 
-	LOG_INF("Light sensor: read 0x%08X", *light_value);
-
 	return 0;
 }
 
@@ -164,8 +162,6 @@ int colour_sensor_read(uint32_t *colour_value)
 		scaled_measurement = SCALE_COLOUR_MEAS(colour_values[i].val1);
 		*colour_value |= scaled_measurement << 8 * i;
 	}
-
-	LOG_INF("Colour sensor: read 0x%08X", *colour_value);
 
 	return 0;
 }

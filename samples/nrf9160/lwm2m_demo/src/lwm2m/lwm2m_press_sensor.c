@@ -48,6 +48,8 @@ static void *pressure_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t re
 			return NULL;
 		}
 
+		LOG_INF("Pressure: %d.%06d kPa", press_val.val1, press_val.val2);
+
 		sensor_read_timestamp = k_uptime_get();
 
 		if (IS_ENABLED(CONFIG_LWM2M_IPSO_PRESSURE_SENSOR_VERSION_1_1)) {

@@ -69,7 +69,7 @@ static void *light_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_
 			lwm2m_set_timestamp(IPSO_OBJECT_COLOUR_ID, obj_inst_id);
 		}
 
-		LOG_DBG("Light value: 0x%08X", light_value);
+		LOG_INF("Light value: 0x%08X", light_value);
 
 		snprintf(light_value_str, RGBIR_STR_LENGTH, "0x%08X", light_value);
 	}
@@ -107,7 +107,7 @@ static void *colour_sensor_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16
 			lwm2m_set_timestamp(IPSO_OBJECT_COLOUR_ID, obj_inst_id);
 		}
 
-		LOG_DBG("Colour value: 0x%08X", colour_value);
+		LOG_INF("Colour value: 0x%08X", colour_value);
 
 		snprintf(colour_value_str, RGBIR_STR_LENGTH, "0x%08X", colour_value);
 	}

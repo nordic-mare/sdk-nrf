@@ -112,8 +112,6 @@ static void accel_work_cb(struct k_work *work)
 	struct accelerometer_sensor_data new_data;
 	bool sufficient_x, sufficient_y, sufficient_z;
 
-	LOG_DBG("ACCEL WORK CB");
-
 	/* Get latest registered accelerometer values */
 	lwm2m_engine_get_res_data(LWM2M_PATH(IPSO_OBJECT_ACCELEROMETER_ID, 0, X_VALUE_RID),
 				  (void **)(&old_x_val), &dummy_data_len, &dummy_data_flags);
@@ -149,8 +147,6 @@ static void temp_work_cb(struct k_work *work)
 	uint8_t dummy_data_flags;
 	struct sensor_value new_temp_val;
 
-	LOG_DBG("TEMP WORK CB");
-
 	/* Get latest registered temperature value */
 	lwm2m_engine_get_res_data(LWM2M_PATH(IPSO_OBJECT_TEMP_SENSOR_ID, 0, SENSOR_VALUE_RID),
 				  (void **)(&old_temp_val), &dummy_data_len, &dummy_data_flags);
@@ -176,8 +172,6 @@ static void press_work_cb(struct k_work *work)
 	uint16_t dummy_data_len;
 	uint8_t dummy_data_flags;
 	struct sensor_value new_press_val;
-
-	LOG_DBG("PRESS WORK CB");
 
 	/* Get latest registered pressure value */
 	lwm2m_engine_get_res_data(LWM2M_PATH(IPSO_OBJECT_PRESSURE_ID, 0, SENSOR_VALUE_RID),
@@ -205,8 +199,6 @@ static void humid_work_cb(struct k_work *work)
 	uint8_t dummy_data_flags;
 	struct sensor_value new_humid_val;
 
-	LOG_DBG("HUMID WORK CB");
-
 	/* Get latest registered humidity value */
 	lwm2m_engine_get_res_data(LWM2M_PATH(IPSO_OBJECT_HUMIDITY_SENSOR_ID, 0, SENSOR_VALUE_RID),
 				  (void **)(&old_humid_val), &dummy_data_len, &dummy_data_flags);
@@ -232,8 +224,6 @@ static void gas_res_work_cb(struct k_work *work)
 	uint16_t dummy_data_len;
 	uint8_t dummy_data_flags;
 	struct sensor_value new_gas_res_val;
-
-	LOG_DBG("GAS RES WORK CB");
 
 	/* Get latest registered gas resistance value */
 	lwm2m_engine_get_res_data(LWM2M_PATH(IPSO_OBJECT_GENERIC_SENSOR_ID, 0, SENSOR_VALUE_RID),
@@ -288,8 +278,6 @@ static void light_work_cb(struct k_work *work)
 	uint32_t old_light_val;
 	uint32_t new_light_val;
 
-	LOG_DBG("LIGHT WORK CB");
-
 	/* Get latest registered light value */
 	lwm2m_engine_get_res_data(
 		LWM2M_PATH(IPSO_OBJECT_COLOUR_ID, LIGHT_OBJ_INSTANCE_ID, COLOUR_RID),
@@ -321,8 +309,6 @@ static void colour_work_cb(struct k_work *work)
 	uint8_t dummy_data_flags;
 	uint32_t old_colour_val;
 	uint32_t new_colour_val;
-
-	LOG_DBG("COLOUR WORK CB");
 
 	/* Get latest registered colour value */
 	lwm2m_engine_get_res_data(

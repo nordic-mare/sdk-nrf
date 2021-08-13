@@ -30,4 +30,4 @@ static int log_ui_input_event(const struct event_header *eh, char *buf, size_t b
 			ui_input_type_to_string(event->type), event->device_number, event->type);
 }
 
-EVENT_TYPE_DEFINE(ui_input_event, true, log_ui_input_event, NULL);
+EVENT_TYPE_DEFINE(ui_input_event, false, log_ui_input_event, NULL);

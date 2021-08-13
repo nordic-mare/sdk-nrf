@@ -49,6 +49,8 @@ static void *gas_resistance_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint1
 			return NULL;
 		}
 
+		LOG_INF("Gas resistance: %d.%06d Ω", gas_res_val.val1, gas_res_val.val2);
+
 		sensor_read_timestamp = k_uptime_get();
 
 		if (IS_ENABLED(CONFIG_LWM2M_IPSO_GENERIC_SENSOR_VERSION_1_1)) {

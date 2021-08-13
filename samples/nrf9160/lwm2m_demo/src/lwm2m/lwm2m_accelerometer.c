@@ -75,6 +75,8 @@ static void *accel_x_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 			return NULL;
 		}
 
+		LOG_INF("Acceleration x-direction: %d.%06d", accel_data.x.val1, accel_data.x.val2);
+
 		accel_read_timestamp[0] = k_uptime_get();
 
 		if (IS_ENABLED(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)) {
@@ -107,6 +109,8 @@ static void *accel_y_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 			return NULL;
 		}
 
+		LOG_INF("Acceleration y-direction: %d.%06d", accel_data.y.val1, accel_data.y.val2);
+
 		accel_read_timestamp[1] = k_uptime_get();
 
 		if (IS_ENABLED(CONFIG_LWM2M_IPSO_ACCELEROMETER_VERSION_1_1)) {
@@ -138,6 +142,8 @@ static void *accel_z_read_cb(uint16_t obj_inst_id, uint16_t res_id, uint16_t res
 			LOG_ERR("Error %d: read accelerometer failed", ret);
 			return NULL;
 		}
+
+		LOG_INF("Acceleration z-direction: %d.%06d", accel_data.z.val1, accel_data.z.val2);
 
 		accel_read_timestamp[2] = k_uptime_get();
 
