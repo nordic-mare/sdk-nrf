@@ -21,6 +21,7 @@ config UI_LED_USE_PWM
 
 config UI_LED_USE_GPIO
 	bool "Use GPIO to control LEDs"
+	select GPIO
 	help
 		If enabled, LEDs will be controlled with GPIO.
 endchoice # LED device
