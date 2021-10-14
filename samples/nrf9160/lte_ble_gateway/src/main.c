@@ -10,11 +10,12 @@
 #include <drivers/gps.h>
 #include <drivers/sensor.h>
 #include <console/console.h>
-#include <net/nrf_cloud.h>
+#include <net/cloud.h>
 #include <dk_buttons_and_leds.h>
 #include <modem/lte_lc.h>
 #include <sys/reboot.h>
 #include <modem/nrf_modem_lib.h>
+#include <data/json.h>
 
 #include "aggregator.h"
 #include "ble.h"
@@ -34,10 +35,10 @@
 #define SWITCH_1 BIT(2)
 #define SWITCH_2 BIT(3)
 
-#define LED_ON(x)			(x)
-#define LED_BLINK(x)		((x) << 8)
-#define LED_GET_ON(x)		((x) & 0xFF)
-#define LED_GET_BLINK(x)	(((x) >> 8) & 0xFF)
+#define LED_ON(x) (x)
+#define LED_BLINK(x) ((x) << 8)
+#define LED_GET_ON(x) ((x)&0xFF)
+#define LED_GET_BLINK(x) (((x) >> 8) & 0xFF)
 
 /* Interval in milliseconds after the device will retry cloud connection
  * if the event NRF_CLOUD_EVT_TRANSPORT_CONNECTED is not received.
@@ -45,25 +46,24 @@
 #define RETRY_CONNECT_WAIT K_MSEC(90000)
 
 enum {
-	LEDS_INITIALIZING       = LED_ON(0),
-	LEDS_LTE_CONNECTING     = LED_BLINK(DK_LED3_MSK),
-	LEDS_LTE_CONNECTED      = LED_ON(DK_LED3_MSK),
-	LEDS_CLOUD_CONNECTING   = LED_BLINK(DK_LED4_MSK),
+	LEDS_INITIALIZING = LED_ON(0),
+	LEDS_LTE_CONNECTING = LED_BLINK(DK_LED3_MSK),
+	LEDS_LTE_CONNECTED = LED_ON(DK_LED3_MSK),
+	LEDS_CLOUD_CONNECTING = LED_BLINK(DK_LED4_MSK),
 	LEDS_CLOUD_PAIRING_WAIT = LED_BLINK(DK_LED3_MSK | DK_LED4_MSK),
-	LEDS_CLOUD_CONNECTED    = LED_ON(DK_LED4_MSK),
-	LEDS_ERROR              = LED_ON(DK_ALL_LEDS_MSK)
+	LEDS_CLOUD_CONNECTED = LED_ON(DK_LED4_MSK),
+	LEDS_ERROR = LED_ON(DK_ALL_LEDS_MSK)
 } display_state;
 
-/* Variable to keep track of nRF cloud user association request. */
-static atomic_val_t association_requested;
+static struct cloud_backend *cloud_backend;
 
 /* Sensor data */
 static struct gps_nmea gps_nmea_data;
-static struct nrf_cloud_sensor_data gps_cloud_data = {
-	.type = NRF_CLOUD_SENSOR_GPS,
+static struct cloud_sensor_data gps_cloud_data = {
+	.type = "GPS",
 	.tag = 0x1,
-	.data.ptr = gps_nmea_data.buf,
-	.data.len = GPS_NMEA_SENTENCE_MAX_LENGTH,
+	.data = gps_nmea_data.buf,
+	.length = GPS_NMEA_SENTENCE_MAX_LENGTH,
 };
 static atomic_val_t send_data_enable;
 
@@ -78,12 +78,24 @@ enum error_type {
 	ERROR_MODEM_RECOVERABLE,
 };
 
+struct cloud_data {
+	const char *app_id;
+	const char *data;
+	const char *message_type;
+};
+
+struct json_obj_descr cloud_data_descr[] = {
+	JSON_OBJ_DESCR_PRIM(struct cloud_data, app_id, JSON_TOK_STRING),
+	JSON_OBJ_DESCR_PRIM(struct cloud_data, data, JSON_TOK_STRING),
+	JSON_OBJ_DESCR_PRIM(struct cloud_data, message_type, JSON_TOK_STRING)
+};
+
 /* Forward declaration of functions */
-static void cloud_connect(struct k_work *work);
+static void cloud_connect_work(struct k_work *work);
 static void sensors_init(void);
 static void work_init(void);
 
-void sensor_data_send(struct nrf_cloud_sensor_data *data);
+void cloud_update(struct cloud_sensor_data cloud_data);
 
 /**@brief nRF Cloud error handler. */
 void error_handler(enum error_type err_type, int err)
@@ -140,12 +152,6 @@ void nrf_cloud_error_handler(int err)
 	error_handler(ERROR_NRF_CLOUD, err);
 }
 
-/**@brief Recoverable modem library error. */
-void nrf_modem_recoverable_error_handler(uint32_t err)
-{
-	error_handler(ERROR_MODEM_RECOVERABLE, (int)err);
-}
-
 /**@brief Callback for GPS events */
 static void gps_handler(const struct device *dev, struct gps_event *evt)
 {
@@ -189,11 +195,9 @@ static void gps_handler(const struct device *dev, struct gps_event *evt)
 		gps_cloud_data.tag = 0x1;
 	}
 
-	memcpy(&in_data.data[0], &gps_cloud_data.tag,
-		sizeof(gps_cloud_data.tag));
+	memcpy(&in_data.data[0], &gps_cloud_data.tag, sizeof(gps_cloud_data.tag));
 
-	memcpy(&in_data.data[sizeof(gps_cloud_data.tag)],
-		evt->nmea.buf, evt->nmea.len);
+	memcpy(&in_data.data[sizeof(gps_cloud_data.tag)], evt->nmea.buf, evt->nmea.len);
 
 	if (aggregator_put(in_data) != 0) {
 		printk("Failed to store GPS data.\n");
@@ -230,67 +234,55 @@ static void leds_update(struct k_work *work)
 	k_work_schedule(&leds_update_work, LEDS_UPDATE_INTERVAL);
 }
 
-/**@brief Send sensor data to nRF Cloud. **/
-void sensor_data_send(struct nrf_cloud_sensor_data *data)
-{
+void cloud_update(struct cloud_sensor_data cloud_data) {
 	int err;
 
-	if (!atomic_get(&send_data_enable)) {
+	if (!cloud_connected) {
+		printk("Not connected to cloud, aborting cloud publication\n");
 		return;
 	}
 
-	if (data->type == NRF_CLOUD_SENSOR_FLIP) {
-		err = nrf_cloud_sensor_data_stream(data);
-	} else {
-		err = nrf_cloud_sensor_data_send(data);
-	}
+	struct cloud_data json_data = {
+		.app_id = cloud_data.type,
+		.data = cloud_data.data, // TODO: Fix
+		.message_type = "DATA"
+	};
 
+	ssize_t json_len = json_calc_encoded_len(cloud_data_descr, ARRAY_SIZE(cloud_data_descr), &json_data) + 1;
+	char json_buffer[json_len];
+
+	err = json_obj_encode_buf(cloud_data_descr, ARRAY_SIZE(cloud_data_descr), &json_data, json_buffer, sizeof(json_buffer));
 	if (err) {
-		printk("Failed to send data to cloud: %d\n", err);
-		nrf_cloud_error_handler(err);
+		printk("Failed encoding sensor data as JSON: %d\n", err);
+	}
+	struct cloud_msg msg = {
+		.qos = CLOUD_QOS_AT_MOST_ONCE,
+		.buf = json_buffer,
+		.len = json_len
+	};
+
+	if (strcmp(CONFIG_CLOUD_BACKEND, "NRF_CLOUD") == 0) {
+		msg.endpoint.type = CLOUD_EP_MSG;
+	} else {
+		msg.endpoint.type = CLOUD_EP_STATE;
+	}
+
+	err = cloud_send(cloud_backend, &msg);
+	if (err) {
+		printk("Failed updating cloud, error %d", err);
 	}
 }
 
-static void on_cloud_evt_user_association_request(void)
-{
-	if (atomic_get(&association_requested) == 0) {
-		atomic_set(&association_requested, 1);
-		printk("Add device to cloud account.\n");
-		printk("Waiting for cloud association...\n");
-	}
-}
-
-static void on_cloud_evt_user_associated(void)
-{
-	int err;
-
-	if (atomic_get(&association_requested)) {
-		atomic_set(&association_requested, 0);
-
-		/* after successful association, the device must
-		 * reconnect to aws.
-		 */
-		printk("Device associated with cloud.\n");
-		printk("Reconnecting for settings to take effect.\n");
-		printk("Disconnecting from cloud...\n");
-
-		err = nrf_cloud_disconnect();
-
-		if (err == 0) {
-			return;
-		} else {
-			printk("Disconnect failed, rebooting...\n");
-			nrf_cloud_error_handler(err);
-		}
-	}
-}
-
-/**@brief Callback for nRF Cloud events. */
-static void cloud_event_handler(const struct nrf_cloud_evt *evt)
+/**@brief Callback for Cloud events. */
+void cloud_event_handler(const struct cloud_backend *const backend,
+			 const struct cloud_event *const evt, void *user_data)
 {
 	switch (evt->type) {
-	case NRF_CLOUD_EVT_TRANSPORT_CONNECTED:
-		printk("NRF_CLOUD_EVT_TRANSPORT_CONNECTED\n");
+	case CLOUD_EVT_CONNECTING:
+		printk("CLOUD_EVT_CONNECTING\n");
+		break;
+	case CLOUD_EVT_CONNECTED:
+		printk("CLOUD_EVT_CONNECTED\n");
 		cloud_connected = true;
 		/* This may fail if the work item is already being processed,
 		 * but in such case, the next time the work handler is executed,
@@ -299,59 +291,48 @@ static void cloud_event_handler(const struct nrf_cloud_evt *evt)
 		 */
 		(void)k_work_cancel_delayable(&connect_work);
 		break;
-	case NRF_CLOUD_EVT_USER_ASSOCIATION_REQUEST:
-		printk("NRF_CLOUD_EVT_USER_ASSOCIATION_REQUEST\n");
-		display_state = LEDS_CLOUD_PAIRING_WAIT;
-		on_cloud_evt_user_association_request();
-		break;
-	case NRF_CLOUD_EVT_USER_ASSOCIATED:
-		printk("NRF_CLOUD_EVT_USER_ASSOCIATED\n");
-		on_cloud_evt_user_associated();
-		break;
-	case NRF_CLOUD_EVT_READY:
-		printk("NRF_CLOUD_EVT_READY\n");
+	case CLOUD_EVT_READY:
+		printk("CLOUD_EVT_READY\n");
 		display_state = LEDS_CLOUD_CONNECTED;
 		sensors_init();
 		atomic_set(&send_data_enable, 1);
 		break;
-	case NRF_CLOUD_EVT_SENSOR_DATA_ACK:
-		printk("NRF_CLOUD_EVT_SENSOR_DATA_ACK\n");
-		break;
-	case NRF_CLOUD_EVT_TRANSPORT_DISCONNECTED:
-		printk("NRF_CLOUD_EVT_TRANSPORT_DISCONNECTED\n");
-		atomic_set(&send_data_enable, 0);
-		display_state = LEDS_INITIALIZING;
-
+	case CLOUD_EVT_DISCONNECTED:
+		printk("CLOUD_EVT_DISCONNECTED\n");
 		cloud_connected = false;
-		/* Reconnect to nRF Cloud. */
-		k_work_schedule(&connect_work, K_NO_WAIT);
+		k_work_reschedule(&connect_work, K_NO_WAIT);
 		break;
-	case NRF_CLOUD_EVT_ERROR:
-		printk("NRF_CLOUD_EVT_ERROR, status: %d\n", evt->status);
+	case CLOUD_EVT_ERROR:
+		printk("CLOUD_EVT_ERROR\n");
 		atomic_set(&send_data_enable, 0);
 		display_state = LEDS_ERROR;
-		nrf_cloud_error_handler(evt->status);
+		break;
+	case CLOUD_EVT_DATA_SENT:
+		printk("CLOUD_EVT_DATA_SENT\n");
+		break;
+	case CLOUD_EVT_DATA_RECEIVED:
+		printk("CLOUD_EVT_DATA_RECEIVED\n");
+		break;
+	case CLOUD_EVT_PAIR_REQUEST:
+		printk("CLOUD_EVT_PAIR_REQUEST\n");
+		break;
+	case CLOUD_EVT_PAIR_DONE:
+		printk("CLOUD_EVT_PAIR_DONE\n");
+		break;
+	case CLOUD_EVT_FOTA_DONE:
+		printk("CLOUD_EVT_FOTA_DONE\n");
+		break;
+	case CLOUD_EVT_FOTA_ERROR:
+		printk("CLOUD_EVT_FOTA_ERROR\n");
 		break;
 	default:
-		printk("Received unknown event %d\n", evt->type);
+		printk("Unknown cloud event type: %d\n", evt->type);
 		break;
 	}
 }
 
-/**@brief Initialize nRF CLoud library. */
-static void cloud_init(void)
-{
-	const struct nrf_cloud_init_param param = {
-		.event_handler = cloud_event_handler
-	};
-
-	int err = nrf_cloud_init(&param);
-
-	__ASSERT(err == 0, "nRF Cloud library could not be initialized.");
-}
-
-/**@brief Connect to nRF Cloud, */
-static void cloud_connect(struct k_work *work)
+/**@brief Connect to Cloud, */
+static void cloud_connect_work(struct k_work *work)
 {
 	int err;
 
@@ -361,23 +342,12 @@ static void cloud_connect(struct k_work *work)
 		return;
 	}
 
-	const enum nrf_cloud_sensor supported_sensors[] = {
-		NRF_CLOUD_SENSOR_GPS, NRF_CLOUD_SENSOR_FLIP
-	};
-
-	const struct nrf_cloud_sensor_list sensor_list = {
-		.size = ARRAY_SIZE(supported_sensors), .ptr = supported_sensors
-	};
-
-	const struct nrf_cloud_connect_param param = {
-		.sensor = &sensor_list,
-	};
-
-	err = nrf_cloud_connect(&param);
+	err = cloud_connect(cloud_backend);
 
 	if (err) {
-		printk("nrf_cloud_connect failed: %d\n", err);
-		nrf_cloud_error_handler(err);
+		printk("Failed to connect to cloud: %d\n", err);
+		printk("Retrying in 90 seconds");
+		k_work_schedule(&connect_work, RETRY_CONNECT_WAIT);
 	}
 
 	display_state = LEDS_CLOUD_CONNECTING;
@@ -389,15 +359,15 @@ static void button_handler(uint32_t buttons, uint32_t has_changed)
 {
 	printk("button_handler: button 1: %u, button 2: %u "
 	       "switch 1: %u, switch 2: %u\n",
-	       (bool)(buttons & BUTTON_1), (bool)(buttons & BUTTON_2),
-	       (bool)(buttons & SWITCH_1), (bool)(buttons & SWITCH_2));
+	       (bool)(buttons & BUTTON_1), (bool)(buttons & BUTTON_2), (bool)(buttons & SWITCH_1),
+	       (bool)(buttons & SWITCH_2));
 }
 
 /**@brief Initializes and submits delayed work. */
 static void work_init(void)
 {
 	k_work_init_delayable(&leds_update_work, leds_update);
-	k_work_init_delayable(&connect_work, cloud_connect);
+	k_work_init_delayable(&connect_work, cloud_connect_work);
 	k_work_schedule(&leds_update_work, LEDS_UPDATE_INTERVAL);
 }
 
@@ -479,18 +449,25 @@ static void buttons_leds_init(void)
 
 void main(void)
 {
+	int err;
+
 	printk("LTE Sensor Gateway sample started\n");
 
 	buttons_leds_init();
 	ble_init();
 
-	work_init();
-	cloud_init();
+	cloud_backend = cloud_get_binding(CONFIG_CLOUD_BACKEND);
+	err = cloud_init(cloud_backend, cloud_event_handler);
+	if (err) {
+		printk("Cloud backend could not be initialized, error: %d", err);
+	}
 	modem_configure();
-	cloud_connect(NULL);
+	cloud_connect(cloud_backend);
+
+	work_init();
 
 	while (true) {
-		nrf_cloud_process();
+		cloud_ping(cloud_backend);
 		send_aggregated_data();
 		k_sleep(K_MSEC(10));
 	}

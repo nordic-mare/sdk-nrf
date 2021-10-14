@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <sys/printk.h>
-#include <net/nrf_cloud.h>
+#include <net/cloud.h>
 
 #include "alarm.h"
 
@@ -14,9 +14,9 @@
 
 static bool alarm_pending;
 
-extern void sensor_data_send(struct nrf_cloud_sensor_data *data);
+extern void cloud_update(struct cloud_sensor_data cloud_data);
 
-char *orientation_strings[] = {"LEFT", "NORMAL", "RIGHT", "UPSIDE_DOWN"};
+char *orientation_strings[] = { "LEFT", "NORMAL", "RIGHT", "UPSIDE_DOWN" };
 
 void alarm(void)
 {
@@ -25,18 +25,8 @@ void alarm(void)
 
 void send_aggregated_data(void)
 {
-	static uint8_t gps_data_buffer[GPS_NMEA_SENTENCE_MAX_LENGTH];
-
-	static struct nrf_cloud_sensor_data gps_cloud_data = {
-		.type = NRF_CLOUD_SENSOR_GPS,
-		.data.ptr = gps_data_buffer,
-	};
-
-	static struct nrf_cloud_sensor_data flip_cloud_data = {
-		.type = NRF_CLOUD_SENSOR_FLIP,
-	};
-
 	struct sensor_data aggregator_data;
+	struct cloud_sensor_data cloud_data;
 
 	if (!alarm_pending) {
 		return;
@@ -45,35 +35,31 @@ void send_aggregated_data(void)
 	alarm_pending = false;
 
 	printk("Alarm triggered !\n");
-	while (1) {
+	while (true) {
 		if (aggregator_get(&aggregator_data) == -ENODATA) {
 			break;
 		}
 		switch (aggregator_data.type) {
 		case THINGY_ORIENTATION:
-			printk("%d] Sending FLIP data.\n",
-			       aggregator_element_count_get());
+			printk("%d] Sending FLIP data.\n", aggregator_element_count_get());
 			if (aggregator_data.length != 1 ||
-				aggregator_data.data[0] >=
-				ARRAY_SIZE(orientation_strings)) {
+			    aggregator_data.data[0] >= ARRAY_SIZE(orientation_strings)) {
 				printk("Unexpected FLIP data format, dropping\n");
 				continue;
 			}
-			flip_cloud_data.data.ptr =
-				orientation_strings[aggregator_data.data[0]];
-			flip_cloud_data.data.len = strlen(
-				orientation_strings[aggregator_data.data[0]]) - 1;
-			sensor_data_send(&flip_cloud_data);
+			cloud_data.type = "FLIP";
+			cloud_data.data = orientation_strings[aggregator_data.data[0]];
+			cloud_data.length =
+				strlen(orientation_strings[aggregator_data.data[0]]) - 1;
+			cloud_update(cloud_data);
 			break;
 
 		case GPS_POSITION:
-			printk("%d] Sending GPS data.\n",
-			       aggregator_element_count_get());
-			gps_cloud_data.data.ptr = &aggregator_data.data[4];
-			gps_cloud_data.data.len = aggregator_data.length;
-			gps_cloud_data.tag =
-			    *((uint32_t *)&aggregator_data.data[0]);
-			sensor_data_send(&gps_cloud_data);
+			printk("%d] Sending GPS data.\n", aggregator_element_count_get());
+			cloud_data.type = "GPS";
+			cloud_data.data = &aggregator_data.data[4];
+			cloud_data.length = aggregator_data.length;
+			cloud_update(cloud_data);
 			break;
 
 		default:

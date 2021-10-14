@@ -6,6 +6,12 @@
 
 menu "LTE BLE gateway sample"
 
+config CLOUD_BACKEND
+	string "Selects the cloud backend to be used"
+	default "NRF_CLOUD"
+	help
+	  Possible values are "NRF_CLOUD".
+
 choice
 	prompt "GPS device"
 	default GPS_USE_SIM
