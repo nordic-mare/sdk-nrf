@@ -176,9 +176,9 @@ config LWM2M_CARRIER_SERVER_BINDING_N
 endchoice
 
 config LWM2M_SERVER_BINDING
-	int
-	default 85 if LWM2M_CARRIER_SERVER_BINDING_U
-	default 78 if LWM2M_CARRIER_SERVER_BINDING_N
+	string
+	default "U" if LWM2M_CARRIER_SERVER_BINDING_U
+	default "N" if LWM2M_CARRIER_SERVER_BINDING_N
 	help
 	  Server binding. Valid values: 'U' (UDP) or 'N' (Non-IP).
 	  Leaving this value empty will default to 'U'.
