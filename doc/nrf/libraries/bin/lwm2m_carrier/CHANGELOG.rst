@@ -41,6 +41,18 @@ Changes
 
   * The object is enabled for the SoftBank subscriber ID :kconfig:option:`CONFIG_LWM2M_CARRIER_SOFTBANK`, or if the LwM2M carrier library is operating in generic mode :kconfig:option:`CONFIG_LWM2M_CARRIER_GENERIC`.
 
+AT&T support has been deprecated
+--------------------------------
+
+The application shall no longer connect to the AT&T Device Management server.
+Consequently, the LwM2M carrier library is no longer required to certify with AT&T.
+
+  * Automatic connection and handling of custom AT&T logic by the LwM2M carrier library is deprecated.
+  * :kconfig:option:`CONFIG_LWM2M_CARRIER_ATT` is now to be disabled by default, and may be removed in future releases.
+  * :kconfig:option:`CONFIG_LWM2M_CARRIER_ATT` must be explicitly enabled to apply the library's AT&T configurations.
+
+    * In previous releases, AT&T support could be implisitly enabled together with all other applicable carriers by initializing :c:macro:`lwm2m_carrier_config_t` with an empty ``carriers_enabled`` parameter.
+
 liblwm2m_carrier 3.2.0
 **********************
 
