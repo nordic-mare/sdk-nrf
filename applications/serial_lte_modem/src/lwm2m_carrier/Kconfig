@@ -15,6 +15,7 @@ config SLM_CARRIER_APP_DATA_BUFFER_LEN
 	default 512
 	help
 	  Specifies maximum application data size to be sent to the server
-	  through the App Data Container or the Event Log object.
+	  through the App Data Container, the Binary App Data Container or
+	  the Event Log objects.
 
 endif # SLM_CARRIER

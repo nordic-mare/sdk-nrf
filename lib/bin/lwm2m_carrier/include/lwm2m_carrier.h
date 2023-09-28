@@ -116,6 +116,10 @@ typedef struct {
 	const uint8_t *buffer;
 	/** Number of bytes received. */
 	size_t buffer_len;
+	/** Path to the resource or resource instance that received the data. */
+	uint16_t path[4];
+	/** Length of the path. */
+	uint8_t path_len;
 } lwm2m_carrier_event_app_data_t;
 
 /**
@@ -729,22 +733,32 @@ int lwm2m_carrier_velocity_set(int heading, float speed_h, float speed_v, float 
 			       float uncertainty_v);
 
 /**
- * @brief Schedule application data to be sent using the App Data Container object.
+ * @brief Schedule application data to be set using either the Binary App Data Container object
+ *        or the App Data Container object.
  *
- * @details This function sets the "UL data" (uplink) resource of this object to the desired value,
- *          which can then be read by, or reported to, the LwM2M server.
+ * @details This function sets the resource given by the path to the desired value. The resource
+ *          can then be read by, or reported to, the LwM2M server.
  *
- * @note The App Data Container object will not be initialized for every carrier.
+ * @note Both the Binary App Data Container object and the App Data Container object will not be
+ *       initialized for every carrier.
  *
- * @param[in]  buffer     Buffer containing the application data to be sent.
+ * @param[in]  path       The path of the resource or resource instance to be sent to. The path
+ *                        contains the object id, object instance id, resource id and resource
+ *                        instance id in order. The resource instance id is not needed for the
+ *                        App Data Container object.
+ * @param[in]  path_len   The length of the path. Must be 3 or 4.
+ * @param[in]  buffer     Buffer containing the application data to be sent. If this is set to null
+ *                        the resource instance is deleted instead when using the Binary App Data
+ *                        Container object.
  * @param[in]  buffer_len Number of bytes in the buffer.
  *
  * @retval  0      If the resource has been set successfully.
  * @retval -ENOENT If the object is not yet initialized.
- * @retval -EINVAL If the buffer is NULL.
+ * @retval -EINVAL If at least one input argument is incorrect.
  * @retval -ENOMEM If there is not enough memory to copy the buffer contents to the resource model.
  */
-int lwm2m_carrier_app_data_send(const uint8_t *buffer, size_t buffer_len);
+int lwm2m_carrier_app_data_send(const uint16_t *path, uint16_t path_len, const uint8_t *buffer,
+				size_t buffer_len);
 
 /**
  * @brief Send log data using the Event Log object.

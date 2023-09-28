@@ -273,7 +273,9 @@ static int carrier_datamode_callback(uint8_t op, const uint8_t *data, int len, u
 			(void)exit_datamode_handler(-EOVERFLOW);
 			return -EOVERFLOW;
 		}
-		ret = lwm2m_carrier_app_data_send(data, len);
+		uint16_t path[4] = {10250, 0, 0};
+		uint8_t path_len = 3;
+		ret = lwm2m_carrier_app_data_send(path, path_len, data, len);
 		LOG_INF("datamode send: %d", ret);
 		if (ret < 0) {
 			(void)exit_datamode_handler(ret);
@@ -285,27 +287,64 @@ static int carrier_datamode_callback(uint8_t op, const uint8_t *data, int len, u
 	return ret;
 }
 
-/* AT#XCARRIER="app_data"[,<data>] */
+/* AT#XCARRIER="app_data"[,<data>|[<instance_id>,<resource_instance_id>[,<data>]]] */
 static int do_carrier_appdata_send(void)
 {
-	int ret;
+	int ret = 0;
 
-	if (at_params_valid_count_get(&slm_at_param_list) == 2) {
+	uint32_t param_count = at_params_valid_count_get(&slm_at_param_list);
+
+	if (param_count == 2) {
 		/* enter data mode */
 		ret = enter_datamode(carrier_datamode_callback);
 		if (ret) {
 			return ret;
 		}
-	} else {
+	} else if (param_count == 3) {
 		char data[CONFIG_SLM_CARRIER_APP_DATA_BUFFER_LEN] = {0};
 		int size = CONFIG_SLM_CARRIER_APP_DATA_BUFFER_LEN;
+
+		uint16_t path[4] = {10250, 0, 0};
+		uint8_t path_len = 3;
 
 		ret = util_string_get(&slm_at_param_list, 2, data, &size);
 		if (ret) {
 			return ret;
 		}
 
-		ret = lwm2m_carrier_app_data_send(data, size);
+		ret = lwm2m_carrier_app_data_send(path, path_len, data, size);
+	} else if (param_count == 4 || param_count == 5) {
+		uint8_t *data = NULL;
+		char buffer[CONFIG_SLM_CARRIER_APP_DATA_BUFFER_LEN] = {0};
+		int size = 0;
+
+		uint16_t inst_id;
+		uint16_t res_inst_id;
+		ret = at_params_unsigned_short_get(&slm_at_param_list, 2, &inst_id);
+		if (ret) {
+			return ret;
+		}
+
+		ret = at_params_unsigned_short_get(&slm_at_param_list, 3, &res_inst_id);
+		if (ret) {
+			return ret;
+		}
+
+		uint16_t path[4] = {19, inst_id, 0, res_inst_id};
+		uint8_t path_len = 4;
+
+		if (param_count == 5) {
+			size = CONFIG_SLM_CARRIER_APP_DATA_BUFFER_LEN;
+
+			ret = util_string_get(&slm_at_param_list, 4, buffer, &size);
+			if (ret) {
+				return ret;
+			}
+
+			data = buffer;
+		}
+
+		ret = lwm2m_carrier_app_data_send(path, path_len, data, size);
 	}
 
 	return ret;
@@ -633,7 +672,7 @@ static int do_carrier_event_log_log_data(void)
 	char data[CONFIG_SLM_CARRIER_APP_DATA_BUFFER_LEN] = {0};
 	int size = CONFIG_SLM_CARRIER_APP_DATA_BUFFER_LEN;
 
-	int ret = util_string_get(&at_param_list, 2, data, &size);
+	int ret = util_string_get(&slm_at_param_list, 2, data, &size);
 
 	if (ret) {
 		return ret;
