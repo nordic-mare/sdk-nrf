@@ -32,7 +32,7 @@
  * declared during the autogeneration process.
  */
 #if defined(PSA_NEED_CC3XX_CIPHER_DRIVER) || defined(PSA_NEED_CC3XX_HASH_DRIVER)
-#include "cc3xx_crypto_primitives.h"
+#include "cc3xx_crypto_primitives_private.h"
 #elif defined(PSA_CRYPTO_DRIVER_CRACEN)
 #include "cracen_psa_primitives.h"
 #endif /* PSA_CRYPTO_DRIVER_CC3XX */
