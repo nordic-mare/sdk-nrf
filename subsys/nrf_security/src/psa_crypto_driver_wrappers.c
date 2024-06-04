@@ -2772,7 +2772,7 @@ psa_status_t psa_driver_wrapper_get_random(psa_driver_random_context_t *context,
 	(void)context;
 
 #if defined(PSA_NEED_CC3XX_CTR_DRBG_DRIVER)
-	err = nrf_cc3xx_platform_ctr_drbg_get(NULL, output, output_size, &output_length);
+	err = mbedtls_psa_external_get_random(NULL, output, output_size, &output_length);
 #elif defined(PSA_NEED_CC3XX_HMAC_DRBG_DRIVER)
 	err = nrf_cc3xx_platform_hmac_drbg_get(NULL, output, output_size, &output_length);
 #endif
