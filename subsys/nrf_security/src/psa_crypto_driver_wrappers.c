@@ -599,14 +599,6 @@ psa_status_t psa_driver_wrapper_import_key(const psa_key_attributes_t *attribute
 			return status;
 		}
 #endif
-#if defined(PSA_NEED_CC3XX_KEY_MANAGEMENT_DRIVER)
-		status = cc3xx_import_key(attributes, data, data_length, key_buffer,
-					  key_buffer_size, key_buffer_length, bits);
-		/* Declared with fallback == true */
-		if (status != PSA_ERROR_NOT_SUPPORTED) {
-			return status;
-		}
-#endif /* PSA_NEED_CC3XX_KEY_MANAGEMENT_DRIVER */
 #if defined(PSA_NEED_OBERON_KEY_MANAGEMENT_DRIVER)
 		status = oberon_import_key(attributes, data, data_length, key_buffer,
 					   key_buffer_size, key_buffer_length, bits);
