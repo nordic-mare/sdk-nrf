@@ -28,17 +28,17 @@ else()
 
   add_subdirectory(fancy_new_cc3xx)
 
-  nrf_security_add_zephyr_options(fancy_new_cc3xx_cc312_rom)
-  nrf_security_add_zephyr_options(fancy_new_cc3xx_cc312_rom_psa_driver_api)
+  nrf_security_add_zephyr_options(fancy_new_cc3xx_cc3xx)
+  nrf_security_add_zephyr_options(fancy_new_cc3xx_cc3xx_psa_driver_api)
 
-  target_include_directories(fancy_new_cc3xx_cc312_rom_psa_driver_api
+  target_include_directories(fancy_new_cc3xx_cc3xx_psa_driver_api
     PUBLIC
     ./fancy_new_cc3xx_includes
   )
 
   target_link_libraries(${mbedcrypto_target}
     PUBLIC
-    fancy_new_cc3xx_cc312_rom_psa_driver_api
+    fancy_new_cc3xx_cc3xx_psa_driver_api
  )
 
 
