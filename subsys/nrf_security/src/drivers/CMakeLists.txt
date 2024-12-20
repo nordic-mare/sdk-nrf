@@ -17,7 +17,7 @@ else()
 
   if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/fancy_new_cc3xx")
     message(FATAL_ERROR "You need to have a folder called fancy_new_cc3xx in this folder which contains points to the"
-                         "folder platform/ext/accelerator/cc312/cc312-rom/ in the TF-M repo. A symlink will work.")
+                         "folder platform/ext/target/arm/drivers/cc3xx/ in the TF-M repo. A symlink will work.")
   endif()
 
   set(CC3XX_TARGET_PREFIX fancy_new_cc3xx_)
