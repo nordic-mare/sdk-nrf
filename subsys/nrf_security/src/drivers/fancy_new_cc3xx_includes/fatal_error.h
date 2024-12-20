@@ -19,3 +19,8 @@
   do {                        \
     printk("FATAL ERROR from new CC3XX driver \n"); \
   } while (0);
+
+#define NONFATAL_ERR(fmt, ...) \
+  do {                        \
+    printk("Recoverable ERROR from new CC3XX driver \n"); \
+  } while (0);
