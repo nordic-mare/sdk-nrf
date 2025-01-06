@@ -43,6 +43,8 @@ manifest:
       url-base: https://github.com/eembc
     - name: george
       url-base: https://github.com/Vge0rge
+    - name: markus # Temporary remote to point to upstream TF-M with modifications.
+      url-base: https://github.com/nordic-mare
 
   # If not otherwise specified, the projects below should be obtained
   # from the ncs remote.
@@ -155,7 +157,8 @@ manifest:
     - name: trusted-firmware-m
       repo-path: sdk-trusted-firmware-m
       path: modules/tee/tf-m/trusted-firmware-m
-      revision: v2.0.0-ncs2-rc2
+      remote: markus
+      revision: new_cc3xx_driver
     - name: psa-arch-tests
       repo-path: sdk-psa-arch-tests
       path: modules/tee/tf-m/psa-arch-tests
